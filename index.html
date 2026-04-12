@@ -20,79 +20,104 @@
 <meta name="robots" content="noindex, nofollow">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e;min-height:100vh;}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e;min-height:100vh;
+  -webkit-tap-highlight-color:transparent;}
 
 /* ===== BANDEAU BLEU MARINE ===== */
 #header{
   background:linear-gradient(135deg,#1a1a2e,#16213e);
   border-bottom:3px solid #e94560;
-  padding:10px 20px;display:flex;align-items:center;gap:14px;
+  padding:8px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;
 }
-.logo-tag{background:#e94560;color:white;font-weight:900;font-size:14px;
-  padding:4px 11px;border-radius:5px;letter-spacing:1px;}
-#header h1{font-size:18px;font-weight:700;color:#ffffff;}
-#header .sub{font-size:12px;color:#a0aec0;}
+.logo-tag{background:#e94560;color:white;font-weight:900;font-size:13px;
+  padding:3px 9px;border-radius:5px;letter-spacing:1px;flex-shrink:0;}
+#header h1{font-size:15px;font-weight:700;color:#ffffff;}
+#header .sub{font-size:11px;color:#a0aec0;}
+#header-right{margin-left:auto;display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+#header-warn{background:rgba(255,255,255,0.08);border:1px solid rgba(255,200,0,0.4);
+  border-radius:6px;padding:5px 10px;font-size:10px;color:#fbd38d;line-height:1.4;text-align:right;}
 
 /* ===== BARRE AVION ===== */
 #avion-bar{
   background:#16213e;border-bottom:1px solid #2d3748;
-  padding:7px 20px;display:flex;gap:7px;align-items:center;flex-wrap:wrap;
+  padding:6px 14px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;
 }
-#avion-bar label{font-size:12px;color:#a0aec0;}
+#avion-bar > label{font-size:12px;color:#a0aec0;flex-shrink:0;}
 .avion-btn{
-  padding:5px 14px;border-radius:20px;border:2px solid #2d3748;
+  padding:5px 12px;border-radius:20px;border:2px solid #2d3748;
   background:#1a2744;color:#a0aec0;cursor:pointer;font-size:12px;font-weight:700;
-  transition:all .2s;
+  transition:all .2s;-webkit-tap-highlight-color:transparent;
+  min-height:34px;
 }
 .avion-btn:hover{border-color:#e94560;color:#fff;}
 .avion-btn.active{background:#e94560;border-color:#e94560;color:white;}
-#avion-detail{font-size:11px;color:#718096;margin-left:8px;}
+#avion-detail{font-size:11px;color:#718096;}
+#avion-bar-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 
 /* ===== ONGLETS ===== */
 #tabs{
   background:#fff;border-bottom:2px solid #e2e8f0;
-  padding:0 20px;display:flex;box-shadow:0 1px 3px rgba(0,0,0,.08);
+  padding:0 8px;display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch;
+  box-shadow:0 1px 3px rgba(0,0,0,.08);scrollbar-width:none;
 }
+#tabs::-webkit-scrollbar{display:none;}
 .tab-btn{
-  padding:11px 18px;border:none;background:none;color:#718096;
-  cursor:pointer;font-size:13px;font-weight:600;border-bottom:3px solid transparent;
-  transition:all .2s;white-space:nowrap;margin-bottom:-2px;
+  padding:10px 13px;border:none;background:none;color:#718096;
+  cursor:pointer;font-size:12px;font-weight:600;border-bottom:3px solid transparent;
+  transition:all .2s;white-space:nowrap;margin-bottom:-2px;flex-shrink:0;
+  min-height:44px;
 }
 .tab-btn:hover{color:#1a1a2e;}
 .tab-btn.active{color:#e94560;border-bottom-color:#e94560;}
 
 /* ===== CONTENU ===== */
-.tab-content{display:none;padding:18px 20px;}
+.tab-content{display:none;padding:12px 14px;}
 .tab-content.active{display:block;}
 
 /* ===== CARDS ===== */
 .card{
   background:#fff;border:1px solid #e2e8f0;border-radius:10px;
-  padding:16px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.06);
+  padding:14px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.06);
 }
 .card h3{
   font-size:11px;color:#e94560;font-weight:700;
-  text-transform:uppercase;letter-spacing:.7px;margin-bottom:12px;
+  text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px;
   border-bottom:1px solid #fee2e2;padding-bottom:6px;
 }
 
 /* ===== LAYOUT ===== */
-.two-col{display:grid;grid-template-columns:320px 1fr;gap:16px;} #tab-carbu .two-col{grid-template-columns:0.65fr 1fr;}
-@media(max-width:860px){.two-col{grid-template-columns:1fr;}}
+.two-col{display:grid;grid-template-columns:320px 1fr;gap:14px;}
+#tab-carbu .two-col{grid-template-columns:0.65fr 1fr;}
+@media(max-width:860px){
+  .two-col{grid-template-columns:1fr;}
+  #tab-carbu .two-col{grid-template-columns:1fr;}
+}
 
 /* ===== SLIDERS ===== */
-.sl-row{display:flex;flex-direction:column;gap:3px;margin-bottom:10px;}
-.sl-row label{font-size:11px;color:#718096;display:flex;justify-content:space-between;}
+.sl-row{display:flex;flex-direction:column;gap:4px;margin-bottom:12px;}
+.sl-row label{font-size:12px;color:#718096;display:flex;justify-content:space-between;}
 .sl-row label span{color:#e94560;font-weight:700;}
-input[type=range]{width:100%;accent-color:#e94560;cursor:pointer;height:4px;}
+input[type=range]{
+  width:100%;accent-color:#e94560;cursor:pointer;
+  height:6px;border-radius:3px;
+  -webkit-appearance:none;appearance:none;
+  background:linear-gradient(to right,#e94560 0%,#e2e8f0 0%);
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:22px;height:22px;
+  border-radius:50%;background:#e94560;border:3px solid #fff;
+  box-shadow:0 1px 4px rgba(0,0,0,.25);cursor:pointer;
+}
 
 /* ===== INPUTS ===== */
 .inp-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
-.inp-field{display:flex;flex-direction:column;gap:3px;flex:1;min-width:90px;}
+.inp-field{display:flex;flex-direction:column;gap:3px;flex:1;min-width:80px;}
 .inp-field label{font-size:11px;color:#718096;}
 .inp-field input,.inp-field select{
   background:#f7f8fa;border:1px solid #cbd5e0;color:#1a1a2e;
-  padding:5px 9px;border-radius:6px;font-size:13px;width:100%;
+  padding:7px 9px;border-radius:6px;font-size:14px;width:100%;
+  min-height:38px;
 }
 .inp-field input:focus,.inp-field select:focus{border-color:#e94560;outline:none;background:#fff;}
 .inp-field input[readonly]{background:#edf2f7;color:#e94560;font-weight:700;}
@@ -101,12 +126,12 @@ input[type=range]{width:100%;accent-color:#e94560;cursor:pointer;height:4px;}
 .res-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .res-box{
   background:#f7f8fa;border:1px solid #e2e8f0;border-radius:8px;
-  padding:12px 14px;text-align:center;
+  padding:12px 10px;text-align:center;
 }
 .res-box .rl{font-size:11px;color:#718096;margin-bottom:4px;}
-.res-box .rv{font-size:28px;font-weight:800;color:#1a1a2e;}
+.res-box .rv{font-size:26px;font-weight:800;color:#1a1a2e;}
 .res-box .ru{font-size:11px;color:#718096;}
-.det-row{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:#718096;margin-top:8px;}
+.det-row{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:#718096;margin-top:8px;}
 .det-row span{color:#1a1a2e;font-weight:600;}
 #warnEl{
   background:#fff5f5;border:1px solid #fc8181;border-radius:6px;
@@ -116,28 +141,29 @@ input[type=range]{width:100%;accent-color:#e94560;cursor:pointer;height:4px;}
 /* ===== BOUTONS PISTE / VENT ===== */
 .btn-grp{display:flex;gap:5px;flex-wrap:wrap;}
 .piste-btn{
-  padding:4px 11px;border-radius:14px;border:1px solid #cbd5e0;
+  padding:6px 12px;border-radius:14px;border:1px solid #cbd5e0;
   background:#f7f8fa;color:#718096;cursor:pointer;font-size:12px;font-weight:500;
   transition:all .2s;line-height:1.35;text-align:center;
+  min-height:36px;-webkit-tap-highlight-color:transparent;
 }
 .piste-btn:hover{border-color:#e94560;color:#e94560;}
 .piste-btn.on{background:#e94560;border-color:#e94560;color:white;font-weight:700;}
 
 /* ===== CANVAS ===== */
 #perf-canvas-wrap,#centrage-canvas-wrap{
-  overflow:auto;background:#f7f8fa;border-radius:10px;
+  overflow:auto;-webkit-overflow-scrolling:touch;background:#f7f8fa;border-radius:10px;
   border:1px solid #e2e8f0;box-shadow:0 1px 4px rgba(0,0,0,.06);
 }
-canvas{display:block;}
+canvas{display:block;max-width:100%;}
 
 /* ===== RÉSULTATS CENTRAGE ===== */
-.result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;}
+.result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;}
 .result-box{
   background:#f7f8fa;border:1px solid #e2e8f0;border-radius:8px;
-  padding:10px 12px;text-align:center;
+  padding:10px 10px;text-align:center;
 }
 .result-box .r-label{font-size:11px;color:#718096;margin-bottom:3px;}
-.result-box .r-value{font-size:22px;font-weight:800;}
+.result-box .r-value{font-size:20px;font-weight:800;}
 .result-box .r-unit{font-size:11px;color:#718096;}
 .result-box.ok{border-color:#38a169;background:#f0fff4;}
 .result-box.ok .r-value{color:#276749;}
@@ -152,6 +178,54 @@ canvas{display:block;}
 .coming-soon{text-align:center;padding:60px 20px;color:#718096;}
 .coming-soon .icon{font-size:44px;margin-bottom:12px;}
 .coming-soon h3{font-size:18px;color:#1a1a2e;margin-bottom:6px;}
+
+/* ===== RESPONSIVE MOBILE (≤480px iPhone) ===== */
+@media(max-width:480px){
+  #header{padding:8px 10px;gap:7px;}
+  #header h1{font-size:13px;}
+  #header .sub{font-size:10px;}
+  #header-warn{display:none;}
+
+  #avion-bar{padding:6px 10px;gap:5px;}
+  .avion-btn{padding:5px 9px;font-size:11px;}
+
+  #tabs{padding:0 4px;}
+  .tab-btn{padding:9px 9px;font-size:11px;}
+
+  .tab-content{padding:10px 10px;}
+  .card{padding:12px 10px;}
+
+  .res-box .rv{font-size:22px;}
+
+  .inp-field input,.inp-field select{font-size:16px;} /* évite le zoom iOS */
+
+  /* Barre avion-bar : conso + date + cdb + dest empilés proprement */
+  #avion-bar-right{width:100%;justify-content:flex-start;}
+  #avion-bar-right > div{flex:1;min-width:130px;}
+
+  /* Prépa: 1 colonne */
+  .prepa-grid{grid-template-columns:1fr !important;}
+
+  /* Score bar: empiler */
+  .prepa-score{flex-direction:column;gap:8px;padding:10px 12px;}
+  .prepa-score .score-go{margin-left:0;width:100%;text-align:center;}
+  #header-right{gap:5px;}
+}
+
+/* ===== RESPONSIVE TABLETTE (481px–860px iPad portrait) ===== */
+@media(min-width:481px) and (max-width:860px){
+  #header{padding:8px 14px;}
+  #header h1{font-size:15px;}
+  #header-warn{max-width:200px;font-size:9px;}
+
+  .tab-btn{padding:10px 11px;font-size:11px;}
+
+  .inp-field input,.inp-field select{font-size:15px;}
+
+  .prepa-grid{grid-template-columns:1fr 1fr;}
+
+  #avion-bar-right{flex-wrap:wrap;gap:6px;}
+}
 
 /* @media print removed */
 
@@ -259,29 +333,28 @@ canvas{display:block;}
     <h1>AT01 — Préparation de vol</h1>
     <div class="sub" id="header-sub">Sélectionner un avion</div>
   </div>
-  <div style="margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+  <div id="header-right">
     <!-- Bouton Admin -->
     <button onclick="openAdmin()" title="Mode administrateur"
-      style="padding:5px 11px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);
+      style="padding:6px 11px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);
              border-radius:6px;color:#a0aec0;font-size:11px;cursor:pointer;font-weight:600;
-             transition:all .2s;"
+             transition:all .2s;min-height:34px;"
       onmouseover="this.style.borderColor='#e94560';this.style.color='#fff'"
       onmouseout="this.style.borderColor='rgba(255,255,255,0.2)';this.style.color='#a0aec0'">
       ⚙️ Admin
     </button>
     <!-- Bouton Déconnexion -->
     <button onclick="doLogout()" title="Se déconnecter"
-      style="padding:5px 11px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);
+      style="padding:6px 11px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);
              border-radius:6px;color:#718096;font-size:11px;cursor:pointer;font-weight:600;
-             transition:all .2s;"
+             transition:all .2s;min-height:34px;"
       onmouseover="this.style.borderColor='#718096';this.style.color='#a0aec0'"
       onmouseout="this.style.borderColor='rgba(255,255,255,0.12)';this.style.color='#718096'">
       🔒 Déco
     </button>
-    <div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,200,0,0.4);
-                border-radius:6px;padding:6px 12px;font-size:11px;color:#fbd38d;line-height:1.5;max-width:320px;text-align:right;">
+    <div id="header-warn">
       ⚠️ <strong>Le CDB est responsable de ses calculs</strong><br>
-      <span style="color:#a0aec0;font-size:10px;">Vérifier les performances avec le Manuel de Vol</span>
+      <span style="color:#a0aec0;font-size:10px;">Vérifier avec le Manuel de Vol</span>
     </div>
   </div>
 </div>
@@ -294,42 +367,40 @@ canvas{display:block;}
   <button class="avion-btn" data-immat="F-HAAT" onclick="setAvion(this)">F-HAAT</button>
   <button class="avion-btn" data-immat="F-HARM" onclick="setAvion(this)">F-HARM</button>
   <span id="avion-detail"></span>
-  <div style="display:flex;align-items:center;gap:6px;margin-left:16px;background:#1e2d4a;border-radius:8px;padding:4px 10px;">
-    <label style="font-size:11px;color:#a0aec0;white-space:nowrap;">Consommation</label>
+  <div style="display:flex;align-items:center;gap:6px;background:#1e2d4a;border-radius:8px;padding:5px 10px;">
+    <label style="font-size:11px;color:#a0aec0;white-space:nowrap;">Conso</label>
     <input type="number" id="conso" value="20" min="5" max="50" step="0.5"
-      style="width:52px;background:#0f1d33;border:1px solid #2d3748;color:#fff;
-             padding:3px 6px;border-radius:5px;font-size:13px;font-weight:700;text-align:center;"
+      style="width:50px;background:#0f1d33;border:1px solid #2d3748;color:#fff;
+             padding:4px 5px;border-radius:5px;font-size:14px;font-weight:700;text-align:center;"
       oninput="syncConso('conso');updateCentrage()">
     <span style="font-size:11px;color:#a0aec0;">L/h</span>
   </div>
-  <div style="margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+  <div id="avion-bar-right">
     <div style="display:flex;align-items:center;gap:4px;">
-      <label style="font-size:10px;color:#a0aec0;white-space:nowrap;">Date vol</label>
+      <label style="font-size:10px;color:#a0aec0;white-space:nowrap;">Date</label>
       <input type="date" id="vol-date"
-        style="background:#1e2d4a;border:1px solid #2d3748;color:#fff;padding:3px 6px;
-               border-radius:5px;font-size:11px;width:120px;"
+        style="background:#1e2d4a;border:1px solid #2d3748;color:#fff;padding:4px 6px;
+               border-radius:5px;font-size:12px;min-height:32px;"
         oninput="var fp=document.getElementById('fp-date');if(fp)fp.value=this.value;if(typeof saveFP==='function')saveFP();">
     </div>
     <div style="display:flex;align-items:center;gap:4px;">
       <label style="font-size:10px;color:#a0aec0;white-space:nowrap;">CDB</label>
       <input type="text" id="vol-cdb" value="Alexandre KILINC"
-        style="background:#1e2d4a;border:1px solid #2d3748;color:#fff;padding:3px 6px;
-               border-radius:5px;font-size:11px;width:140px;"
+        style="background:#1e2d4a;border:1px solid #2d3748;color:#fff;padding:4px 6px;
+               border-radius:5px;font-size:12px;width:130px;min-height:32px;"
         oninput="var fp=document.getElementById('fp-cdb');if(fp)fp.value=this.value;">
     </div>
     <div style="display:flex;align-items:center;gap:4px;">
-      <label style="font-size:10px;color:#a0aec0;white-space:nowrap;">Destination</label>
-      <input type="text" id="vol-dest" placeholder="ICAO ou lieu"
-        style="background:#1e2d4a;border:1px solid #2d3748;color:#fff;padding:3px 6px;
-               border-radius:5px;font-size:11px;width:110px;text-transform:uppercase;"
+      <label style="font-size:10px;color:#a0aec0;white-space:nowrap;">Dest.</label>
+      <input type="text" id="vol-dest" placeholder="ICAO"
+        style="background:#1e2d4a;border:1px solid #2d3748;color:#fff;padding:4px 6px;
+               border-radius:5px;font-size:12px;width:80px;text-transform:uppercase;min-height:32px;"
         oninput="
           this.value=this.value.toUpperCase();
           var v=this.value.trim();
-          // → Arrivée carburant
           var arrMode=document.querySelector('input[name=\'c-arr-mode\'][value=\'autre\']');
           var arrIcao=document.getElementById('c-arr-icao');
           if(arrMode&&arrIcao){arrMode.checked=true;arrIcao.style.display='block';arrIcao.value=v;}
-          // → Arrivée plan de vol
           var fpArr=document.getElementById('fp-arr');
           if(fpArr){fpArr.value=v;}
           if(typeof updateCarbu==='function')updateCarbu();
@@ -338,9 +409,9 @@ canvas{display:block;}
         ">
     </div>
     <button onclick="printPreparation()"
-      style="padding:6px 14px;background:#e94560;color:white;border:none;border-radius:6px;
-             cursor:pointer;font-size:12px;font-weight:700;white-space:nowrap;">
-      📄 Exporter PDF
+      style="padding:6px 12px;background:#e94560;color:white;border:none;border-radius:6px;
+             cursor:pointer;font-size:12px;font-weight:700;white-space:nowrap;min-height:32px;">
+      📄 PDF
     </button>
   </div>
 </div>
@@ -1068,51 +1139,53 @@ canvas{display:block;}
 <div id="tab-prepa" class="tab-content">
 <style>
 /* Prépa spécifique */
-.prepa-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.prepa-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 @media(max-width:860px){ .prepa-grid { grid-template-columns: 1fr; } }
-.prepa-section { background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:16px; margin-bottom:14px; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+.prepa-section { background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:14px; margin-bottom:12px; box-shadow:0 1px 4px rgba(0,0,0,.06); }
 .prepa-section-title {
   font-size:11px; color:#e94560; font-weight:700;
-  text-transform:uppercase; letter-spacing:.7px; margin-bottom:12px;
+  text-transform:uppercase; letter-spacing:.7px; margin-bottom:10px;
   border-bottom:1px solid #fee2e2; padding-bottom:6px;
-  display:flex; align-items:center; justify-content:space-between;
+  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:4px;
 }
 .prepa-section-title .section-badge {
   font-size:10px; padding:2px 8px; border-radius:10px;
-  font-weight:700; letter-spacing:0; text-transform:none;
+  font-weight:700; letter-spacing:0; text-transform:none; flex-shrink:0;
 }
 .prepa-section-title .section-badge.ok { background:#c6f6d5; color:#276749; }
 .prepa-section-title .section-badge.warn { background:#feebc8; color:#744210; }
 .prepa-section-title .section-badge.nok { background:#fed7d7; color:#c53030; }
 
-/* Check row */
+/* Check row — touch-friendly */
 .chk-row {
   display:flex; align-items:center; gap:10px;
-  padding:7px 10px; border-radius:7px; margin-bottom:5px;
+  padding:9px 10px; border-radius:7px; margin-bottom:5px;
   background:#f7f8fa; border:1px solid #e2e8f0; cursor:pointer;
-  transition: all .15s;
+  transition: all .15s; min-height:44px;
+  -webkit-tap-highlight-color:transparent;
 }
 .chk-row:hover { border-color:#cbd5e0; background:#edf2f7; }
+.chk-row:active { background:#edf2f7; }
 .chk-row.checked { background:#f0fff4; border-color:#9ae6b4; }
 .chk-row.checked .chk-box { background:#38a169; border-color:#38a169; color:white; }
 .chk-row.warn-item { background:#fffbeb; border-color:#fbd38d; }
 .chk-row.warn-item.checked { background:#f0fff4; border-color:#9ae6b4; }
 .chk-box {
-  width:22px; height:22px; border-radius:5px; border:2px solid #cbd5e0;
+  width:26px; height:26px; border-radius:6px; border:2px solid #cbd5e0;
   display:flex; align-items:center; justify-content:center;
   flex-shrink:0; font-size:13px; font-weight:700; transition:all .15s;
 }
-.chk-label { font-size:12px; color:#2d3748; font-weight:600; flex:1; }
-.chk-sub { font-size:10px; color:#718096; margin-top:1px; }
-.chk-input-wrap { display:flex; align-items:center; gap:5px; }
+.chk-label { font-size:12px; color:#2d3748; font-weight:600; flex:1; line-height:1.35; }
+.chk-sub { font-size:10px; color:#718096; margin-top:2px; line-height:1.4; }
+.chk-input-wrap { display:flex; align-items:center; gap:5px; flex-wrap:wrap; }
 .chk-date {
   background:#fff; border:1px solid #cbd5e0; border-radius:5px;
-  padding:3px 7px; font-size:12px; color:#1a1a2e; width:120px;
-  font-weight:600;
+  padding:4px 7px; font-size:12px; color:#1a1a2e; width:120px;
+  font-weight:600; min-height:32px;
 }
 .chk-date:focus { border-color:#e94560; outline:none; }
 .validity-badge {
-  font-size:10px; font-weight:700; padding:2px 7px; border-radius:8px;
+  font-size:10px; font-weight:700; padding:3px 7px; border-radius:8px;
   white-space:nowrap; flex-shrink:0;
 }
 .validity-badge.ok { background:#c6f6d5; color:#276749; }
@@ -1123,19 +1196,19 @@ canvas{display:block;}
 /* Score global */
 .prepa-score {
   background: linear-gradient(135deg,#1a1a2e,#16213e);
-  border-radius:10px; padding:8px 14px; margin-bottom:12px;
+  border-radius:10px; padding:10px 14px; margin-bottom:12px;
   display:flex; align-items:center; gap:12px; flex-wrap:wrap;
 }
-.prepa-score .score-val { font-size:24px; font-weight:900; color:#fff; line-height:1; }
+.prepa-score .score-val { font-size:22px; font-weight:900; color:#fff; line-height:1; }
 .prepa-score .score-label { font-size:11px; color:#a0aec0; }
 .prepa-score .score-go {
-  margin-left:auto; font-size:14px; font-weight:800; padding:8px 18px;
-  border-radius:8px; letter-spacing:.5px;
+  margin-left:auto; font-size:13px; font-weight:800; padding:8px 16px;
+  border-radius:8px; letter-spacing:.5px; white-space:nowrap;
 }
 .prepa-score .score-go.go { background:#38a169; color:#fff; }
 .prepa-score .score-go.nogo { background:#e53e3e; color:#fff; }
 .prepa-score .score-go.partial { background:#d69e2e; color:#fff; }
-.prepa-progress { flex:1; min-width:160px; }
+.prepa-progress { flex:1; min-width:140px; }
 .prepa-progress-bar { height:8px; border-radius:4px; background:#2d3748; overflow:hidden; margin-top:4px; }
 .prepa-progress-fill { height:100%; border-radius:4px; transition: width .4s, background .4s; }
 
@@ -1148,7 +1221,7 @@ canvas{display:block;}
 
 /* Règle 3R */
 .trois-r { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:8px; }
-.r-card { border-radius:8px; padding:10px; text-align:center; border:2px solid transparent; cursor:pointer; transition:all .2s; }
+.r-card { border-radius:8px; padding:12px 8px; text-align:center; border:2px solid transparent; cursor:pointer; transition:all .2s; min-height:44px; -webkit-tap-highlight-color:transparent; }
 .r-card .r-icon { font-size:20px; margin-bottom:4px; }
 .r-card .r-title { font-size:11px; font-weight:700; margin-bottom:2px; }
 .r-card .r-desc { font-size:10px; color:#718096; }
@@ -1158,27 +1231,47 @@ canvas{display:block;}
 .r-card:not(.ok-active):not(.warn-active):not(.nok-active) { background:#f7f8fa; border-color:#e2e8f0; }
 
 /* Météo checkboxes */
-.meteo-row { display:flex; align-items:flex-start; gap:10px; padding:6px 8px; margin-bottom:4px; border-radius:6px; background:#ebf8ff; border:1px solid #bee3f8; }
+.meteo-row { display:flex; align-items:flex-start; gap:10px; padding:8px 8px; margin-bottom:4px; border-radius:6px; background:#ebf8ff; border:1px solid #bee3f8; }
 .meteo-row label { font-size:12px; color:#2c5282; font-weight:600; flex:1; cursor:pointer; }
 .meteo-sub { font-size:10px; color:#4a90b8; margin-top:1px; }
 
 /* Checkbox tout-cocher section */
 .sec-all-btn {
   display:inline-flex; align-items:center; gap:4px;
-  margin-left:8px; cursor:pointer; user-select:none;
+  margin-left:6px; cursor:pointer; user-select:none;
   font-size:10px; color:#718096; font-weight:600;
   background:#f7f8fa; border:1px solid #e2e8f0;
-  border-radius:5px; padding:2px 7px;
+  border-radius:5px; padding:3px 7px; flex-shrink:0;
   transition:background .15s, color .15s;
+  -webkit-tap-highlight-color:transparent;
 }
 .sec-all-btn:hover { background:#e2e8f0; color:#2d3748; }
 .sec-all-btn.all-done { background:#c6f6d5; border-color:#9ae6b4; color:#276749; }
+
+/* Plan de vol responsive */
+#prepa-flightplan-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
+@media(max-width:600px){ #prepa-flightplan-grid { grid-template-columns:1fr 1fr; } }
+@media(max-width:400px){ #prepa-flightplan-grid { grid-template-columns:1fr; } }
+
+/* Zones de validation responsive */
+#zone-buttons { display:flex; flex-direction:row; gap:5px; flex-wrap:wrap; }
+@media(max-width:480px){ #zone-buttons { width:100%; } #zone-buttons > label { flex:1; justify-content:center; } }
+
+/* Score bar responsive */
+@media(max-width:480px){
+  .prepa-score { flex-direction:column; align-items:stretch; padding:10px 12px; }
+  .prepa-score .score-go { margin-left:0; text-align:center; }
+  .prepa-progress { min-width:unset; }
+  #zone-buttons { margin-left:0; }
+  .chk-date { width:100px; font-size:11px; }
+  .chk-label { font-size:11px; }
+}
 </style>
 
   <!-- ═══ BANDEAU PLAN DE VOL ═══ -->
   <div id="prepa-flightplan" style="background:linear-gradient(135deg,#0d2354,#1a3a6e);border-radius:12px;padding:14px 18px;margin-bottom:12px;color:#fff;">
     <div style="font-size:11px;font-weight:700;color:#90cdf4;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">✈️ Plan de vol — Prévol</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+    <div id="prepa-flightplan-grid">
 
       <!-- CDB -->
       <div>
@@ -1290,7 +1383,7 @@ canvas{display:block;}
       </div>
     </div>
     <!-- 3 zones de validation manuelle (horizontal compact) -->
-    <div style="display:flex;flex-direction:row;gap:5px;margin-left:auto;flex-wrap:wrap;">
+    <div id="zone-buttons">
       <!-- Prépa (auto) -->
       <label id="zone-prepa-label" style="display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:7px;cursor:pointer;border:2px solid #2d3748;background:#1a2744;transition:all .2s;" title="Validé automatiquement quand tous les éléments Prépa sont cochés">
         <input type="checkbox" id="chk-zone-prepa" style="width:14px;height:14px;accent-color:#38a169;cursor:pointer;" onchange="onZoneCheck('prepa')" disabled>
