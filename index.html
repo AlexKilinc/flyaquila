@@ -1250,8 +1250,8 @@ canvas{display:block;max-width:100%;}
 
 /* Plan de vol responsive */
 #prepa-flightplan-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
-@media(max-width:600px){ #prepa-flightplan-grid { grid-template-columns:1fr 1fr; } }
-@media(max-width:400px){ #prepa-flightplan-grid { grid-template-columns:1fr; } }
+@media(max-width:700px){ #prepa-flightplan-grid { grid-template-columns:1fr 1fr; } }
+@media(max-width:420px){ #prepa-flightplan-grid { grid-template-columns:1fr; } }
 
 /* Zones de validation responsive */
 #zone-buttons { display:flex; flex-direction:row; gap:5px; flex-wrap:wrap; }
@@ -1269,7 +1269,7 @@ canvas{display:block;max-width:100%;}
 </style>
 
   <!-- ═══ BANDEAU PLAN DE VOL ═══ -->
-  <div id="prepa-flightplan" style="background:linear-gradient(135deg,#0d2354,#1a3a6e);border-radius:12px;padding:14px 18px;margin-bottom:12px;color:#fff;">
+  <div id="prepa-flightplan" style="background:linear-gradient(135deg,#0d2354,#1a3a6e);border-radius:12px;padding:14px 16px;margin-bottom:12px;color:#fff;">
     <div style="font-size:11px;font-weight:700;color:#90cdf4;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">✈️ Plan de vol — Prévol</div>
     <div id="prepa-flightplan-grid">
 
@@ -1277,7 +1277,7 @@ canvas{display:block;max-width:100%;}
       <div>
         <label style="font-size:10px;color:#90cdf4;display:block;margin-bottom:3px;">Commandant de bord</label>
         <input type="text" id="fp-cdb" placeholder="Nom Prénom"
-          style="width:100%;padding:6px 10px;border-radius:6px;border:1px solid #2c5282;background:#0d2354;color:#fff;font-size:13px;font-weight:600;box-sizing:border-box;"
+          style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid #2c5282;background:#0d2354;color:#fff;font-size:14px;font-weight:600;box-sizing:border-box;min-height:36px;"
           oninput="saveFP();var v=document.getElementById('vol-cdb');if(v)v.value=this.value;">
       </div>
 
@@ -1285,7 +1285,7 @@ canvas{display:block;max-width:100%;}
       <div>
         <label style="font-size:10px;color:#90cdf4;display:block;margin-bottom:3px;">Date de vol prévue</label>
         <input type="date" id="fp-date"
-          style="width:100%;padding:6px 10px;border-radius:6px;border:1px solid #2c5282;background:#0d2354;color:#fff;font-size:13px;font-weight:600;box-sizing:border-box;"
+          style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid #2c5282;background:#0d2354;color:#fff;font-size:14px;font-weight:600;box-sizing:border-box;min-height:36px;-webkit-appearance:none;appearance:none;"
           onchange="saveFP();var v=document.getElementById('vol-date');if(v)v.value=this.value;">
       </div>
 
@@ -1293,19 +1293,19 @@ canvas{display:block;max-width:100%;}
       <div>
         <label style="font-size:10px;color:#90cdf4;display:block;margin-bottom:3px;">Avion</label>
         <input type="text" id="fp-avion" placeholder="F-GXCF" readonly
-          style="width:100%;padding:6px 10px;border-radius:6px;border:1px solid #2c5282;background:#0d2354;color:#e94560;font-size:13px;font-weight:700;box-sizing:border-box;letter-spacing:1px;">
+          style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid #2c5282;background:#0d2354;color:#e94560;font-size:14px;font-weight:700;box-sizing:border-box;letter-spacing:1px;min-height:36px;">
       </div>
 
       <!-- Départ -->
       <div>
         <label style="font-size:10px;color:#90cdf4;display:block;margin-bottom:3px;">Départ (ICAO)</label>
         <div style="display:flex;align-items:center;gap:8px;">
-          <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:#bee3f8;cursor:pointer;white-space:nowrap;">
-            <input type="checkbox" id="fp-dep-lfpn" onchange="toggleDepLFPN()" style="accent-color:#3182ce;">
+          <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:#bee3f8;cursor:pointer;white-space:nowrap;flex-shrink:0;">
+            <input type="checkbox" id="fp-dep-lfpn" onchange="toggleDepLFPN()" style="accent-color:#3182ce;width:16px;height:16px;">
             LFPN
           </label>
           <input type="text" id="fp-dep" placeholder="LFPB…" maxlength="4"
-            style="flex:1;padding:6px 10px;border-radius:6px;border:1px solid #2c5282;background:#0d2354;color:#fff;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;box-sizing:border-box;"
+            style="flex:1;min-width:0;padding:7px 10px;border-radius:6px;border:1px solid #2c5282;background:#0d2354;color:#fff;font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;box-sizing:border-box;min-height:36px;"
             oninput="this.value=this.value.toUpperCase();saveFP()">
         </div>
       </div>
@@ -1314,7 +1314,7 @@ canvas{display:block;max-width:100%;}
       <div>
         <label style="font-size:10px;color:#90cdf4;display:block;margin-bottom:3px;">Arrivée (ICAO)</label>
         <input type="text" id="fp-arr" placeholder="LFPG…" maxlength="4"
-          style="width:100%;padding:6px 10px;border-radius:6px;border:1px solid #2c5282;background:#0d2354;color:#fff;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;box-sizing:border-box;"
+          style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid #2c5282;background:#0d2354;color:#fff;font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;box-sizing:border-box;min-height:36px;"
           oninput="this.value=this.value.toUpperCase();saveFP();
             var v=this.value.trim();
             var d=document.getElementById('vol-dest');if(d)d.value=v;
@@ -1329,21 +1329,21 @@ canvas{display:block;max-width:100%;}
     <!-- Étapes facultatives -->
     <div style="margin-top:10px;">
       <label style="font-size:10px;color:#90cdf4;display:block;margin-bottom:4px;">Étapes facultatives (ICAO)</label>
-      <div style="display:flex;gap:8px;">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
         <input type="text" id="fp-wpt1" placeholder="WPT 1" maxlength="4"
-          style="flex:1;padding:6px 10px;border-radius:6px;border:1px solid #2c5282;background:#0d2354;color:#fff;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;box-sizing:border-box;"
+          style="flex:1;min-width:70px;padding:7px 10px;border-radius:6px;border:1px solid #2c5282;background:#0d2354;color:#fff;font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;box-sizing:border-box;min-height:36px;"
           oninput="this.value=this.value.toUpperCase();saveFP()">
         <input type="text" id="fp-wpt2" placeholder="WPT 2" maxlength="4"
-          style="flex:1;padding:6px 10px;border-radius:6px;border:1px solid #2c5282;background:#0d2354;color:#fff;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;box-sizing:border-box;"
+          style="flex:1;min-width:70px;padding:7px 10px;border-radius:6px;border:1px solid #2c5282;background:#0d2354;color:#fff;font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;box-sizing:border-box;min-height:36px;"
           oninput="this.value=this.value.toUpperCase();saveFP()">
         <input type="text" id="fp-wpt3" placeholder="WPT 3" maxlength="4"
-          style="flex:1;padding:6px 10px;border-radius:6px;border:1px solid #2c5282;background:#0d2354;color:#fff;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;box-sizing:border-box;"
+          style="flex:1;min-width:70px;padding:7px 10px;border-radius:6px;border:1px solid #2c5282;background:#0d2354;color:#fff;font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;box-sizing:border-box;min-height:36px;"
           oninput="this.value=this.value.toUpperCase();saveFP()">
       </div>
     </div>
 
     <!-- Route résumée -->
-    <div style="margin-top:8px;padding:6px 10px;background:rgba(255,255,255,.07);border-radius:6px;font-size:12px;font-weight:700;color:#ebf8ff;letter-spacing:1px;" id="fp-route-display">—</div>
+    <div style="margin-top:8px;padding:6px 10px;background:rgba(255,255,255,.07);border-radius:6px;font-size:12px;font-weight:700;color:#ebf8ff;letter-spacing:1px;word-break:break-all;" id="fp-route-display">—</div>
   </div>
 
   <!-- Score global en-tête -->
