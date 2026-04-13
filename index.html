@@ -1944,6 +1944,7 @@ function buildCarbuAvionBtns() {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'avion-btn';
+    btn.dataset.immat = immat;
     btn.textContent = immat;
     if (immat === avionActuel) btn.classList.add('active');
     btn.onclick = () => {
