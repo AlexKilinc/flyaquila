@@ -4071,8 +4071,40 @@ td    { padding: 3px 4px; border-bottom: 1px solid #f0f0f0; }
 .tab-body div[style*="background:#faf5ff"],
 .tab-body div[style*="background:#fffbeb"],
 .tab-body div[style*="background:#fff5f5"] { padding: 4px 6px; border-radius: 4px; margin-bottom: 4px; font-size: 10px; }
+
+/* Barre retour — visible à l'écran, masquée à l'impression */
+#back-bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
+  background: linear-gradient(135deg,#1a1a2e,#16213e);
+  border-bottom: 3px solid #e94560;
+  padding: 10px 16px;
+  display: flex; align-items: center; gap: 14px;
+}
+#back-bar .logo { background:#e94560;color:white;font-weight:900;font-size:13px;padding:3px 10px;border-radius:5px;letter-spacing:1px; }
+#back-bar .title { color:#fff;font-size:14px;font-weight:700;flex:1; }
+#back-bar .sub { color:#a0aec0;font-size:11px; }
+#back-btn {
+  padding: 8px 18px;
+  background: #e94560; color: white; border: none; border-radius: 8px;
+  font-size: 14px; font-weight: 800; cursor: pointer;
+  letter-spacing: .3px;
+}
+/* Décaler le contenu sous la barre */
+body { padding-top: 56px; }
+@media print {
+  #back-bar { display: none !important; }
+  body { padding-top: 0 !important; }
+}
 </style>
 </head><body>
+<div id="back-bar">
+  <div class="logo">AQUILA</div>
+  <div>
+    <div class="title">AT01 — Préparation de vol</div>
+    <div class="sub">${immat} · ${date}${cdb ? ' · ' + cdb : ''}</div>
+  </div>
+  <button id="back-btn" onclick="window.close()">← Retour à l'app</button>
+</div>
 ${pagesHtml}
 <script>
 window.onload = function() { setTimeout(function() { window.print(); }, 800); };
