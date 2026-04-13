@@ -178,19 +178,8 @@ input[type=range]::-webkit-slider-thumb{
 }
 canvas{display:block;max-width:100%;}
 
-/* ===== RÉSULTATS CENTRAGE ===== */
+/* ===== RÉSULTATS CENTRAGE — unifié avec res-box ===== */
 .result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;}
-.result-box{
-  background:#f7f8fa;border:1px solid #e2e8f0;border-radius:8px;
-  padding:10px 10px;text-align:center;
-}
-.result-box .r-label{font-size:11px;color:#718096;margin-bottom:3px;}
-.result-box .r-value{font-size:20px;font-weight:800;}
-.result-box .r-unit{font-size:11px;color:#718096;}
-.result-box.ok{border-color:#38a169;background:#f0fff4;}
-.result-box.ok .r-value{color:#276749;}
-.result-box.error{border-color:#e53e3e;background:#fff5f5;}
-.result-box.error .r-value{color:#c53030;}
 
 .badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:700;}
 .badge.ok{background:#c6f6d5;color:#276749;}
@@ -202,6 +191,88 @@ canvas{display:block;max-width:100%;}
 .coming-soon h3{font-size:18px;color:#1a1a2e;margin-bottom:6px;}
 
 /* ===== RESPONSIVE MOBILE (≤480px iPhone) ===== */
+
+/* Piste buttons: 4 sur une ligne — toutes tailles */
+.piste-4-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  width: 100%;
+}
+.piste-4-grid .piste-btn {
+  padding: 5px 2px;
+  font-size: 11px;
+  border-radius: 10px;
+  min-height: 38px;
+  white-space: nowrap;
+}
+
+/* Atterrissage résultats + piste en ligne */
+.att-piste-inline {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: nowrap;
+}
+.att-piste-left { flex: 1; min-width: 0; }
+.att-piste-right {
+  flex-shrink: 0;
+  background: #f7f8fa;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px 14px;
+  text-align: center;
+  min-width: 100px;
+}
+.piste-marge-btn {
+  padding: 5px 6px !important;
+  font-size: 11px !important;
+  min-height: 34px !important;
+  flex: 1;
+}
+.piste-marge-row {
+  display: flex;
+  gap: 4px;
+  width: 100%;
+}
+
+/* Historique modal */
+#hist-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+  z-index: 9000; display: none; align-items: center; justify-content: center;
+  padding: 16px;
+}
+#hist-overlay.open { display: flex; }
+#hist-box {
+  background: #fff; border-radius: 14px; width: 100%; max-width: 560px;
+  max-height: 85vh; display: flex; flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.35); overflow: hidden;
+}
+#hist-header {
+  background: linear-gradient(135deg,#1a1a2e,#16213e);
+  padding: 14px 18px; display: flex; align-items: center; gap: 10px;
+}
+#hist-header .tag { background:#e94560;color:white;font-weight:900;font-size:12px;padding:3px 9px;border-radius:5px; }
+#hist-header h3 { color:#fff;font-size:14px;font-weight:700;flex:1; }
+#hist-list { flex: 1; overflow-y: auto; padding: 12px; }
+.hist-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: 8px; margin-bottom: 6px;
+  background: #f7f8fa; border: 1px solid #e2e8f0;
+  transition: background .15s;
+}
+.hist-item:hover { background: #edf2f7; }
+.hist-num {
+  width: 24px; height: 24px; background: #e94560; color: white;
+  border-radius: 50%; font-size: 10px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.hist-info { flex: 1; }
+.hist-route { font-size: 13px; font-weight: 700; color: #1a1a2e; }
+.hist-date { font-size: 11px; color: #718096; margin-top: 2px; }
+.hist-empty { text-align: center; padding: 40px 20px; color: #718096; font-size: 13px; }
+#hist-footer { padding: 10px 14px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; gap: 8px; }
+
 @media(max-width:480px){
   #header{padding:8px 10px;gap:7px;}
   #header h1{font-size:13px;}
@@ -356,6 +427,15 @@ canvas{display:block;max-width:100%;}
     <div class="sub" id="header-sub">Sélectionner un avion</div>
   </div>
   <div id="header-right">
+    <!-- Bouton Historique -->
+    <button onclick="openHist()" title="Historique des vols préparés"
+      style="padding:6px 11px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);
+             border-radius:6px;color:#a0aec0;font-size:11px;cursor:pointer;font-weight:600;
+             transition:all .2s;min-height:34px;"
+      onmouseover="this.style.borderColor='#e94560';this.style.color='#fff'"
+      onmouseout="this.style.borderColor='rgba(255,255,255,0.2)';this.style.color='#a0aec0'">
+      📋 Historique
+    </button>
     <!-- Bouton Admin -->
     <button onclick="openAdmin()" title="Mode administrateur"
       style="padding:6px 11px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);
@@ -543,9 +623,9 @@ canvas{display:block;max-width:100%;}
           </div>
           <div>
             <div style="font-size:11px;color:#718096;margin-bottom:4px;">Type de piste</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;width:200px;">
-              <button class="piste-btn on" id="p_dur_sec" onclick="setPiste('dur_sec')">Dur sèche<br><span style="font-size:9px;opacity:0.85;">Référence</span></button>
-              <button class="piste-btn" id="p_herbe_sec" onclick="setPiste('herbe_sec')">Herbe sèche<br><span style="font-size:9px;opacity:0.85;">+25%</span></button>
+            <div class="piste-4-grid">
+              <button class="piste-btn on" id="p_dur_sec" onclick="setPiste('dur_sec')">Dur sèche<br><span style="font-size:9px;opacity:0.85;">Réf.</span></button>
+              <button class="piste-btn" id="p_herbe_sec" onclick="setPiste('herbe_sec')">Herbe<br><span style="font-size:9px;opacity:0.85;">+25%</span></button>
               <button class="piste-btn" id="p_molle" onclick="setPiste('molle')">Molle<br><span style="font-size:9px;opacity:0.85;">+40%</span></button>
               <button class="piste-btn" id="p_humide" onclick="setPiste('humide')">Humide<br><span style="font-size:9px;opacity:0.85;">+10%</span></button>
             </div>
@@ -623,44 +703,49 @@ canvas{display:block;max-width:100%;}
 
         <!-- Départ -->
         <div style="margin-bottom:10px;">
-          <div style="font-size:11px;font-weight:700;color:#3182ce;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:8px;">
-            Au départ <span id="badge-dep" class="badge" style="font-size:11px;">—</span>
+          <div style="font-size:10px;font-weight:700;color:#3182ce;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;display:flex;align-items:center;gap:8px;">
+            ✈️ Au départ <span id="badge-dep" class="badge" style="font-size:11px;">—</span>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+          <div class="res-grid">
             <div class="res-box" id="rb-masse-dep" style="border-top:3px solid #3182ce;">
               <div class="rl">Masse départ</div>
               <div class="rv" id="rv-masse-dep" style="color:#3182ce;">—</div>
               <div class="ru">kg</div>
             </div>
             <div class="res-box" id="rb-cg-dep" style="border-top:3px solid #3182ce;">
-              <div class="rl">Moment départ</div>
+              <div class="rl">CG départ</div>
               <div class="rv" id="rv-cg-dep" style="color:#3182ce;">—</div>
-              <div class="ru">kg·m</div>
+              <div class="ru">mm</div>
             </div>
           </div>
         </div>
 
         <!-- Arrivée -->
         <div>
-          <div style="font-size:11px;font-weight:700;color:#805ad5;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:8px;">
-            À l'arrivée <span id="badge-arr" class="badge" style="font-size:11px;">—</span>
+          <div style="font-size:10px;font-weight:700;color:#805ad5;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;display:flex;align-items:center;gap:8px;">
+            🏁 À l'arrivée <span id="badge-arr" class="badge" style="font-size:11px;">—</span>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+          <div class="res-grid">
             <div class="res-box" id="rb-masse-arr" style="border-top:3px solid #805ad5;">
               <div class="rl">Masse arrivée</div>
               <div class="rv" id="rv-masse-arr" style="color:#805ad5;">—</div>
               <div class="ru">kg</div>
             </div>
             <div class="res-box" id="rb-cg-arr" style="border-top:3px solid #805ad5;">
-              <div class="rl">Moment arrivée</div>
+              <div class="rl">CG arrivée</div>
               <div class="rv" id="rv-cg-arr" style="color:#805ad5;">—</div>
-              <div class="ru">kg·m</div>
+              <div class="ru">mm</div>
             </div>
           </div>
         </div>
+
+        <!-- Limites -->
+        <div style="margin-top:10px;padding:7px 10px;background:#f7f8fa;border-radius:6px;font-size:11px;color:#718096;border-left:3px solid #e2e8f0;">
+          Limites CG : <strong style="color:#1a1a2e;">427–523 mm</strong> · MTOW : <strong style="color:#1a1a2e;">750 kg</strong>
+        </div>
       </div>
     </div>
-    <div id="centrage-canvas-wrap"><canvas id="cv-centrage"></canvas></div>
+    <div id="centrage-canvas-wrap" style="align-self:start;position:sticky;top:12px;"><canvas id="cv-centrage"></canvas></div>
   </div>
 </div>
 
@@ -949,9 +1034,9 @@ canvas{display:block;max-width:100%;}
           </div>
           <div>
             <div style="font-size:11px;color:#718096;margin-bottom:4px;">Type de piste</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;width:200px;">
-              <button class="piste-btn on" id="att-pt-dur_sec"    onclick="setPisteAtt('dur_sec')">Dur sèche<br><span style="font-size:9px;opacity:0.85;">Référence</span></button>
-              <button class="piste-btn"    id="att-pt-herbe_sec"  onclick="setPisteAtt('herbe_sec')">Herbe sèche<br><span style="font-size:9px;opacity:0.85;">+15%</span></button>
+            <div class="piste-4-grid">
+              <button class="piste-btn on" id="att-pt-dur_sec"    onclick="setPisteAtt('dur_sec')">Dur sèche<br><span style="font-size:9px;opacity:0.85;">Réf.</span></button>
+              <button class="piste-btn"    id="att-pt-herbe_sec"  onclick="setPisteAtt('herbe_sec')">Herbe<br><span style="font-size:9px;opacity:0.85;">+15%</span></button>
               <button class="piste-btn"    id="att-pt-humide"     onclick="setPisteAtt('humide')">Humide<br><span style="font-size:9px;opacity:0.85;">+15%</span></button>
               <button class="piste-btn"    id="att-pt-contaminee" onclick="setPisteAtt('contaminee')">Contaminée<br><span style="font-size:9px;opacity:0.85;">+30%</span></button>
             </div>
@@ -960,10 +1045,10 @@ canvas{display:block;max-width:100%;}
       </div>
 
       <div class="card">
-        <h3>Résultats</h3>
+        <h3>Résultats &amp; Longueur de piste</h3>
         <div class="res-grid">
           <div class="res-box">
-            <div class="rl">Distance atterrissage 50ft</div>
+            <div class="rl">Distance att. 50ft</div>
             <div class="rv" id="att-res50">—</div>
             <div class="ru">m</div>
           </div>
@@ -979,30 +1064,34 @@ canvas{display:block;max-width:100%;}
           <div>Vent ×<span id="att-detWF">—</span></div>
           <div>Piste ×<span id="att-detCF">—</span></div>
         </div>
-        <div style="margin-top:8px;font-size:11px;color:#718096;background:#f7f8fa;padding:6px 10px;border-radius:6px;">
-          Conditions: Gaz réduit · Volets 35° · Freins appliqués · Piste en dur sèche
+        <div style="margin-top:6px;font-size:11px;color:#718096;background:#f7f8fa;padding:5px 10px;border-radius:6px;">
+          Gaz réduit · Volets 35° · Freins appliqués · Piste en dur sèche
         </div>
-
-      </div>
-
-      <div class="card">
-        <h3>Longueur de piste nécessaire</h3>
-        <div style="margin-bottom:10px;">
-          <div style="font-size:11px;color:#718096;margin-bottom:5px;">Marge de sécurité</div>
-          <div class="btn-grp">
-            <button class="piste-btn"    id="att-marge-15" onclick="setMargeAtt(15)">15%</button>
-            <button class="piste-btn on" id="att-marge-30" onclick="setMargeAtt(30)">30%</button>
-            <button class="piste-btn"    id="att-marge-50" onclick="setMargeAtt(50)">50%</button>
+        <div style="height:1px;background:#e2e8f0;margin:12px 0;"></div>
+        <!-- Longueur piste nécessaire inline -->
+        <div class="att-piste-inline">
+          <div class="att-piste-left">
+            <div style="font-size:11px;color:#718096;margin-bottom:4px;">Marge de sécurité</div>
+            <div class="piste-marge-row">
+              <button class="piste-btn piste-marge-btn"    id="att-marge-15" onclick="setMargeAtt(15)">15%</button>
+              <button class="piste-btn piste-marge-btn on" id="att-marge-30" onclick="setMargeAtt(30)">30%</button>
+              <button class="piste-btn piste-marge-btn"    id="att-marge-50" onclick="setMargeAtt(50)">50%</button>
+            </div>
+          </div>
+          <div class="att-piste-right">
+            <div style="font-size:11px;color:#718096;margin-bottom:2px;">Piste nécessaire <span style="color:#e94560;font-weight:700;">×<span id="att-marge-lbl">1.30</span></span></div>
+            <div style="display:flex;align-items:baseline;gap:5px;">
+              <div style="font-size:32px;font-weight:900;color:#1a1a2e;" id="att-piste-nec">—</div>
+              <div style="font-size:14px;color:#718096;">m</div>
+            </div>
           </div>
         </div>
-        <!-- Résultat longueur piste -->
-        <div style="background:#f7f8fa;border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin-bottom:10px;">
-          <div style="font-size:11px;color:#718096;margin-bottom:4px;">
-            (Distance att 50ft + Roulement) × <span id="att-marge-lbl" style="color:#e94560;font-weight:700;">1.30</span>
-          </div>
-          <div style="display:flex;align-items:baseline;gap:6px;">
-            <div style="font-size:32px;font-weight:800;color:#1a1a2e;" id="att-piste-nec">—</div>
-            <div style="font-size:14px;color:#718096;">m</div>
+        <!-- Résultat longueur piste (hidden duplicate kept for compat) -->
+        <div style="display:none;">
+          <div style="background:#f7f8fa;border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin-bottom:10px;">
+            <div style="font-size:11px;color:#718096;margin-bottom:4px;">
+              (Distance att 50ft + Roulement) × <span id="att-marge-lbl2" style="color:#e94560;font-weight:700;">1.30</span>
+            </div>
           </div>
         </div>
         <!-- Comparatif Manuel vs Auto (visible seulement en mode manuel) -->
@@ -2077,16 +2166,19 @@ function updateCentrage(){
   const momArr=av.masse_vide*av.bras_vide+p1*BRAS_PILOTE+p2*BRAS_PASS+bag*BRAS_BAGAGE+kgArr*BRAS_ESSENCE;
   const cgDep=Math.round(momDep/mDep*1000);
   const cgArr=Math.round(momArr/mArr*1000);
-  const setBox=(ib,iv,val,ok)=>{
+  const setBox=(ib,iv,val,ok,color)=>{
     const elv=document.getElementById(iv);
     const elb=document.getElementById(ib);
     if(elv) elv.textContent=(typeof val==='number'&&!Number.isInteger(val)&&Math.abs(val)<1000)?val.toFixed(2):Math.round(val);
-    if(elb) elb.className='result-box '+(ok?'ok':'error');
+    if(elb){
+      elb.className='res-box '+(ok?'ok':'error');
+      elb.style.borderTop='3px solid '+(color||'#3182ce');
+    }
   };
-  setBox('rb-masse-dep','rv-masse-dep',mDep,mDep<=MTOW);
-  setBox('rb-cg-dep','rv-cg-dep',momDep,cgDep>=CG_MIN&&cgDep<=CG_MAX);
-  setBox('rb-masse-arr','rv-masse-arr',mArr,mArr<=MTOW);
-  setBox('rb-cg-arr','rv-cg-arr',momArr,cgArr>=CG_MIN&&cgArr<=CG_MAX);
+  setBox('rb-masse-dep','rv-masse-dep',mDep,   mDep<=MTOW,                        '#3182ce');
+  setBox('rb-cg-dep',   'rv-cg-dep',   cgDep,  cgDep>=CG_MIN&&cgDep<=CG_MAX,      '#3182ce');
+  setBox('rb-masse-arr','rv-masse-arr',mArr,   mArr<=MTOW,                         '#805ad5');
+  setBox('rb-cg-arr',   'rv-cg-arr',   cgArr,  cgArr>=CG_MIN&&cgArr<=CG_MAX,       '#805ad5');
   const depOk=mDep<=MTOW&&cgDep>=CG_MIN&&cgDep<=CG_MAX;
   const arrOk=mArr<=MTOW&&cgArr>=CG_MIN&&cgArr<=CG_MAX;
   const bd=document.getElementById('badge-dep'),ba=document.getElementById('badge-arr');
@@ -2098,8 +2190,8 @@ function updateCentrage(){
 function drawCentrage(momDep,mDep,momArr,mArr){
   const cv=document.getElementById('cv-centrage');
   if(!CENTRAGE_IMG.complete||!CENTRAGE_IMG.naturalWidth)return;
-  // Reduire a 60% de la taille originale pour affichage complet
-  const scale=0.6;
+  // Reduire a 42% de la taille originale
+  const scale=0.42;
   cv.width=Math.round(CENTRAGE_IMG.naturalWidth*scale);
   cv.height=Math.round(CENTRAGE_IMG.naturalHeight*scale);
   const ctx=cv.getContext('2d');
@@ -3805,6 +3897,9 @@ function printPreparation() {
   const cdb   = document.getElementById('vol-cdb')?.value  || '';
   const dest  = document.getElementById('vol-dest')?.value || '';
 
+  // ── Sauvegarder dans l'historique ──
+  histSave({ immat, date, dateRaw, cdb, dep: getCarbuDep(), arr: getCarbuArr() || dest });
+
   const tabIds   = ['tab-carbu','tab-centrage','tab-perf','tab-atterro','tab-montee','tab-autonomie'];
   const tabNames = ['? Carburant','?? Masse & Centrage','? Decollage','? Atterrissage','? Montee','? Autonomie'];
 
@@ -4657,6 +4752,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
 </script>
 
+<!-- ═══ MODAL HISTORIQUE ═══ -->
+<div id="hist-overlay" onclick="if(event.target===this)closeHist()">
+  <div id="hist-box">
+    <div id="hist-header">
+      <div class="tag">AQUILA</div>
+      <h3>📋 Historique des préparations</h3>
+      <button onclick="closeHist()" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:4px 11px;border-radius:6px;cursor:pointer;font-size:12px;">✕</button>
+    </div>
+    <div id="hist-list"></div>
+    <div id="hist-footer">
+      <button onclick="clearHist()" style="padding:6px 14px;border:1px solid #e53e3e;background:#fff;color:#e53e3e;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;">🗑 Effacer l'historique</button>
+      <button onclick="closeHist()" style="padding:6px 18px;background:#1a1a2e;color:white;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700;">Fermer</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL ADMIN -->
 <div id="admin-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;overflow-y:auto;padding:20px;">
   <div style="max-width:700px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4);">
@@ -4766,6 +4877,64 @@ document.addEventListener('DOMContentLoaded', function() {
 </div><!-- /app-wrapper -->
 
 <script>
+// ===== HISTORIQUE DES PRÉPARATIONS =====
+const LS_HIST = 'aquila_history_v1';
+const HIST_MAX = 50;
+
+function histSave(entry) {
+  try {
+    const hist = histLoad();
+    // Éviter doublons exacts (même immat + même date + même route)
+    const key = `${entry.immat}|${entry.dateRaw}|${entry.dep}|${entry.arr}`;
+    const exists = hist.some(h => `${h.immat}|${h.dateRaw}|${h.dep}|${h.arr}` === key);
+    if (!exists) {
+      hist.unshift({ ...entry, savedAt: new Date().toISOString() });
+      if (hist.length > HIST_MAX) hist.pop();
+      localStorage.setItem(LS_HIST, JSON.stringify(hist));
+    }
+  } catch(e) {}
+}
+
+function histLoad() {
+  try { return JSON.parse(localStorage.getItem(LS_HIST) || '[]'); } catch(e) { return []; }
+}
+
+function openHist() {
+  const overlay = document.getElementById('hist-overlay');
+  const list    = document.getElementById('hist-list');
+  if (!overlay || !list) return;
+  const hist = histLoad();
+  if (hist.length === 0) {
+    list.innerHTML = '<div class="hist-empty">📭 Aucune préparation enregistrée.<br><span style="font-size:11px;">Un enregistrement est créé à chaque export PDF.</span></div>';
+  } else {
+    list.innerHTML = hist.map((h, i) => {
+      const dep = h.dep || '—';
+      const arr = h.arr || '—';
+      const route = dep === arr ? dep : `${dep} → ${arr}`;
+      const savedDate = h.savedAt ? new Date(h.savedAt).toLocaleDateString('fr-FR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
+      return `<div class="hist-item">
+        <div class="hist-num">${i+1}</div>
+        <div class="hist-info">
+          <div class="hist-route">✈️ ${route} &nbsp;<span style="color:#e94560;font-size:12px;font-weight:800;">${h.immat||''}</span></div>
+          <div class="hist-date">📅 Vol du ${h.date || '—'} &nbsp;·&nbsp; 🕐 Préparé le ${savedDate}${h.cdb ? ' &nbsp;·&nbsp; 👤 ' + h.cdb : ''}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  overlay.classList.add('open');
+}
+
+function closeHist() {
+  const overlay = document.getElementById('hist-overlay');
+  if (overlay) overlay.classList.remove('open');
+}
+
+function clearHist() {
+  if (!confirm('Effacer tout l\'historique des préparations ?')) return;
+  try { localStorage.removeItem(LS_HIST); } catch(e) {}
+  openHist(); // Rafraîchir
+}
+
 // ===== AUTHENTIFICATION =====
 const AUTH_EMAIL = 'alexandre.kilinc@gmail.com';
 const AUTH_PWD   = 'Racalefly';
