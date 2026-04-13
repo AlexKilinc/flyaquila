@@ -110,6 +110,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e;mi
 
 /* ===== LAYOUT ===== */
 .two-col{display:grid;grid-template-columns:320px 1fr;gap:14px;}
+.two-col > div{min-width:0;overflow:hidden;}
 #tab-carbu .two-col{grid-template-columns:0.65fr 1fr;}
 @media(max-width:860px){
   .two-col{grid-template-columns:1fr;}
@@ -143,6 +144,8 @@ input[type=range]::-webkit-slider-thumb{
 }
 .inp-field input:focus,.inp-field select:focus{border-color:#e94560;outline:none;background:#fff;}
 .inp-field input[readonly]{background:#edf2f7;color:#e94560;font-weight:700;}
+/* Fix global input[date] — évite débordement iOS/Safari */
+input[type="date"]{-webkit-appearance:none;appearance:none;box-sizing:border-box;max-width:100%;min-width:0;}
 
 /* ===== RÉSULTATS PERF ===== */
 .res-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
@@ -291,6 +294,15 @@ canvas{display:block;max-width:100%;}
   .res-box .rv{font-size:22px;}
 
   .inp-field input,.inp-field select{font-size:16px;} /* évite le zoom iOS */
+
+  /* Fix date débordement iOS Safari */
+  input[type="date"] {
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    box-sizing:border-box !important;
+    font-size:16px !important; /* évite zoom */
+  }
 
   /* Barre avion-bar : conso + date + cdb + dest empilés proprement */
   #avion-bar-right{width:100%;justify-content:flex-start;}
@@ -462,6 +474,7 @@ canvas{display:block;max-width:100%;}
 </div>
 
 <!-- SÉLECTEUR AVION (bleu marine) -->
+<input type="text" id="immat" value="F-GXCF" readonly style="display:none;">
 <div id="avion-bar">
   <label>Avion :</label>
   <button class="avion-btn" data-immat="F-GXCF" onclick="setAvion(this)">F-GXCF</button>
@@ -503,6 +516,8 @@ canvas{display:block;max-width:100%;}
           var arrMode=document.querySelector('input[name=\'c-arr-mode\'][value=\'autre\']');
           var arrIcao=document.getElementById('c-arr-icao');
           if(arrMode&&arrIcao){arrMode.checked=true;arrIcao.style.display='block';arrIcao.value=v;}
+          var fpArrIcao=document.getElementById('fp-arr-icao');
+          if(fpArrIcao){fpArrIcao.value=v;}
           var fpArr=document.getElementById('fp-arr');
           if(fpArr){fpArr.value=v;}
           if(typeof updateCarbu==='function')updateCarbu();
@@ -535,31 +550,26 @@ canvas{display:block;max-width:100%;}
     <div>
       <div class="card">
         <h3>Paramètres</h3>
-        <div class="inp-row">
-          <div class="inp-field"><label>Immatriculation</label>
-            <input type="text" id="immat" value="F-GXCF" readonly></div>
-          <div class="inp-field"><label>Pilote</label>
-            <input type="text" id="pilote" placeholder="Nom"></div>
-          <div class="inp-field"><label>Aérodrome départ</label>
-            <div style="display:flex;gap:4px;">
-              <select id="aero" onchange="toggleIcao('aero','aero-txt');compute()" style="background:#f7f8fa;border:1px solid #cbd5e0;color:#1a1a2e;padding:5px 6px;border-radius:6px;font-size:12px;flex:1;">
-                <option value="LFPN">LFPN</option>
-                <option value="LFOB">LFOB</option>
-                <option value="LFPO">LFPO</option>
-                <option value="LFPB">LFPB</option>
-                <option value="LFPT">LFPT</option>
-                <option value="LFFQ">LFFQ</option>
-                <option value="LFAV">LFAV</option>
-                <option value="_autre">Autre…</option>
-              </select>
-              <input type="text" id="aero-txt" placeholder="ICAO" maxlength="4"
-                style="display:none;width:60px;background:#fff;border:1px solid #e94560;
-                       border-radius:6px;padding:5px 6px;font-size:13px;font-weight:700;
-                       text-transform:uppercase;text-align:center;"
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:10px;">
+          <div>
+            <label style="font-size:11px;color:#718096;display:block;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Aérodrome départ</label>
+            <div style="display:flex;gap:6px;align-items:center;position:relative;">
+              <input type="text" id="aero-txt" value="LFPN" maxlength="4" placeholder="ICAO"
+                style="flex:1;min-width:0;background:#fff;border:2px solid #cbd5e0;border-radius:8px;padding:10px 12px;font-size:18px;font-weight:800;text-transform:uppercase;text-align:center;min-height:44px;color:#1a1a2e;box-sizing:border-box;"
                 oninput="this.value=this.value.toUpperCase();compute()">
-            </div></div>
-          <div class="inp-field"><label>Date</label>
-            <input type="date" id="dateVol"></div>
+              <button onclick="toggleAeroMenu('aero-menu')" type="button"
+                style="min-width:44px;min-height:44px;background:#f7f8fa;border:1px solid #cbd5e0;border-radius:8px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">▾</button>
+              <div id="aero-menu" style="display:none;position:absolute;top:48px;left:0;right:0;z-index:999;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.15);min-width:220px;overflow:hidden;"></div>
+            </div>
+          </div>
+          <div>
+            <label style="font-size:11px;color:#718096;display:block;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Date du vol</label>
+            <div style="width:100%;overflow:hidden;">
+            <input type="date" id="dateVol"
+              style="width:100%;min-height:44px;font-size:16px;padding:9px 10px;border-radius:8px;border:1px solid #cbd5e0;background:#f7f8fa;color:#1a1a2e;box-sizing:border-box;-webkit-appearance:none;appearance:none;display:block;"
+              onchange="var v=document.getElementById('vol-date');if(v)v.value=this.value;var fp=document.getElementById('fp-date');if(fp)fp.value=this.value;var cd=document.getElementById('c-date-vol');if(cd)cd.value=this.value;">
+            </div>
+          </div>
         </div>
         <div class="sl-row">
           <label>Température extérieure <span id="tempVal">20°C</span></label>
@@ -759,51 +769,72 @@ canvas{display:block;max-width:100%;}
       <!-- Identification -->
       <div class="card" style="border-left:4px solid #e94560;">
         <h3>Identification du vol</h3>
-        <!-- Ligne 1: Départ / Arrivée -->
-        <div class="inp-row" style="margin-bottom:6px;">
-          <div class="inp-field"><label>Départ</label>
-            <div style="display:flex;align-items:center;gap:8px;">
-              <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:#1a1a2e;cursor:pointer;">
-                <input type="radio" name="c-dep-mode" value="lfpn" checked onchange="toggleDepMode(this.value)">
-                <span style="font-weight:700;color:#e94560;">LFPN</span>
-              </label>
-              <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:#718096;cursor:pointer;">
-                <input type="radio" name="c-dep-mode" value="autre" onchange="toggleDepMode(this.value)">
-                Autre
-              </label>
-              <input type="text" id="c-dep-icao" placeholder="ICAO" maxlength="4"
-                style="display:none;width:70px;background:#fff;border:1px solid #e94560;border-radius:6px;
-                       padding:4px 7px;font-size:14px;font-weight:700;text-transform:uppercase;text-align:center;color:#1a1a2e;"
-                oninput="this.value=this.value.toUpperCase();updateCarbu()">
-            </div></div>
-          <div class="inp-field"><label>Arrivée</label>
-            <div style="display:flex;align-items:center;gap:8px;">
-              <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:#1a1a2e;cursor:pointer;">
-                <input type="radio" name="c-arr-mode" value="lfpn" checked onchange="toggleArrMode(this.value)">
-                <span style="font-weight:700;color:#e94560;">LFPN</span>
-              </label>
-              <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:#718096;cursor:pointer;">
-                <input type="radio" name="c-arr-mode" value="autre" onchange="toggleArrMode(this.value)">
-                Autre
-              </label>
-              <input type="text" id="c-arr-icao" placeholder="ICAO" maxlength="4"
-                style="display:none;width:70px;background:#fff;border:1px solid #e94560;border-radius:6px;
-                       padding:4px 7px;font-size:14px;font-weight:700;text-transform:uppercase;text-align:center;color:#1a1a2e;"
-                oninput="this.value=this.value.toUpperCase();updateCarbu();
-                  var v=this.value.trim();
-                  var d=document.getElementById('vol-dest');if(d)d.value=v;
-                  var f=document.getElementById('fp-arr');if(f)f.value=v;
-                  if(typeof updateFPRoute==='function')updateFPRoute();
-                  if(typeof saveFP==='function')saveFP();">
-            </div></div>
+
+        <!-- Départ -->
+        <div style="margin-bottom:12px;">
+          <label style="font-size:11px;color:#718096;display:block;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Aérodrome départ</label>
+          <div style="display:flex;gap:6px;align-items:center;position:relative;">
+            <input type="text" id="c-dep-icao" value="LFPN" maxlength="4" placeholder="ICAO"
+              style="flex:1;min-width:0;background:#fff;border:2px solid #cbd5e0;border-radius:8px;padding:10px 12px;font-size:18px;font-weight:800;text-transform:uppercase;text-align:center;min-height:44px;color:#1a1a2e;box-sizing:border-box;"
+              oninput="this.value=this.value.toUpperCase();updateCarbu();
+                var fp=document.getElementById('fp-dep');if(fp)fp.value=this.value;
+                var fpi=document.getElementById('fp-dep-icao');if(fpi)fpi.value=this.value;
+                if(typeof updateFPRoute==='function')updateFPRoute();">
+            <button onclick="toggleAeroMenu('c-dep-menu')" type="button"
+              style="min-width:44px;min-height:44px;background:#f7f8fa;border:1px solid #cbd5e0;border-radius:8px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">▾</button>
+            <div id="c-dep-menu" style="display:none;position:absolute;top:48px;left:0;right:0;z-index:999;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.15);min-width:220px;overflow:hidden;"></div>
+          </div>
         </div>
-        <!-- Ligne 2: Avion / Conso -->
-        <div class="inp-row">
-          <div class="inp-field"><label>Avion</label>
-            <input type="text" id="c-avion" readonly style="color:#e94560;font-weight:700;background:#edf2f7;border:1px solid #cbd5e0;padding:5px 8px;border-radius:6px;font-size:13px;width:100%;"></div>
-          <div class="inp-field"><label>Conso (L/h)</label>
-            <input type="number" id="c-conso" value="20" min="5" max="50" step="0.5" oninput="syncConso('c-conso');updateCarbu()"></div>
+
+        <!-- Arrivée -->
+        <div style="margin-bottom:12px;">
+          <label style="font-size:11px;color:#718096;display:block;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Aérodrome arrivée</label>
+          <div style="display:flex;gap:6px;align-items:center;position:relative;">
+            <input type="text" id="c-arr-icao" value="LFPN" maxlength="4" placeholder="ICAO"
+              style="flex:1;min-width:0;background:#fff;border:2px solid #cbd5e0;border-radius:8px;padding:10px 12px;font-size:18px;font-weight:800;text-transform:uppercase;text-align:center;min-height:44px;color:#1a1a2e;box-sizing:border-box;"
+              oninput="this.value=this.value.toUpperCase();updateCarbu();
+                var v=this.value.trim();
+                var d=document.getElementById('vol-dest');if(d)d.value=v;
+                var f=document.getElementById('fp-arr');if(f)f.value=v;
+                var fi=document.getElementById('fp-arr-icao');if(fi)fi.value=v;
+                if(typeof updateFPRoute==='function')updateFPRoute();
+                if(typeof saveFP==='function')saveFP();">
+            <button onclick="toggleAeroMenu('c-arr-menu')" type="button"
+              style="min-width:44px;min-height:44px;background:#f7f8fa;border:1px solid #cbd5e0;border-radius:8px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">▾</button>
+            <div id="c-arr-menu" style="display:none;position:absolute;top:48px;left:0;right:0;z-index:999;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.15);min-width:220px;overflow:hidden;"></div>
+          </div>
         </div>
+
+        <!-- Date de vol -->
+        <div style="margin-bottom:12px;">
+          <label style="font-size:11px;color:#718096;display:block;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Date de vol prévue</label>
+          <div style="width:100%;overflow:hidden;">
+          <input type="date" id="c-date-vol"
+            style="width:100%;background:#f7f8fa;border:1px solid #cbd5e0;color:#1a1a2e;padding:9px 10px;border-radius:8px;font-size:16px;font-weight:600;min-height:44px;box-sizing:border-box;-webkit-appearance:none;appearance:none;display:block;"
+            onchange="
+              var v=this.value;
+              var vd=document.getElementById('vol-date');if(vd)vd.value=v;
+              var fp=document.getElementById('fp-date');if(fp)fp.value=v;
+              var dv=document.getElementById('dateVol');if(dv)dv.value=v;
+              if(typeof saveFP==='function')saveFP();">
+          </div>
+        </div>
+
+        <!-- Avion — boutons style bandeau -->
+        <div style="margin-bottom:10px;">
+          <label style="font-size:11px;color:#718096;display:block;margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Avion</label>
+          <div id="c-avion-btns" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;"></div>
+          <div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:#f7f8fa;border-radius:8px;">
+            <span style="font-size:12px;color:#718096;">Conso</span>
+            <input type="number" id="c-conso" value="20" min="5" max="50" step="0.5"
+              style="width:60px;background:#fff;border:1px solid #cbd5e0;border-radius:6px;padding:6px 8px;font-size:15px;font-weight:700;text-align:center;"
+              oninput="syncConso('c-conso');updateCarbu()">
+            <span style="font-size:12px;color:#718096;">L/h</span>
+          </div>
+        </div>
+        <!-- champ readonly legacy pour compatibilité JS -->
+        <input type="text" id="c-avion" readonly style="display:none;">
+        <span id="c-avion-lbl" style="display:none;"></span>
       </div>
 
       <!-- Roulage -->
@@ -973,16 +1004,25 @@ canvas{display:block;max-width:100%;}
     <div>
       <div class="card">
         <h3>Paramètres atterrissage</h3>
-        <div class="inp-row">
-          <div class="inp-field"><label>Immatriculation</label>
-            <input type="text" id="att-immat" readonly style="color:#e94560;font-weight:700;background:#edf2f7;border:1px solid #cbd5e0;padding:5px 8px;border-radius:6px;font-size:13px;width:100%;"></div>
-          <div class="inp-field"><label>Aérodrome</label>
-            <select id="att-aero" style="background:#f7f8fa;border:1px solid #cbd5e0;color:#1a1a2e;padding:5px 8px;border-radius:6px;font-size:13px;width:100%;">
-              <option value="LFPN">LFPN</option><option value="LFOB">LFOB</option>
-              <option value="LFPO">LFPO</option><option value="LFPB">LFPB</option>
-              <option value="LFPT">LFPT</option><option value="LFFQ">LFFQ</option>
-              <option value="LFAV">LFAV</option>
-            </select></div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:10px;">
+          <div>
+            <label style="font-size:11px;color:#718096;display:block;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Aérodrome arrivée</label>
+            <div style="display:flex;gap:6px;align-items:center;position:relative;">
+              <input type="text" id="att-aero-txt" value="LFPN" maxlength="4" placeholder="ICAO"
+                style="flex:1;min-width:0;background:#fff;border:2px solid #cbd5e0;border-radius:8px;padding:10px 12px;font-size:18px;font-weight:800;text-transform:uppercase;text-align:center;min-height:44px;color:#1a1a2e;box-sizing:border-box;"
+                oninput="this.value=this.value.toUpperCase();">
+              <button onclick="toggleAeroMenu('att-aero-menu')" type="button"
+                style="min-width:44px;min-height:44px;background:#f7f8fa;border:1px solid #cbd5e0;border-radius:8px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">▾</button>
+              <div id="att-aero-menu" style="display:none;position:absolute;top:48px;left:0;right:0;z-index:999;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.15);min-width:220px;overflow:hidden;"></div>
+            </div>
+          </div>
+          <div>
+            <label style="font-size:11px;color:#718096;display:block;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Date arrivée</label>
+            <div style="width:100%;overflow:hidden;">
+            <input type="date" id="att-date"
+              style="width:100%;min-height:44px;font-size:16px;padding:9px 10px;border-radius:8px;border:1px solid #cbd5e0;background:#f7f8fa;color:#1a1a2e;box-sizing:border-box;-webkit-appearance:none;appearance:none;display:block;">
+            </div>
+          </div>
         </div>
         <div class="sl-row">
           <label>Température extérieure <span id="att-tempVal">20°C</span></label>
@@ -1410,29 +1450,35 @@ canvas{display:block;max-width:100%;}
       <!-- Départ -->
       <div>
         <label style="font-size:10px;color:#90cdf4;display:block;margin-bottom:3px;">Départ (ICAO)</label>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:#bee3f8;cursor:pointer;white-space:nowrap;flex-shrink:0;">
-            <input type="checkbox" id="fp-dep-lfpn" onchange="toggleDepLFPN()" style="accent-color:#3182ce;width:16px;height:16px;">
-            LFPN
-          </label>
-          <input type="text" id="fp-dep" placeholder="LFPB…" maxlength="4"
-            style="flex:1;min-width:0;padding:7px 10px;border-radius:6px;border:1px solid #2c5282;background:#0d2354;color:#fff;font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;box-sizing:border-box;min-height:36px;"
-            oninput="this.value=this.value.toUpperCase();saveFP()">
+        <div style="display:flex;gap:6px;align-items:center;position:relative;">
+          <input type="text" id="fp-dep-icao" value="LFPN" maxlength="4" placeholder="ICAO"
+            style="flex:1;min-width:0;background:#0d2354;border:1px solid #2c5282;border-radius:6px;padding:7px 10px;font-size:16px;font-weight:800;text-transform:uppercase;text-align:center;min-height:36px;color:#fff;box-sizing:border-box;"
+            oninput="this.value=this.value.toUpperCase();saveFP();
+              var fp=document.getElementById('fp-dep');if(fp)fp.value=this.value;
+              var cd=document.getElementById('c-dep-icao');if(cd){cd.value=this.value;cd.dispatchEvent(new Event('input'));}
+              if(typeof updateFPRoute==='function')updateFPRoute();">
+          <button onclick="toggleAeroMenu('fp-dep-menu')" type="button"
+            style="min-width:36px;min-height:36px;background:rgba(255,255,255,.1);border:1px solid #2c5282;border-radius:6px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;">▾</button>
+          <div id="fp-dep-menu" style="display:none;position:absolute;top:42px;left:0;right:0;z-index:999;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);min-width:220px;overflow:hidden;"></div>
         </div>
       </div>
 
       <!-- Arrivée -->
       <div>
         <label style="font-size:10px;color:#90cdf4;display:block;margin-bottom:3px;">Arrivée (ICAO)</label>
-        <input type="text" id="fp-arr" placeholder="LFPG…" maxlength="4"
-          style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid #2c5282;background:#0d2354;color:#fff;font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;box-sizing:border-box;min-height:36px;"
-          oninput="this.value=this.value.toUpperCase();saveFP();
-            var v=this.value.trim();
-            var d=document.getElementById('vol-dest');if(d)d.value=v;
-            var arrMode=document.querySelector('input[name=\'c-arr-mode\'][value=\'autre\']');
-            var arrIcao=document.getElementById('c-arr-icao');
-            if(arrMode&&arrIcao){arrMode.checked=true;arrIcao.style.display='block';arrIcao.value=v;}
-            if(typeof updateCarbu==='function')updateCarbu();">
+        <div style="display:flex;gap:6px;align-items:center;position:relative;">
+          <input type="text" id="fp-arr-icao" value="" maxlength="4" placeholder="ICAO"
+            style="flex:1;min-width:0;background:#0d2354;border:1px solid #2c5282;border-radius:6px;padding:7px 10px;font-size:16px;font-weight:800;text-transform:uppercase;text-align:center;min-height:36px;color:#fff;box-sizing:border-box;"
+            oninput="this.value=this.value.toUpperCase();saveFP();
+              var v=this.value.trim();
+              var d=document.getElementById('vol-dest');if(d)d.value=v;
+              var f=document.getElementById('fp-arr');if(f)f.value=v;
+              var ca=document.getElementById('c-arr-icao');if(ca){ca.value=v;ca.dispatchEvent(new Event('input'));}
+              if(typeof updateFPRoute==='function')updateFPRoute();">
+          <button onclick="toggleAeroMenu('fp-arr-menu')" type="button"
+            style="min-width:36px;min-height:36px;background:rgba(255,255,255,.1);border:1px solid #2c5282;border-radius:6px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;">▾</button>
+          <div id="fp-arr-menu" style="display:none;position:absolute;top:42px;left:0;right:0;z-index:999;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);min-width:220px;overflow:hidden;"></div>
+        </div>
       </div>
 
     </div>
@@ -1813,6 +1859,96 @@ canvas{display:block;max-width:100%;}
 
 
 <script>
+// ===== LISTE AÉRODROMES =====
+const AERODROMES = [
+  { icao:'LFPN', name:'Toussus-le-Noble' },
+  { icao:'LPOX', name:'Étampes' },
+  { icao:'LFPM', name:'Melun' },
+  { icao:'LFOR', name:'Chartres' },
+  { icao:'LFOZ', name:'Orléans StD' },
+  { icao:'LFOP', name:'Rouen' },
+  { icao:'LFPT', name:'Pontoise' },
+  { icao:'LFOQ', name:'Blois' },
+  { icao:'LFOB', name:'Beauvais' },
+  { icao:'LFAT', name:'Le Touquet' },
+  { icao:'LFRG', name:'Deauville' },
+];
+
+// Ouvre/ferme le menu déroulant aérodrome et le peuple si vide
+function toggleAeroMenu(menuId) {
+  // Fermer tous les autres menus
+  ['aero-menu','att-aero-menu','c-dep-menu','c-arr-menu','fp-dep-menu','fp-arr-menu'].forEach(id => {
+    if (id !== menuId) { const m = document.getElementById(id); if(m) m.style.display='none'; }
+  });
+  const menu = document.getElementById(menuId);
+  if (!menu) return;
+  if (menu.style.display !== 'none') { menu.style.display='none'; return; }
+  // Peupler si vide
+  if (!menu.children.length) {
+    AERODROMES.forEach(a => {
+      const row = document.createElement('div');
+      row.style.cssText = 'padding:10px 14px;cursor:pointer;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center;';
+      row.innerHTML = '<span style="font-weight:800;color:#1a1a2e;font-size:14px;">'+a.icao+'</span>'
+                    + '<span style="font-size:12px;color:#718096;">'+a.name+'</span>';
+      row.onmouseenter = () => row.style.background='#f7f8fa';
+      row.onmouseleave = () => row.style.background='';
+      row.onclick = () => {
+        // Trouver le champ ICAO associé à ce menu
+        const inputId = {
+          'aero-menu':    'aero-txt',
+          'att-aero-menu':'att-aero-txt',
+          'c-dep-menu':   'c-dep-icao',
+          'c-arr-menu':   'c-arr-icao',
+          'fp-dep-menu':  'fp-dep-icao',
+          'fp-arr-menu':  'fp-arr-icao'
+        }[menuId];
+        const inp = document.getElementById(inputId);
+        if (inp) {
+          inp.value = a.icao;
+          inp.dispatchEvent(new Event('input'));
+        }
+        menu.style.display = 'none';
+      };
+      menu.appendChild(row);
+    });
+  }
+  menu.style.display = 'block';
+}
+// Fermer les menus au clic dehors
+document.addEventListener('click', e => {
+  ['aero-menu','att-aero-menu','c-dep-menu','c-arr-menu','fp-dep-menu','fp-arr-menu'].forEach(id => {
+    const m = document.getElementById(id);
+    if (m && m.style.display !== 'none') {
+      const btn = m.previousElementSibling;
+      if (!m.contains(e.target) && e.target !== btn) m.style.display='none';
+    }
+  });
+});
+
+// Peuple les boutons avion dans l'onglet carburant (même style que bandeau)
+function buildCarbuAvionBtns() {
+  const container = document.getElementById('c-avion-btns');
+  if (!container || container.children.length) return;
+  Object.keys(AVIONS).forEach(immat => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'avion-btn';
+    btn.textContent = immat;
+    if (immat === avionActuel) btn.classList.add('active');
+    btn.onclick = () => {
+      // Synchroniser avec le bouton du bandeau
+      const mainBtn = document.querySelector(`.avion-btn[data-immat="${immat}"]`);
+      if (mainBtn) setAvion(mainBtn);
+      // Mettre à jour l'état visuel des boutons carbu
+      container.querySelectorAll('.avion-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    };
+    container.appendChild(btn);
+  });
+}
+// Mettre à jour le label avion dans carbu quand setAvion est appelé
+const _origSetAvionHook = typeof setAvion !== 'undefined' ? null : null; // placé après setAvion
+
 // ===== DONNEES AVIONS (modifiables via mode admin) =====
 // Structure par defaut - surchargee par localStorage si donnees admin sauvegardees
 const AVIONS_DEFAULT = {
@@ -1899,8 +2035,8 @@ const LS_KEY_FP       = 'aquila_fp_v1';
 
 // ===== PLAN DE VOL =====
 function updateFPRoute() {
-  const dep  = document.getElementById('fp-dep')?.value  || '—';
-  const arr  = document.getElementById('fp-arr')?.value  || '—';
+  const dep  = document.getElementById('fp-dep-icao')?.value  || document.getElementById('fp-dep')?.value  || '—';
+  const arr  = document.getElementById('fp-arr-icao')?.value  || document.getElementById('fp-arr')?.value  || '—';
   const w1   = document.getElementById('fp-wpt1')?.value;
   const w2   = document.getElementById('fp-wpt2')?.value;
   const w3   = document.getElementById('fp-wpt3')?.value;
@@ -1912,14 +2048,13 @@ function updateFPRoute() {
 
 // Lire le ICAO départ depuis l'onglet carburant
 function getCarbuDep() {
-  const mode = document.querySelector('input[name="c-dep-mode"]:checked')?.value || 'lfpn';
-  if (mode === 'lfpn') return 'LFPN';
+  const sel = document.getElementById('c-dep-select');
+  if(sel && sel.value && sel.value !== '_autre') return sel.value;
   return (document.getElementById('c-dep-icao')?.value || '').toUpperCase() || 'LFPN';
 }
-// Lire le ICAO arrivée depuis l'onglet carburant
 function getCarbuArr() {
-  const mode = document.querySelector('input[name="c-arr-mode"]:checked')?.value || 'lfpn';
-  if (mode === 'lfpn') return 'LFPN';
+  const sel = document.getElementById('c-arr-select');
+  if(sel && sel.value && sel.value !== '_autre') return sel.value;
   return (document.getElementById('c-arr-icao')?.value || '').toUpperCase() || '';
 }
 
@@ -1938,24 +2073,16 @@ function syncFPFromSources() {
 
   // Départ depuis carburant — toujours synchroniser
   const depSrc = getCarbuDep();
-  const fpDep  = document.getElementById('fp-dep');
-  const fpDepChk = document.getElementById('fp-dep-lfpn');
-  if (fpDep && fpDepChk) {
-    if (depSrc === 'LFPN') {
-      fpDepChk.checked = true;
-      fpDep.value = 'LFPN';
-      fpDep.disabled = true;
-      fpDep.style.opacity = '.5';
-    } else {
-      fpDepChk.checked = false;
-      fpDep.disabled = false;
-      fpDep.style.opacity = '1';
-      fpDep.value = depSrc;
-    }
-  }
+  const fpDepIcao = document.getElementById('fp-dep-icao');
+  if (fpDepIcao) fpDepIcao.value = depSrc;
+  // champ legacy fp-dep pour compatibilité route display
+  const fpDep = document.getElementById('fp-dep');
+  if (fpDep) fpDep.value = depSrc;
 
   // Arrivée depuis carburant — toujours synchroniser
   const arrSrc = getCarbuArr();
+  const fpArrIcao = document.getElementById('fp-arr-icao');
+  if (fpArrIcao && arrSrc) fpArrIcao.value = arrSrc;
   const fpArr = document.getElementById('fp-arr');
   if (fpArr && arrSrc) fpArr.value = arrSrc;
 
@@ -1967,22 +2094,12 @@ function saveFP() {
   lsSave(LS_KEY_FP, {
     cdb:  document.getElementById('fp-cdb')?.value  || '',
     date: document.getElementById('fp-date')?.value || '',
-    dep:  document.getElementById('fp-dep')?.value  || '',
-    arr:  document.getElementById('fp-arr')?.value  || '',
+    dep:  document.getElementById('fp-dep-icao')?.value  || '',
+    arr:  document.getElementById('fp-arr-icao')?.value  || '',
     wpt1: document.getElementById('fp-wpt1')?.value || '',
     wpt2: document.getElementById('fp-wpt2')?.value || '',
     wpt3: document.getElementById('fp-wpt3')?.value || '',
-    depLFPN: document.getElementById('fp-dep-lfpn')?.checked || false,
   });
-}
-
-function toggleDepLFPN() {
-  const chk = document.getElementById('fp-dep-lfpn');
-  const inp = document.getElementById('fp-dep');
-  if (!chk || !inp) return;
-  if (chk.checked) { inp.value = 'LFPN'; inp.disabled = true; inp.style.opacity = '.5'; }
-  else             { inp.value = '';     inp.disabled = false; inp.style.opacity = '1'; }
-  saveFP();
 }
 
 function restoreFP() {
@@ -1991,16 +2108,13 @@ function restoreFP() {
     const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
     set('fp-cdb', d.cdb);
     set('fp-date', d.date);
-    set('fp-arr',  d.arr);
+    set('fp-dep-icao', d.dep);
+    set('fp-arr-icao', d.arr);
+    set('fp-dep', d.dep);
+    set('fp-arr', d.arr);
     set('fp-wpt1', d.wpt1);
     set('fp-wpt2', d.wpt2);
     set('fp-wpt3', d.wpt3);
-    const chk = document.getElementById('fp-dep-lfpn');
-    const inp = document.getElementById('fp-dep');
-    if (chk && inp) {
-      if (d.depLFPN) { chk.checked = true; inp.value = 'LFPN'; inp.disabled = true; inp.style.opacity = '.5'; }
-      else { set('fp-dep', d.dep); }
-    }
   }
   // Compléter les champs vides depuis les sources (bandeau sup + carburant)
   syncFPFromSources();
@@ -2115,6 +2229,14 @@ function setAvion(btn){
   // Synchroniser le champ Avion dans l'onglet Carburant
   const cAvion=document.getElementById('c-avion');
   if(cAvion) cAvion.value=avionActuel;
+  // Synchroniser le label avion carbu
+  const lbl=document.getElementById('c-avion-lbl');
+  if(lbl) lbl.textContent=avionActuel;
+  // Synchroniser les boutons avion dans carbu
+  const container=document.getElementById('c-avion-btns');
+  if(container) container.querySelectorAll('.avion-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.immat===avionActuel);
+  });
   // Synchroniser le champ Avion dans le Plan de vol (Prépa vol)
   const fpAvion=document.getElementById('fp-avion');
   if(fpAvion) fpAvion.value=avionActuel;
@@ -2234,6 +2356,8 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('immat').value = 'F-GXCF';
     const cAvion = document.getElementById('c-avion');
     if (cAvion) cAvion.value = 'F-GXCF';
+    const lbl = document.getElementById('c-avion-lbl');
+    if (lbl) lbl.textContent = 'F-GXCF';
     const fpAvion = document.getElementById('fp-avion');
     if (fpAvion) fpAvion.value = 'F-GXCF';
   }
@@ -2370,6 +2494,9 @@ function updateCarbu() {
 
 // Init carburant quand l'onglet s'ouvre
 document.addEventListener('DOMContentLoaded', () => {
+  // Construire les boutons avion dans l'onglet carburant
+  buildCarbuAvionBtns();
+
   const ci = document.getElementById('c-conso');
   if(ci) ci.addEventListener('input', ()=>{ ci._userEdited=true; updateCarbu(); });
   setReserve(30);
@@ -2388,6 +2515,39 @@ function syncConso(srcId) {
   });
 }
 
+function onCarbuDepSelect(val) {
+  const inp = document.getElementById('c-dep-icao');
+  if(val === '_autre') {
+    if(inp){ inp.style.display='block'; inp.focus(); }
+  } else {
+    if(inp){ inp.style.display='none'; inp.value=''; }
+    // Sync fp-dep-icao
+    const fpDepIcao = document.getElementById('fp-dep-icao');
+    if(fpDepIcao){ fpDepIcao.value = val; }
+    const fpDep = document.getElementById('fp-dep');
+    if(fpDep){ fpDep.value = val; }
+    if(typeof updateFPRoute==='function') updateFPRoute();
+  }
+  updateCarbu();
+}
+function onCarbuArrSelect(val) {
+  const inp = document.getElementById('c-arr-icao');
+  if(val === '_autre') {
+    if(inp){ inp.style.display='block'; inp.focus(); }
+  } else {
+    if(inp){ inp.style.display='none'; inp.value=''; }
+    // Sync destinations
+    const dest = document.getElementById('vol-dest');
+    const fpArrIcao = document.getElementById('fp-arr-icao');
+    const fpArr = document.getElementById('fp-arr');
+    if(dest) dest.value = val;
+    if(fpArrIcao) fpArrIcao.value = val;
+    if(fpArr) fpArr.value = val;
+    if(typeof updateFPRoute==='function') updateFPRoute();
+    if(typeof saveFP==='function') saveFP();
+  }
+  updateCarbu();
+}
 function toggleDepMode(val) {
   const inp = document.getElementById('c-dep-icao');
   if(inp) inp.style.display = val==='autre' ? 'block' : 'none';
@@ -3693,8 +3853,8 @@ function buildPrepaPage(immat, date, cdb, dest) {
   // ---- Plan de vol ----
   const fpCdb  = document.getElementById('fp-cdb')?.value  || cdb || '';
   const fpDate = document.getElementById('fp-date')?.value || '';
-  const fpDep  = document.getElementById('fp-dep')?.value  || '';
-  const fpArr  = document.getElementById('fp-arr')?.value  || '';
+  const fpDep  = document.getElementById('fp-dep-icao')?.value  || document.getElementById('fp-dep')?.value  || '';
+  const fpArr  = document.getElementById('fp-arr-icao')?.value  || document.getElementById('fp-arr')?.value  || '';
   const fpW1   = document.getElementById('fp-wpt1')?.value || '';
   const fpW2   = document.getElementById('fp-wpt2')?.value || '';
   const fpW3   = document.getElementById('fp-wpt3')?.value || '';
@@ -4384,7 +4544,10 @@ ${d50>700?'<div class="wb">? Performances elevees - verifiez la distance disponi
   a2.click();
 }
 
-document.getElementById("dateVol").value=new Date().toLocaleDateString("fr-FR");
+const _today = new Date().toISOString().slice(0,10);
+document.getElementById("dateVol").value = _today;
+const _vd = document.getElementById('vol-date');
+if(_vd && !_vd.value) _vd.value = _today;
 CHART.onload=()=>compute();
 CHART.onerror=()=>compute();
 // Le resize ne change pas CW (fixe a 1400), l'image se redimensionne en CSS
