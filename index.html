@@ -432,7 +432,7 @@ canvas{display:block;max-width:100%;}
       <input type="password" id="login-pwd" placeholder="••••••••"
         onkeydown="if(event.key==='Enter')doLogin()">
     </div>
-    <button id="login-btn" onclick="doLogin()">✈️ Accéder à l'application</button>
+    <button id="login-btn" onclick="doLogin()"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:7px"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4 19-7z"/></svg>Accéder à l'application</button>
     <div id="login-error">❌ Identifiants incorrects — accès refusé</div>
     <div id="login-session-info">Session conservée sur cet appareil</div>
   </div>
@@ -449,6 +449,17 @@ canvas{display:block;max-width:100%;}
     <div class="sub" id="header-sub">Sélectionner un avion</div>
   </div>
   <div id="header-right">
+    <!-- Bouton START -->
+    <button onclick="showTab('carbu', document.querySelector('.tab-btn[onclick*=\'carbu\']'))" title="Commencer la préparation de vol"
+      style="padding:6px 13px;background:#e94560;border:none;
+             border-radius:6px;color:#fff;font-size:11px;cursor:pointer;font-weight:700;
+             transition:all .2s;min-height:34px;display:flex;align-items:center;gap:5px;
+             box-shadow:0 2px 8px rgba(233,69,96,0.4);"
+      onmouseover="this.style.background='#c73652';this.style.boxShadow='0 2px 12px rgba(233,69,96,0.6)'"
+      onmouseout="this.style.background='#e94560';this.style.boxShadow='0 2px 8px rgba(233,69,96,0.4)'">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      START
+    </button>
     <!-- Nom utilisateur connecté -->
     <div id="user-badge" style="display:flex;align-items:center;gap:7px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:5px 11px;min-height:34px;">
       <div id="user-initials" style="width:26px;height:26px;border-radius:50%;background:#e94560;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;flex-shrink:0;"></div>
