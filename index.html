@@ -262,7 +262,7 @@ canvas{display:block;max-width:100%;}
   display: flex; align-items: center; gap: 10px;
   padding: 10px 12px; border-radius: 8px; margin-bottom: 6px;
   background: #f7f8fa; border: 1px solid #e2e8f0;
-  transition: background .15s;
+  transition: background .15s; cursor: pointer;
 }
 .hist-item:hover { background: #edf2f7; }
 .hist-num {
@@ -315,6 +315,9 @@ canvas{display:block;max-width:100%;}
   .prepa-score{flex-direction:column;gap:8px;padding:10px 12px;}
   .prepa-score .score-go{margin-left:0;width:100%;text-align:center;}
   #header-right{gap:5px;}
+  /* Mobile : masquer nom complet, garder seulement le cercle initiales */
+  #user-fullname{display:none;}
+  #user-badge{padding:4px 6px;gap:0;}
 }
 
 /* ===== RESPONSIVE TABLETTE (481px–860px iPad portrait) ===== */
@@ -330,6 +333,9 @@ canvas{display:block;max-width:100%;}
   .prepa-grid{grid-template-columns:1fr 1fr;}
 
   #avion-bar-right{flex-wrap:wrap;gap:6px;}
+  /* iPad : masquer nom complet, garder initiales */
+  #user-fullname{display:none;}
+  #user-badge{padding:4px 6px;gap:0;}
 }
 
 /* @media print removed */
@@ -439,6 +445,11 @@ canvas{display:block;max-width:100%;}
     <div class="sub" id="header-sub">Sélectionner un avion</div>
   </div>
   <div id="header-right">
+    <!-- Nom utilisateur connecté -->
+    <div id="user-badge" style="display:flex;align-items:center;gap:7px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:5px 11px;min-height:34px;">
+      <div id="user-initials" style="width:26px;height:26px;border-radius:50%;background:#e94560;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;flex-shrink:0;"></div>
+      <span id="user-fullname" style="font-size:12px;font-weight:700;color:#e2e8f0;white-space:nowrap;"></span>
+    </div>
     <!-- Bouton Historique -->
     <button onclick="openHist()" title="Historique des vols préparés"
       style="padding:6px 11px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);
@@ -4058,7 +4069,11 @@ function printPreparation() {
   const dest  = document.getElementById('vol-dest')?.value || '';
 
   // ── Sauvegarder dans l'historique ──
-  histSave({ immat, date, dateRaw, cdb, dep: getCarbuDep(), arr: getCarbuArr() || dest });
+  const _snapFP    = (() => { try { return JSON.parse(localStorage.getItem('aquila_fp_v1') || 'null'); } catch(e){return null;} })();
+  const _snapPrepa = (() => { try { return JSON.parse(localStorage.getItem('aquila_prepa_v1') || 'null'); } catch(e){return null;} })();
+  const _snapParam = (() => { try { return JSON.parse(localStorage.getItem('aquila_params_v1') || 'null'); } catch(e){return null;} })();
+  histSave({ immat, date, dateRaw, cdb, dep: getCarbuDep(), arr: getCarbuArr() || dest,
+             snapFP: _snapFP, snapPrepa: _snapPrepa, snapParam: _snapParam });
 
   const tabIds   = ['tab-carbu','tab-centrage','tab-perf','tab-atterro','tab-montee','tab-autonomie'];
   const tabNames = ['? Carburant','?? Masse & Centrage','? Decollage','? Atterrissage','? Montee','? Autonomie'];
@@ -5096,27 +5111,95 @@ function histLoad() {
 
 function openHist() {
   const overlay = document.getElementById('hist-overlay');
-  const list    = document.getElementById('hist-list');
-  if (!overlay || !list) return;
+  if (!overlay) return;
+  renderHistList();
+  overlay.classList.add('open');
+}
+
+function renderHistList() {
+  const list = document.getElementById('hist-list');
+  if (!list) return;
   const hist = histLoad();
   if (hist.length === 0) {
     list.innerHTML = '<div class="hist-empty">📭 Aucune préparation enregistrée.<br><span style="font-size:11px;">Un enregistrement est créé à chaque export PDF.</span></div>';
-  } else {
-    list.innerHTML = hist.map((h, i) => {
-      const dep = h.dep || '—';
-      const arr = h.arr || '—';
-      const route = dep === arr ? dep : `${dep} → ${arr}`;
-      const savedDate = h.savedAt ? new Date(h.savedAt).toLocaleDateString('fr-FR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
-      return `<div class="hist-item">
-        <div class="hist-num">${i+1}</div>
-        <div class="hist-info">
-          <div class="hist-route">✈️ ${route} &nbsp;<span style="color:#e94560;font-size:12px;font-weight:800;">${h.immat||''}</span></div>
-          <div class="hist-date">📅 Vol du ${h.date || '—'} &nbsp;·&nbsp; 🕐 Préparé le ${savedDate}${h.cdb ? ' &nbsp;·&nbsp; 👤 ' + h.cdb : ''}</div>
-        </div>
-      </div>`;
-    }).join('');
+    return;
   }
-  overlay.classList.add('open');
+  list.innerHTML = hist.map((h, i) => {
+    const dep = h.dep || '—';
+    const arr = h.arr || '—';
+    const route = dep === arr ? dep : `${dep} → ${arr}`;
+    const savedDate = h.savedAt
+      ? new Date(h.savedAt).toLocaleDateString('fr-FR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})
+      : '';
+    return `<div class="hist-item" title="Cliquer pour recharger cette préparation" onclick="restoreFromHist(${i})">
+      <div class="hist-num">${i+1}</div>
+      <div class="hist-info">
+        <div class="hist-route">✈️ ${route} &nbsp;<span style="color:#e94560;font-size:12px;font-weight:800;">${h.immat||''}</span></div>
+        <div class="hist-date">📅 Vol du ${h.date || '—'} &nbsp;·&nbsp; 🕐 Préparé le ${savedDate}${h.cdb ? ' &nbsp;·&nbsp; 👤 ' + h.cdb : ''}</div>
+      </div>
+      <button onclick="event.stopPropagation();deleteHistEntry(${i})" title="Supprimer ce vol"
+        style="flex-shrink:0;width:30px;height:30px;border-radius:6px;border:1px solid #fed7d7;background:#fff5f5;color:#e53e3e;cursor:pointer;font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:center;line-height:1;">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function deleteHistEntry(index) {
+  const hist = histLoad();
+  if (index < 0 || index >= hist.length) return;
+  const h = hist[index];
+  if (!confirm(`Supprimer ce vol ?\n${h.dep||''}→${h.arr||''} · ${h.date||'—'}`)) return;
+  hist.splice(index, 1);
+  try { localStorage.setItem(LS_HIST, JSON.stringify(hist)); } catch(e) {}
+  renderHistList();
+}
+
+function restoreFromHist(index) {
+  const hist = histLoad();
+  const h = hist[index];
+  if (!h) return;
+  if (!confirm(`Recharger la préparation du ${h.date||'—'} (${h.dep||''}→${h.arr||''}) ?\n\nLes données actuelles non sauvegardées seront remplacées.`)) return;
+  closeHist();
+  // Restaurer les snapshots dans localStorage
+  try {
+    if (h.snapFP)    localStorage.setItem('aquila_fp_v1',     JSON.stringify(h.snapFP));
+    if (h.snapPrepa) localStorage.setItem('aquila_prepa_v1',  JSON.stringify(h.snapPrepa));
+    if (h.snapParam) localStorage.setItem('aquila_params_v1', JSON.stringify(h.snapParam));
+  } catch(e) {}
+  // Appliquer avion
+  if (h.immat) {
+    const btn = document.querySelector(`.avion-btn[data-immat="${h.immat}"]`);
+    if (btn) btn.click();
+    else { const im = document.getElementById('immat'); if(im) im.value = h.immat; }
+  }
+  // Appliquer date
+  if (h.dateRaw) {
+    ['vol-date','fp-date','c-date-vol'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) { el.value = h.dateRaw; el.dispatchEvent(new Event('change')); }
+    });
+  }
+  // Appliquer CDB
+  if (h.cdb) {
+    ['vol-cdb','fp-cdb'].forEach(id => {
+      const el = document.getElementById(id); if(el) el.value = h.cdb;
+    });
+  }
+  // Restaurer plan de vol + checklist prépa
+  if (typeof restoreFP === 'function') restoreFP();
+  if (typeof prepaRestore === 'function') prepaRestore();
+  // Naviguer sur l'onglet Prépa
+  const prepaBtn = document.getElementById('tab-btn-prepa');
+  if (prepaBtn) prepaBtn.click();
+  // Relancer les calculs
+  setTimeout(() => {
+    try{updateCarbu();}catch(e){}
+    try{updateCentrage();}catch(e){}
+    try{compute();}catch(e){}
+    try{computeAtt();}catch(e){}
+    try{computeMontee();}catch(e){}
+    try{computeAutonomie();}catch(e){}
+    try{updateFPRoute();}catch(e){}
+  }, 120);
 }
 
 function closeHist() {
@@ -5127,12 +5210,14 @@ function closeHist() {
 function clearHist() {
   if (!confirm('Effacer tout l\'historique des préparations ?')) return;
   try { localStorage.removeItem(LS_HIST); } catch(e) {}
-  openHist(); // Rafraîchir
+  renderHistList();
 }
 
 // ===== AUTHENTIFICATION =====
-const AUTH_EMAIL = 'alexandre.kilinc@gmail.com';
-const AUTH_PWD   = 'Racalefly';
+const AUTH_EMAIL    = 'alexandre.kilinc@gmail.com';
+const AUTH_PWD      = 'Racalefly';
+const AUTH_NAME     = 'Alexandre KILINC';
+const AUTH_INITIALS = 'AK';
 const LS_AUTH    = 'aquila_auth_v1';
 
 function doLogin() {
@@ -5141,7 +5226,6 @@ function doLogin() {
   const errEl = document.getElementById('login-error');
 
   if (email === AUTH_EMAIL && pwd === AUTH_PWD) {
-    // Sauvegarder session
     try { localStorage.setItem(LS_AUTH, JSON.stringify({ ok: true, ts: Date.now() })); } catch(e){}
     showApp();
   } else {
@@ -5155,6 +5239,11 @@ function doLogin() {
 function showApp() {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app-wrapper').style.display  = 'block';
+  // Afficher nom + initiales dans le header
+  const ni = document.getElementById('user-initials');
+  const nf = document.getElementById('user-fullname');
+  if (ni) ni.textContent = AUTH_INITIALS;
+  if (nf) nf.textContent = AUTH_NAME;
 }
 
 function doLogout() {
