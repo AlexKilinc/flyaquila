@@ -4677,8 +4677,6 @@ function printPreparation() {
     </div>`;
   }
 
-  if(activeTab) activeTab.style.display='block';
-
   const printWin = window.open('', '_blank');
   if(!printWin) { alert('Autorisez les popups pour exporter le PDF.'); return; }
 
