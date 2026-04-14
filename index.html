@@ -1617,7 +1617,7 @@ canvas{display:block;max-width:100%;}
       <!-- A. PILOTE & QUALIFICATIONS -->
       <div class="prepa-section">
         <div class="prepa-section-title">
-          🪪 A — Pilote &amp; Qualifications
+          A — Pilote &amp; Qualifications
           <span class="section-badge nok" id="badge-A">0/4</span>
           <button id="sec-all-A" class="sec-all-btn" onclick="event.stopPropagation();toggleSection('A')" title="Tout cocher"><span>☐ Tout</span></button>
         </div>
@@ -3964,7 +3964,7 @@ CHART_AUTO.onload = () => computeAutonomie();
 function buildPrepaPage(immat, date, cdb, dest) {
 
   const SECTIONS_PRINT = [
-    { id:'A', icon:'🪪', title:'Pilote & Qualifications', items:[
+    { id:'A', icon:'A', title:'Pilote & Qualifications', items:[
       { id:'licence',   label:'Licence SEP valide (PPL / LAPL)',                          sub:'Verifier expiration sur la licence',                               dateId:'date-licence',  validId:'valid-licence'  },
       { id:'medical',   label:'Visite medicale valide',                                   sub:'Cl.2 : 5 ans <40 / 2 ans 40-50 / 1 an >50 - LAPL : 2 ans',        dateId:'date-medical',  validId:'valid-medical'  },
       { id:'radio',     label:'Piece d\'identite',                                        sub:'CNI ou passeport en cours de validite',                            dateId:null            },
@@ -3993,6 +3993,8 @@ function buildPrepaPage(immat, date, cdb, dest) {
       { id:'notam',     label:'NOTAMs consultes (veille + jour J)',                       sub:'SIA France - Option route etroite - Terrain depart & arrivee',     dateId:null             },
       { id:'cartes',    label:'Cartes a jour',                                            sub:'IGN 1/500 000 - Cartes VAC - SIA 1/1 000 000 si > 5 000 ft',      dateId:null             },
       { id:'freq',      label:'Frequences & transpondeur notes',                          sub:'ATIS - Tour - Approche - Squawk si applicable',                    dateId:null             },
+      { id:'lognav',    label:'Log de navigation prepare',                                sub:'Log a jour - Plan de vol si necessaire - Survol maritime',          dateId:null             },
+      { id:'piste-circuit', label:'Piste & circuit aerodrome verifies',                   sub:'TODA - ASDA - LDA - Sens du circuit d\'integration',               dateId:null             },
     ]},
     { id:'F', icon:'F', title:'Visite prevol (Walk-around)', items:[
       { id:'fuel',      label:'Carburant verifie (jauges + visuel)',                      sub:'Purge siphons - Pas d\'eau - Bouchons fermes',                     dateId:null             },
@@ -4001,6 +4003,7 @@ function buildPrepaPage(immat, date, cdb, dest) {
       { id:'train',     label:'Train & freins',                                          sub:'Pneus gonfles - Pas de fuite - Roue de nez libre',                 dateId:null             },
       { id:'pitot',     label:'Pitot / statique / bouchons retires',                     sub:'Depot d\'insectes frequent - verifier soigneusement',              dateId:null             },
       { id:'cockpit',   label:'Cockpit & instruments',                                   sub:'Altimetre cale - ELT - Extincteur - Masse & centrage OK',          dateId:null             },
+      { id:'facteur-humain', label:'Facteur humain - Pas de limitation',                 sub:'Fatigue - Medicaments - Stress - Apte a voler',                    dateId:null             },
     ]},
     { id:'G', icon:'G', title:'Regle des 3 R', items:[
       { id:'3r',        label:'Le vol est Reglementaire - Realisable - Raisonnable',      sub:'Les 3 conditions sont reunies avant de decoller',                  dateId:null             },
@@ -4010,8 +4013,8 @@ function buildPrepaPage(immat, date, cdb, dest) {
   // ---- Compteurs par segment ----
   const PREPA_IDS  = ['licence','medical','radio','recence','pax90j','briefing',
                       'immatriculation','cdn','cen','lsa-radio','acou','assurance','carnet','signaux','manuel',
-                      'meteo-consult','meteo-degd','notam','cartes','freq'];
-  const PREVOL_IDS = ['fuel','huile','surfaces','train','pitot','cockpit'];
+                      'meteo-consult','meteo-degd','notam','cartes','freq','lognav','piste-circuit'];
+  const PREVOL_IDS = ['fuel','huile','surfaces','train','pitot','cockpit','facteur-humain'];
   const R3_IDS     = ['3r'];
 
   const cntPrepa  = PREPA_IDS.filter(id => prepaState[id]).length;
@@ -4077,9 +4080,8 @@ function buildPrepaPage(immat, date, cdb, dest) {
     const sb  = sc === st ? '#c6f6d5' : sc > 0 ? '#feebc8' : '#f0f0f0';
     const sco = sc === st ? '#276749' : sc > 0 ? '#744210' : '#888';
     return `<div style="border:1px solid #dde;border-radius:4px;padding:4px 5px;margin-bottom:4px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
-      <div style="display:flex;align-items:center;gap:4px;margin-bottom:3px;padding-bottom:2px;border-bottom:1px solid #1a1a2e;">
-        <span style="font-size:8px;">${s.icon}</span>
-        <span style="font-size:7px;font-weight:700;color:#1a1a2e;text-transform:uppercase;letter-spacing:.4px;flex:1;">${s.id} — ${s.title}</span>
+      <div style="display:flex;align-items:center;gap:4px;margin-bottom:3px;padding-bottom:2px;border-bottom:1px solid #16213e;">
+        <span style="font-size:7px;font-weight:700;color:#16213e;text-transform:uppercase;letter-spacing:.4px;flex:1;">${s.id} — ${s.title}</span>
         <span style="font-size:6px;font-weight:700;padding:0 4px;border-radius:4px;background:${sb};color:${sco};-webkit-print-color-adjust:exact;print-color-adjust:exact;">${sc}/${st}</span>
       </div>
       ${s.items.map(it => renderRow(it)).join('')}
@@ -4220,16 +4222,16 @@ function buildPrepaPage(immat, date, cdb, dest) {
       <div style="font-size:16px;font-weight:900;color:#fff;line-height:1;white-space:nowrap;">${checked}<span style="font-size:9px;color:#718096;">/${total}</span></div>
       <!-- Segments -->
       <div style="flex:1;display:flex;gap:3px;align-items:center;">
-        <!-- Préparation 20 items -->
-        <div style="flex:20;">
-          <div style="font-size:5.5px;color:#90cdf4;text-align:center;margin-bottom:1px;">Préparation ${cntPrepa}/20</div>
+        <!-- Préparation -->
+        <div style="flex:${PREPA_IDS.length};">
+          <div style="font-size:5.5px;color:#90cdf4;text-align:center;margin-bottom:1px;">Préparation ${cntPrepa}/${PREPA_IDS.length}</div>
           <div style="height:5px;border-radius:3px;background:#2d3748;overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
             <div style="height:100%;width:${pctPrepa}%;background:${colPrepa};border-radius:3px;-webkit-print-color-adjust:exact;print-color-adjust:exact;"></div>
           </div>
         </div>
-        <!-- Prévol 6 items -->
-        <div style="flex:6;">
-          <div style="font-size:5.5px;color:#90cdf4;text-align:center;margin-bottom:1px;">Prévol ${cntPrevol}/6</div>
+        <!-- Prévol -->
+        <div style="flex:${PREVOL_IDS.length};">
+          <div style="font-size:5.5px;color:#90cdf4;text-align:center;margin-bottom:1px;">Prévol ${cntPrevol}/${PREVOL_IDS.length}</div>
           <div style="height:5px;border-radius:3px;background:#2d3748;overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
             <div style="height:100%;width:${pctPrevol}%;background:${colPrevol};border-radius:3px;-webkit-print-color-adjust:exact;print-color-adjust:exact;"></div>
           </div>
@@ -4347,7 +4349,83 @@ function printPreparation() {
       }
     });
 
-    pagesHtml += `<div class="page">
+    // Remplacer les inputs/selects par leur valeur en texte statique (pour que les données saisies apparaissent)
+    clone.querySelectorAll('input, select').forEach(inp => {
+      const val = inp.value || '';
+      if (!val || inp.type === 'hidden' || inp.style.display === 'none') return;
+      const span = document.createElement('span');
+      span.style.cssText = 'font-weight:700;color:#16213e;font-size:inherit;';
+      span.textContent = val + (inp.nextElementSibling?.textContent?.match(/^(L\/h|min|kg|ft|m|°C|L|%)/) ? ' ' + inp.nextElementSibling.textContent.trim() : '');
+      inp.parentNode.replaceChild(span, inp);
+    });
+
+    // Bandeau données saisies pour l'onglet Carburant
+    let carbuBanner = '';
+    if (tabIds[i] === 'tab-carbu') {
+      const cDep   = document.getElementById('c-dep-icao')?.value || dep || '—';
+      const cArr   = document.getElementById('c-arr-icao')?.value || dest || '—';
+      const cConso = document.getElementById('c-conso')?.value || '—';
+      const cRoula = document.getElementById('c-roulage')?.value || '—';
+      const cNavB  = document.getElementById('c-nav-base')?.value || '—';
+      const cNavM  = document.getElementById('c-nav-meteo')?.value || '0';
+      const cNavR  = document.getElementById('c-nav-retard')?.value || '0';
+      const cNavE  = document.getElementById('c-etapes')?.value || '1';
+      const cDega  = document.getElementById('c-dega')?.value || '—';
+      const cDiver = document.getElementById('c-diver')?.value || '—';
+      const cResLbl = document.getElementById('c-res-lbl')?.textContent || '30 min';
+      const cMarge = document.getElementById('c-marge')?.value || '—';
+      const cDateV = document.getElementById('c-date-vol')?.value || '';
+      const cDateFmt = cDateV ? new Date(cDateV).toLocaleDateString('fr-FR') : date;
+      carbuBanner = `<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr;gap:4px;margin-bottom:4px;font-size:8px;">
+        <div style="background:#f0f4ff;border:1px solid #bee3f8;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+          <div style="font-size:6px;font-weight:700;color:#3182ce;text-transform:uppercase;margin-bottom:1px;">Identification</div>
+          <div style="color:#16213e;line-height:1.4;">
+            <strong>${immat}</strong> · ${cDateFmt}<br>
+            CDB : <strong>${cdb || '—'}</strong>
+          </div>
+        </div>
+        <div style="background:#f0f4ff;border:1px solid #bee3f8;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+          <div style="font-size:6px;font-weight:700;color:#3182ce;text-transform:uppercase;margin-bottom:1px;">Aérodromes</div>
+          <div style="display:flex;gap:4px;align-items:center;color:#16213e;">
+            <div><span style="font-size:5px;color:#718096;">DEP</span><div style="font-size:10px;font-weight:900;letter-spacing:1px;">${cDep}</div></div>
+            <span style="color:#718096;">→</span>
+            <div><span style="font-size:5px;color:#718096;">ARR</span><div style="font-size:10px;font-weight:900;letter-spacing:1px;">${cArr}</div></div>
+          </div>
+        </div>
+        <div style="background:#ebf8ff;border:1px solid #90cdf4;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+          <div style="font-size:6px;font-weight:700;color:#3182ce;text-transform:uppercase;margin-bottom:1px;">Navigation</div>
+          <div style="color:#16213e;line-height:1.4;">
+            Sans vent : <strong>${cNavB} min</strong> · Météo : <strong>${cNavM} min</strong><br>
+            Retards : <strong>${cNavR} min</strong> × ${cNavE} ét. · Roulage : <strong>${cRoula} min</strong>
+          </div>
+        </div>
+        <div style="background:#faf5ff;border:1px solid #d6bcfa;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+          <div style="font-size:6px;font-weight:700;color:#805ad5;text-transform:uppercase;margin-bottom:1px;">Diversion</div>
+          <div style="color:#16213e;line-height:1.4;">
+            Terrain : <strong>${cDega}</strong><br>
+            Durée : <strong>${cDiver} min</strong>
+          </div>
+        </div>
+        <div style="background:#fffbeb;border:1px solid #fbd38d;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+          <div style="font-size:6px;font-weight:700;color:#d69e2e;text-transform:uppercase;margin-bottom:1px;">Consommation</div>
+          <div style="color:#16213e;line-height:1.4;">
+            Moteur : <strong>${cConso} L/h</strong><br>
+            Réserve : <strong>${cResLbl}</strong>
+          </div>
+        </div>
+        <div style="background:#fff5f5;border:1px solid #feb2b2;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+          <div style="font-size:6px;font-weight:700;color:#e94560;text-transform:uppercase;margin-bottom:1px;">Marge sécurité</div>
+          <div style="color:#16213e;line-height:1.4;">
+            Marge CDB : <strong>${cMarge} min</strong>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    // Classes spéciales pour carburant et centrage
+    const pageClass = (tabIds[i] === 'tab-carbu' || tabIds[i] === 'tab-centrage') ? 'page page-compact' : 'page';
+
+    pagesHtml += `<div class="${pageClass}">
       <div class="page-header">
         <strong>AQUILA AT01</strong> &nbsp;·&nbsp; Préparation de vol
         &nbsp;·&nbsp; <strong>${immat}</strong>
@@ -4356,6 +4434,7 @@ function printPreparation() {
         ${dep ? '&nbsp;·&nbsp; ' + dep + (dest ? ' → ' + dest : '') : ''}
         &nbsp;·&nbsp; <span class="tab-name">${tabNames[i]}</span>
       </div>
+      ${carbuBanner}
       <div class="tab-body">${clone.innerHTML}</div>
     </div>`;
   }
@@ -4372,17 +4451,18 @@ function printPreparation() {
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body {
   font-family: Arial, sans-serif;
-  font-size: 11px;
+  font-size: 10px;
   background: white;
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
 }
-@page { size: A4 landscape; margin: 8mm; }
+@page { size: A4 landscape; margin: 6mm; }
 
 /* 1 onglet = 1 page */
 .page {
-  width: 277mm;
-  min-height: 190mm;
+  width: 285mm;
+  height: 198mm;
+  max-height: 198mm;
   page-break-after: always;
   display: flex;
   flex-direction: column;
@@ -4391,104 +4471,129 @@ body {
 .page:last-child { page-break-after: avoid; }
 
 .page-header {
-  font-size: 9px;
+  font-size: 8px;
   color: #555;
-  padding: 2mm 0 2mm;
-  border-bottom: 1.5px solid #1a1a2e;
-  margin-bottom: 3mm;
+  padding: 1.5mm 0;
+  border-bottom: 1.5px solid #16213e;
+  margin-bottom: 2mm;
   display: flex;
   align-items: center;
   gap: 4px;
+  flex-shrink: 0;
 }
 .tab-name {
-  background: #1a1a2e;
+  background: #16213e;
   color: white;
   padding: 1px 7px;
   border-radius: 3px;
   font-weight: 700;
-  font-size: 9px;
+  font-size: 8px;
 }
 
 .tab-body {
   flex: 1;
   overflow: hidden;
+  font-size: 9px;
 }
+
+/* Force tout le contenu à tenir dans la page */
+.tab-body > * {
+  transform-origin: top left;
+}
+
+/* Pages compactes (Carburant, Centrage) — scale adapté A4 paysage */
+.page-compact .tab-body {
+  font-size: 9px;
+  transform: scale(0.82);
+  transform-origin: top left;
+  width: 121.9%;
+}
+.page-compact .tab-body .card { padding: 3px 5px; margin-bottom: 2px; }
+.page-compact .tab-body .card h3 { font-size: 8px; margin-bottom: 2px; }
+.page-compact .tab-body .rv { font-size: 16px; }
+.page-compact .canvas-img { max-width: 50% !important; max-height: 120mm; margin: 0 auto; }
 
 /* Mise en page 2 colonnes */
 .tab-body .two-col {
   display: grid;
-  grid-template-columns: 320px 1fr;
-  gap: 4mm;
+  grid-template-columns: 280px 1fr;
+  gap: 3mm;
 }
-#tab-carbu .two-col { grid-template-columns: 0.65fr 1fr; }
+#tab-carbu .two-col { grid-template-columns: 0.6fr 1fr; }
 
 /* Cards */
 .tab-body .card {
   background: #fff;
   border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  padding: 5px 7px;
-  margin-bottom: 4px;
-  break-inside: avoid;
-}
-.tab-body .card h3 { font-size: 10px; font-weight: 700; color: #1a1a2e; margin-bottom: 4px; }
-
-/* Onglets Carburant et Centrage: tout plus compact */
-.page:nth-child(2) .tab-body .card,
-.page:nth-child(3) .tab-body .card {
+  border-radius: 5px;
   padding: 4px 6px;
   margin-bottom: 3px;
-  font-size: 10px;
+  break-inside: avoid;
 }
-.page:nth-child(2) .tab-body,
-.page:nth-child(3) .tab-body {
-  font-size: 10px;
-  transform: scale(0.9);
+.tab-body .card h3 { font-size: 9px; font-weight: 700; color: #16213e; margin-bottom: 3px; }
+
+/* Tous les onglets : contenu compact */
+.tab-body {
+  font-size: 9px;
+  transform: scale(0.85);
   transform-origin: top left;
-  width: 111%;
+  width: 117.6%;
 }
 
 /* Resultats */
-.tab-body .res-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+.tab-body .res-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; }
 .tab-body .res-box  {
   background: #f7f8fa; border: 1px solid #e2e8f0;
-  border-radius: 6px; padding: 6px; text-align: center;
+  border-radius: 5px; padding: 4px; text-align: center;
 }
-.tab-body .rl { font-size: 9px; color: #718096; }
-.tab-body .rv { font-size: 20px; font-weight: 800; color: #1a1a2e; }
-.tab-body .ru { font-size: 9px; color: #718096; }
-.tab-body .det-row { display: flex; gap: 8px; font-size: 9px; color: #718096; flex-wrap: wrap; margin-top: 3px; }
+.tab-body .rl { font-size: 8px; color: #718096; }
+.tab-body .rv { font-size: 16px; font-weight: 800; color: #16213e; }
+.tab-body .ru { font-size: 8px; color: #718096; }
+.tab-body .det-row { display: flex; gap: 6px; font-size: 8px; color: #718096; flex-wrap: wrap; margin-top: 2px; }
 
-/* Canvas remplaces */
-.canvas-img { max-width: 100%; height: auto; display: block; border-radius: 6px; }
-/* Reduire specifiquement le canvas centrage */
-.page:nth-child(3) .canvas-img { max-width: 55% !important; height: auto; margin: 0 auto; }
+/* Canvas/charts remplacés par images — limiter la taille */
+.canvas-img {
+  max-width: 100%;
+  max-height: 140mm;
+  height: auto;
+  display: block;
+  border-radius: 5px;
+  object-fit: contain;
+}
+/* Centrage canvas plus petit */
+.page:nth-child(3) .canvas-img { max-width: 50% !important; max-height: 120mm; margin: 0 auto; }
 
-/* Masquer les controles interactifs */
-.tab-body input, .tab-body select,
+/* Masquer les controles interactifs (les inputs sont remplacés par des spans dans le JS) */
+.tab-body input[type="range"],
+.tab-body select,
 .tab-body button, .tab-body .btn-grp,
-.tab-body .piste-btn, .tab-body .sl-row,
-.tab-body label,
+.tab-body .piste-btn,
 .tab-body #manual-instr, .tab-body #att-manual-instr,
 .tab-body #manual-compar, .tab-body #att-manual-compar,
 .tab-body #att-piste-compar,
 .tab-body .inp-row, .tab-body .inp-field
 { display: none !important; }
+/* Masquer les sliders mais garder leur label */
+.tab-body .sl-row { display: none !important; }
+/* Les menus déroulants aérodrome */
+.tab-body div[id$="-menu"] { display: none !important; }
+/* Boutons dropdown ▾ */
+.tab-body button[onclick*="toggleAeroMenu"] { display: none !important; }
 
 /* Badges */
-.badge { font-size: 9px; padding: 1px 6px; border-radius: 8px; font-weight: 700; }
+.badge { font-size: 8px; padding: 1px 5px; border-radius: 8px; font-weight: 700; }
 .badge.ok    { background: #c6f6d5; color: #276749; }
 .badge.error { background: #fed7d7; color: #9b2c2c; }
 
 /* Tables carburant */
-table { width: 100%; border-collapse: collapse; font-size: 10px; }
-td    { padding: 3px 4px; border-bottom: 1px solid #f0f0f0; }
+table { width: 100%; border-collapse: collapse; font-size: 9px; }
+td    { padding: 2px 4px; border-bottom: 1px solid #f0f0f0; }
 
 /* Blocs colores carburant */
 .tab-body div[style*="background:#ebf8ff"],
 .tab-body div[style*="background:#faf5ff"],
 .tab-body div[style*="background:#fffbeb"],
-.tab-body div[style*="background:#fff5f5"] { padding: 4px 6px; border-radius: 4px; margin-bottom: 4px; font-size: 10px; }
+.tab-body div[style*="background:#fff5f5"] { padding: 3px 5px; border-radius: 4px; margin-bottom: 3px; font-size: 9px; }
 
 /* Barre retour — visible à l'écran, masquée à l'impression */
 #back-bar {
@@ -5263,7 +5368,7 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
 
         <div style="margin-bottom:18px;">
-          <div style="font-size:11px;font-weight:700;color:#e94560;text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px;border-bottom:1px solid #fee2e2;padding-bottom:6px;">🪪 Données pilote — Validités</div>
+          <div style="font-size:11px;font-weight:700;color:#e94560;text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px;border-bottom:1px solid #fee2e2;padding-bottom:6px;">Données pilote — Validités</div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
             <div>
               <label style="font-size:11px;color:#718096;display:block;margin-bottom:3px;">Nom CDB par défaut</label>
