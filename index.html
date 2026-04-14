@@ -1909,8 +1909,8 @@ canvas{display:block;max-width:100%;}
 
 
 <script>
-// ===== LISTE AÉRODROMES =====
-const AERODROMES = [
+// ===== LISTE AÉRODROMES (persistante) =====
+const AERO_DEFAULTS = [
   { icao:'LFPN', name:'Toussus-le-Noble' },
   { icao:'LPOX', name:'Étampes' },
   { icao:'LFPM', name:'Melun' },
@@ -1923,46 +1923,160 @@ const AERODROMES = [
   { icao:'LFAT', name:'Le Touquet' },
   { icao:'LFRG', name:'Deauville' },
 ];
+let AERODROMES = JSON.parse(localStorage.getItem('aquila_aerodromes') || 'null') || JSON.parse(JSON.stringify(AERO_DEFAULTS));
+function saveAerodromes() { localStorage.setItem('aquila_aerodromes', JSON.stringify(AERODROMES)); }
 
-// Ouvre/ferme le menu déroulant aérodrome et le peuple si vide
+// Force re-render de tous les menus
+function invalidateAeroMenus() {
+  ['aero-menu','att-aero-menu','c-dep-menu','c-arr-menu','fp-dep-menu','fp-arr-menu'].forEach(id => {
+    const m = document.getElementById(id);
+    if (m) { m.innerHTML = ''; m.style.display = 'none'; }
+  });
+}
+
+// Ouvre/ferme le menu déroulant aérodrome
 function toggleAeroMenu(menuId) {
-  // Fermer tous les autres menus
   ['aero-menu','att-aero-menu','c-dep-menu','c-arr-menu','fp-dep-menu','fp-arr-menu'].forEach(id => {
     if (id !== menuId) { const m = document.getElementById(id); if(m) m.style.display='none'; }
   });
   const menu = document.getElementById(menuId);
   if (!menu) return;
   if (menu.style.display !== 'none') { menu.style.display='none'; return; }
-  // Peupler si vide
-  if (!menu.children.length) {
-    AERODROMES.forEach(a => {
-      const row = document.createElement('div');
-      row.style.cssText = 'padding:10px 14px;cursor:pointer;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center;';
-      row.innerHTML = '<span style="font-weight:800;color:#1a1a2e;font-size:14px;">'+a.icao+'</span>'
-                    + '<span style="font-size:12px;color:#718096;">'+a.name+'</span>';
-      row.onmouseenter = () => row.style.background='#f7f8fa';
-      row.onmouseleave = () => row.style.background='';
-      row.onclick = () => {
-        // Trouver le champ ICAO associé à ce menu
-        const inputId = {
-          'aero-menu':    'aero-txt',
-          'att-aero-menu':'att-aero-txt',
-          'c-dep-menu':   'c-dep-icao',
-          'c-arr-menu':   'c-arr-icao',
-          'fp-dep-menu':  'fp-dep-icao',
-          'fp-arr-menu':  'fp-arr-icao'
-        }[menuId];
-        const inp = document.getElementById(inputId);
-        if (inp) {
-          inp.value = a.icao;
-          inp.dispatchEvent(new Event('input'));
-        }
-        menu.style.display = 'none';
-      };
-      menu.appendChild(row);
-    });
-  }
+  // Toujours repeupler pour refléter les changements
+  menu.innerHTML = '';
+  buildAeroMenuContent(menu, menuId);
   menu.style.display = 'block';
+}
+
+function buildAeroMenuContent(menu, menuId) {
+  // Header avec bouton éditer
+  const hdr = document.createElement('div');
+  hdr.style.cssText = 'padding:8px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #e2e8f0;background:#f7f8fa;';
+  hdr.innerHTML = '<span style="font-size:10px;font-weight:700;color:#718096;text-transform:uppercase;letter-spacing:.5px;">Aérodromes favoris</span>';
+  const editBtn = document.createElement('button');
+  editBtn.type = 'button';
+  editBtn.style.cssText = 'padding:3px 8px;font-size:10px;font-weight:600;border:1px solid #cbd5e0;border-radius:4px;background:#fff;color:#718096;cursor:pointer;';
+  editBtn.textContent = 'Gérer';
+  editBtn.onclick = (e) => { e.stopPropagation(); menu.style.display='none'; openAeroManager(); };
+  hdr.appendChild(editBtn);
+  menu.appendChild(hdr);
+
+  // Liste des aérodromes
+  AERODROMES.forEach(a => {
+    const row = document.createElement('div');
+    row.style.cssText = 'padding:10px 14px;cursor:pointer;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center;transition:background .15s;';
+    row.innerHTML = '<span style="font-weight:800;color:#1a1a2e;font-size:14px;">'+a.icao+'</span>'
+                  + '<span style="font-size:12px;color:#718096;">'+a.name+'</span>';
+    row.onmouseenter = () => row.style.background='#f7f8fa';
+    row.onmouseleave = () => row.style.background='';
+    row.onclick = () => {
+      const inputId = {
+        'aero-menu':'aero-txt','att-aero-menu':'att-aero-txt',
+        'c-dep-menu':'c-dep-icao','c-arr-menu':'c-arr-icao',
+        'fp-dep-menu':'fp-dep-icao','fp-arr-menu':'fp-arr-icao'
+      }[menuId];
+      const inp = document.getElementById(inputId);
+      if (inp) { inp.value = a.icao; inp.dispatchEvent(new Event('input')); }
+      menu.style.display = 'none';
+    };
+    menu.appendChild(row);
+  });
+}
+
+// ===== GESTIONNAIRE D'AÉRODROMES =====
+function openAeroManager() {
+  let overlay = document.getElementById('aero-mgr-overlay');
+  if (overlay) { overlay.style.display = 'flex'; renderAeroManager(); return; }
+  overlay = document.createElement('div');
+  overlay.id = 'aero-mgr-overlay';
+  overlay.style.cssText = 'display:flex;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99999;align-items:center;justify-content:center;padding:20px;';
+  overlay.onclick = (e) => { if(e.target===overlay) overlay.style.display='none'; };
+
+  const box = document.createElement('div');
+  box.id = 'aero-mgr-box';
+  box.style.cssText = 'background:#fff;border-radius:12px;width:100%;max-width:420px;max-height:85vh;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4);display:flex;flex-direction:column;';
+  box.innerHTML = `
+    <div style="background:linear-gradient(135deg,#1a1a2e,#16213e);padding:14px 18px;display:flex;align-items:center;gap:10px;">
+      <div style="background:#e94560;color:white;font-weight:900;font-size:11px;padding:2px 8px;border-radius:4px;">AERO</div>
+      <div style="color:#fff;font-size:14px;font-weight:700;flex:1;">Gérer les aérodromes</div>
+      <button onclick="document.getElementById('aero-mgr-overlay').style.display='none'" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:12px;">✕</button>
+    </div>
+    <div id="aero-mgr-list" style="flex:1;overflow-y:auto;padding:8px 0;"></div>
+    <div style="padding:10px 14px;border-top:1px solid #e2e8f0;display:flex;gap:6px;align-items:center;">
+      <input type="text" id="aero-add-icao" maxlength="4" placeholder="ICAO" style="width:60px;border:1px solid #cbd5e0;border-radius:6px;padding:7px 8px;font-size:13px;font-weight:700;text-transform:uppercase;text-align:center;">
+      <input type="text" id="aero-add-name" placeholder="Nom de l'aérodrome" style="flex:1;border:1px solid #cbd5e0;border-radius:6px;padding:7px 10px;font-size:13px;">
+      <button onclick="addAerodrome()" style="padding:7px 14px;background:#38a169;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700;white-space:nowrap;">+ Ajouter</button>
+    </div>
+    <div style="padding:8px 14px;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;">
+      <button onclick="resetAerodromes()" style="padding:6px 12px;border:1px solid #e53e3e;background:#fff;color:#e53e3e;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;">Réinitialiser</button>
+      <button onclick="document.getElementById('aero-mgr-overlay').style.display='none'" style="padding:6px 16px;background:#1a1a2e;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700;">Fermer</button>
+    </div>
+  `;
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+  renderAeroManager();
+}
+
+function renderAeroManager() {
+  const list = document.getElementById('aero-mgr-list');
+  if (!list) return;
+  list.innerHTML = '';
+  AERODROMES.forEach((a, i) => {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:6px;padding:7px 14px;border-bottom:1px solid #f0f0f0;';
+    row.innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:2px;flex-shrink:0;">
+        <button onclick="moveAero(${i},-1)" style="border:none;background:none;cursor:pointer;font-size:10px;color:#718096;padding:0;line-height:1;" ${i===0?'disabled style="opacity:.3;border:none;background:none;cursor:default;font-size:10px;color:#718096;padding:0;line-height:1;"':''}>▲</button>
+        <button onclick="moveAero(${i},1)" style="border:none;background:none;cursor:pointer;font-size:10px;color:#718096;padding:0;line-height:1;" ${i===AERODROMES.length-1?'disabled style="opacity:.3;border:none;background:none;cursor:default;font-size:10px;color:#718096;padding:0;line-height:1;"':''}>▼</button>
+      </div>
+      <span style="font-weight:800;color:#1a1a2e;font-size:14px;width:50px;flex-shrink:0;">${a.icao}</span>
+      <span style="font-size:12px;color:#718096;flex:1;">${a.name}</span>
+      <button onclick="deleteAero(${i})" title="Supprimer" style="width:28px;height:28px;border-radius:6px;border:1px solid #fed7d7;background:#fff5f5;color:#e53e3e;cursor:pointer;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;">✕</button>
+    `;
+    list.appendChild(row);
+  });
+}
+
+function moveAero(index, dir) {
+  const newIdx = index + dir;
+  if (newIdx < 0 || newIdx >= AERODROMES.length) return;
+  const tmp = AERODROMES[index];
+  AERODROMES[index] = AERODROMES[newIdx];
+  AERODROMES[newIdx] = tmp;
+  saveAerodromes();
+  invalidateAeroMenus();
+  renderAeroManager();
+}
+
+function deleteAero(index) {
+  if (AERODROMES.length <= 1) return;
+  AERODROMES.splice(index, 1);
+  saveAerodromes();
+  invalidateAeroMenus();
+  renderAeroManager();
+}
+
+function addAerodrome() {
+  const icaoEl = document.getElementById('aero-add-icao');
+  const nameEl = document.getElementById('aero-add-name');
+  const icao = (icaoEl.value || '').toUpperCase().trim();
+  const name = (nameEl.value || '').trim();
+  if (!icao || icao.length < 3) { icaoEl.style.borderColor='#e53e3e'; setTimeout(()=>icaoEl.style.borderColor='#cbd5e0',1500); return; }
+  if (AERODROMES.some(a => a.icao === icao)) { icaoEl.style.borderColor='#d69e2e'; setTimeout(()=>icaoEl.style.borderColor='#cbd5e0',1500); return; }
+  AERODROMES.push({ icao, name: name || icao });
+  saveAerodromes();
+  invalidateAeroMenus();
+  renderAeroManager();
+  icaoEl.value = '';
+  nameEl.value = '';
+}
+
+function resetAerodromes() {
+  if (!confirm('Réinitialiser la liste des aérodromes par défaut ?')) return;
+  AERODROMES = JSON.parse(JSON.stringify(AERO_DEFAULTS));
+  saveAerodromes();
+  invalidateAeroMenus();
+  renderAeroManager();
 }
 // Fermer les menus au clic dehors
 document.addEventListener('click', e => {
