@@ -208,6 +208,46 @@ canvas{display:block;max-width:100%;}
 .badge.ok{background:#c6f6d5;color:#276749;}
 .badge.error{background:#fed7d7;color:#c53030;}
 
+/* ===== CARBURANT — Identification du vol ===== */
+.carbu-aero-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  margin-bottom: 12px;
+}
+.carbu-aero-col { flex: 1; min-width: 0; }
+.carbu-aero-arrow {
+  font-size: 24px;
+  font-weight: 700;
+  color: #16213e;
+  padding-bottom: 8px;
+  flex-shrink: 0;
+}
+.carbu-date-conso-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  margin-bottom: 12px;
+}
+.carbu-date-col { flex: 1; min-width: 0; }
+.carbu-conso-col { flex: 0 0 auto; min-width: 120px; }
+@media (max-width: 480px) {
+  .carbu-aero-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .carbu-aero-arrow {
+    display: none;
+  }
+  .carbu-date-conso-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .carbu-conso-col { min-width: 100%; }
+}
+
 /* ===== COMING SOON ===== */
 .coming-soon{text-align:center;padding:60px 20px;color:#718096;}
 .coming-soon .icon{font-size:44px;margin-bottom:12px;}
@@ -851,70 +891,76 @@ canvas{display:block;max-width:100%;}
       <div class="card" style="border-left:4px solid #e94560;">
         <h3>Identification du vol</h3>
 
-        <!-- Départ -->
-        <div style="margin-bottom:12px;">
-          <label style="font-size:11px;color:#16213e;display:block;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Aérodrome départ</label>
-          <div style="display:flex;gap:6px;align-items:center;position:relative;">
-            <input type="text" id="c-dep-icao" value="LFPN" maxlength="4" placeholder="ICAO"
-              style="flex:1;min-width:0;background:#fff;border:2px solid #16213e;border-radius:8px;padding:10px 12px;font-size:18px;font-weight:800;text-transform:uppercase;text-align:center;min-height:44px;color:#16213e;box-sizing:border-box;"
-              oninput="this.value=this.value.toUpperCase();updateCarbu();
-                var fp=document.getElementById('fp-dep');if(fp)fp.value=this.value;
-                var fpi=document.getElementById('fp-dep-icao');if(fpi)fpi.value=this.value;
-                var vd=document.getElementById('vol-dep');if(vd)vd.value=this.value;
-                if(typeof updateFPRoute==='function')updateFPRoute();">
-            <button onclick="toggleAeroMenu('c-dep-menu')" type="button"
-              style="min-width:44px;min-height:44px;background:#fff;border:2px solid #16213e;border-radius:8px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#16213e;font-weight:700;">▾</button>
-            <div id="c-dep-menu" style="display:none;position:absolute;top:48px;left:0;right:0;z-index:999;background:#fff;border:2px solid #16213e;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.15);min-width:220px;overflow:hidden;"></div>
+        <!-- Départ + Arrivée côte à côte -->
+        <div class="carbu-aero-row">
+          <!-- Départ -->
+          <div class="carbu-aero-col">
+            <label style="font-size:11px;color:#16213e;display:block;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Aérodrome départ</label>
+            <div style="display:flex;gap:6px;align-items:center;position:relative;">
+              <input type="text" id="c-dep-icao" value="LFPN" maxlength="4" placeholder="ICAO"
+                style="flex:1;min-width:0;background:#fff;border:2px solid #16213e;border-radius:8px;padding:10px 12px;font-size:18px;font-weight:800;text-transform:uppercase;text-align:center;min-height:44px;color:#16213e;box-sizing:border-box;"
+                oninput="this.value=this.value.toUpperCase();updateCarbu();
+                  var fp=document.getElementById('fp-dep');if(fp)fp.value=this.value;
+                  var fpi=document.getElementById('fp-dep-icao');if(fpi)fpi.value=this.value;
+                  var vd=document.getElementById('vol-dep');if(vd)vd.value=this.value;
+                  if(typeof updateFPRoute==='function')updateFPRoute();">
+              <button onclick="toggleAeroMenu('c-dep-menu')" type="button"
+                style="min-width:44px;min-height:44px;background:#fff;border:2px solid #16213e;border-radius:8px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#16213e;font-weight:700;">▾</button>
+              <div id="c-dep-menu" style="display:none;position:absolute;top:48px;left:0;right:0;z-index:999;background:#fff;border:2px solid #16213e;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.15);min-width:220px;overflow:hidden;"></div>
+            </div>
+          </div>
+
+          <!-- Flèche -->
+          <div class="carbu-aero-arrow">→</div>
+
+          <!-- Arrivée -->
+          <div class="carbu-aero-col">
+            <label style="font-size:11px;color:#16213e;display:block;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Aérodrome arrivée</label>
+            <div style="display:flex;gap:6px;align-items:center;position:relative;">
+              <input type="text" id="c-arr-icao" value="LFPN" maxlength="4" placeholder="ICAO"
+                style="flex:1;min-width:0;background:#fff;border:2px solid #16213e;border-radius:8px;padding:10px 12px;font-size:18px;font-weight:800;text-transform:uppercase;text-align:center;min-height:44px;color:#16213e;box-sizing:border-box;"
+                oninput="this.value=this.value.toUpperCase();updateCarbu();
+                  var v=this.value.trim();
+                  var d=document.getElementById('vol-dest');if(d)d.value=v;
+                  var f=document.getElementById('fp-arr');if(f)f.value=v;
+                  var fi=document.getElementById('fp-arr-icao');if(fi)fi.value=v;
+                  if(typeof updateFPRoute==='function')updateFPRoute();
+                  if(typeof saveFP==='function')saveFP();">
+              <button onclick="toggleAeroMenu('c-arr-menu')" type="button"
+                style="min-width:44px;min-height:44px;background:#fff;border:2px solid #16213e;border-radius:8px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#16213e;font-weight:700;">▾</button>
+              <div id="c-arr-menu" style="display:none;position:absolute;top:48px;left:0;right:0;z-index:999;background:#fff;border:2px solid #16213e;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.15);min-width:220px;overflow:hidden;"></div>
+            </div>
           </div>
         </div>
 
-        <!-- Arrivée -->
-        <div style="margin-bottom:12px;">
-          <label style="font-size:11px;color:#16213e;display:block;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Aérodrome arrivée</label>
-          <div style="display:flex;gap:6px;align-items:center;position:relative;">
-            <input type="text" id="c-arr-icao" value="LFPN" maxlength="4" placeholder="ICAO"
-              style="flex:1;min-width:0;background:#fff;border:2px solid #16213e;border-radius:8px;padding:10px 12px;font-size:18px;font-weight:800;text-transform:uppercase;text-align:center;min-height:44px;color:#16213e;box-sizing:border-box;"
-              oninput="this.value=this.value.toUpperCase();updateCarbu();
-                var v=this.value.trim();
-                var d=document.getElementById('vol-dest');if(d)d.value=v;
-                var f=document.getElementById('fp-arr');if(f)f.value=v;
-                var fi=document.getElementById('fp-arr-icao');if(fi)fi.value=v;
-                if(typeof updateFPRoute==='function')updateFPRoute();
+        <!-- Date de vol + Conso sur 1 ligne -->
+        <div class="carbu-date-conso-row">
+          <div class="carbu-date-col">
+            <label style="font-size:11px;color:#1a1a2e;display:block;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Date de vol</label>
+            <input type="date" id="c-date-vol"
+              style="width:100%;background:#f7f8fa;border:1px solid #cbd5e0;color:#1a1a2e;padding:9px 10px;border-radius:8px;font-size:16px;font-weight:600;min-height:44px;box-sizing:border-box;-webkit-appearance:none;appearance:none;display:block;"
+              onchange="
+                var v=this.value;
+                var vd=document.getElementById('vol-date');if(vd)vd.value=v;
+                var fp=document.getElementById('fp-date');if(fp)fp.value=v;
+                var dv=document.getElementById('dateVol');if(dv)dv.value=v;
                 if(typeof saveFP==='function')saveFP();">
-            <button onclick="toggleAeroMenu('c-arr-menu')" type="button"
-              style="min-width:44px;min-height:44px;background:#fff;border:2px solid #16213e;border-radius:8px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#16213e;font-weight:700;">▾</button>
-            <div id="c-arr-menu" style="display:none;position:absolute;top:48px;left:0;right:0;z-index:999;background:#fff;border:2px solid #16213e;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.15);min-width:220px;overflow:hidden;"></div>
           </div>
-        </div>
-
-        <!-- Date de vol -->
-        <div style="margin-bottom:12px;">
-          <label style="font-size:11px;color:#1a1a2e;display:block;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Date de vol prévue</label>
-          <div style="width:100%;overflow:hidden;">
-          <input type="date" id="c-date-vol"
-            style="width:100%;background:#f7f8fa;border:1px solid #cbd5e0;color:#1a1a2e;padding:9px 10px;border-radius:8px;font-size:16px;font-weight:600;min-height:44px;box-sizing:border-box;-webkit-appearance:none;appearance:none;display:block;"
-            onchange="
-              var v=this.value;
-              var vd=document.getElementById('vol-date');if(vd)vd.value=v;
-              var fp=document.getElementById('fp-date');if(fp)fp.value=v;
-              var dv=document.getElementById('dateVol');if(dv)dv.value=v;
-              if(typeof saveFP==='function')saveFP();">
-          </div>
-        </div>
-
-        <!-- Avion + Conso — même ligne -->
-        <div style="margin-bottom:10px;">
-          <label style="font-size:11px;color:#1a1a2e;display:block;margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Avion</label>
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-            <div id="c-avion-btns" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
-            <div style="display:flex;align-items:center;gap:6px;padding:6px 10px;background:#f7f8fa;border-radius:8px;border:1px solid #e2e8f0;">
-              <span style="font-size:11px;color:#718096;font-weight:600;">Conso</span>
+          <div class="carbu-conso-col">
+            <label style="font-size:11px;color:#1a1a2e;display:block;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Consommation</label>
+            <div style="display:flex;align-items:center;gap:6px;background:#f7f8fa;border:1px solid #cbd5e0;border-radius:8px;padding:6px 10px;min-height:44px;box-sizing:border-box;">
               <input type="number" id="c-conso" value="20" min="5" max="50" step="1"
                 style="width:54px;background:#fff;border:1px solid #cbd5e0;border-radius:6px;padding:5px 6px;font-size:14px;font-weight:700;text-align:center;"
                 oninput="syncConso('c-conso');updateCarbu()">
-              <span style="font-size:11px;color:#718096;">L/h</span>
+              <span class="conso-unit" style="font-size:12px;color:#718096;font-weight:600;">L/h</span>
             </div>
           </div>
+        </div>
+
+        <!-- Avion -->
+        <div style="margin-bottom:10px;">
+          <label style="font-size:11px;color:#1a1a2e;display:block;margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Avion</label>
+          <div id="c-avion-btns" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
         </div>
         <!-- champ readonly legacy pour compatibilité JS -->
         <input type="text" id="c-avion" readonly style="display:none;">
@@ -4853,6 +4899,69 @@ body {
 .tab-body div[id$="-menu"] { display: none !important; }
 /* Boutons dropdown ▾ */
 .tab-body button[onclick*="toggleAeroMenu"] { display: none !important; }
+
+/* ===== Identification du vol — impression carburant ===== */
+.tab-body label { 
+  font-size: 8px !important; 
+  margin-bottom: 3px !important; 
+  display: block !important;
+}
+
+/* Aérodromes côte à côte */
+.tab-body .carbu-aero-row { 
+  display: flex !important;
+  gap: 12px !important; 
+  margin-bottom: 8px !important;
+  align-items: flex-end !important;
+}
+.tab-body .carbu-aero-col {
+  flex: 1 !important;
+}
+.tab-body .carbu-aero-arrow { 
+  font-size: 16px !important; 
+  padding-bottom: 6px !important;
+  color: #16213e !important;
+}
+
+/* Date + Conso sur une ligne */
+.tab-body .carbu-date-conso-row { 
+  display: flex !important;
+  gap: 24px !important; 
+  margin-bottom: 8px !important;
+  align-items: flex-end !important;
+}
+.tab-body .carbu-date-col {
+  flex: 0 0 auto !important;
+}
+.tab-body .carbu-conso-col { 
+  flex: 0 0 auto !important;
+}
+/* Simplifier affichage conso */
+.tab-body .carbu-conso-col > div { 
+  background: transparent !important; 
+  border: none !important; 
+  padding: 0 !important;
+  min-height: auto !important;
+  display: inline !important;
+}
+/* Unité L/h - taille réduite et couleur grise */
+.tab-body .conso-unit {
+  font-size: 8px !important;
+  color: #718096 !important;
+  font-weight: 500 !important;
+}
+
+/* Afficher l'avion sélectionné */
+.tab-body #c-avion-btns .avion-btn { display: none !important; }
+.tab-body #c-avion-btns .avion-btn.active { 
+  display: inline-block !important; 
+  font-size: 10px !important;
+  padding: 4px 10px !important;
+  background: #16213e !important;
+  color: #fff !important;
+  border-radius: 6px !important;
+  border: none !important;
+}
 
 /* Badges */
 .badge { font-size: 8px; padding: 1px 5px; border-radius: 8px; font-weight: 700; }
