@@ -182,9 +182,17 @@ input[type="date"]{-webkit-appearance:none;appearance:none;box-sizing:border-box
   background:#f7f8fa;color:#718096;cursor:pointer;font-size:12px;font-weight:500;
   transition:all .2s;line-height:1.35;text-align:center;
   min-height:36px;-webkit-tap-highlight-color:transparent;
+  -webkit-touch-callout:none;-webkit-user-select:none;user-select:none;
+  transform:scale(1);-webkit-transform:scale(1);
 }
 .piste-btn:hover{border-color:#e94560;color:#e94560;}
+.piste-btn:active{transform:scale(0.97);-webkit-transform:scale(0.97);}
+.piste-btn:focus{outline:none;}
 .piste-btn.on{background:#e94560;border-color:#e94560;color:white;font-weight:700;}
+@media (hover:none){
+  .piste-btn:hover{border-color:#cbd5e0;color:#718096;}
+  .piste-btn.on:hover{border-color:#e94560;color:white;}
+}
 
 /* ===== CANVAS ===== */
 #perf-canvas-wrap,#centrage-canvas-wrap{
@@ -581,8 +589,8 @@ canvas{display:block;max-width:100%;}
 
 <!-- ONGLETS (fond blanc) -->
 <div id="tabs">
-  <button class="tab-btn active" onclick="showTab('carbu',this)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><path d="M4 4h10l2 2v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4z"/><path d="M14 4v4h4"/><line x1="7" y1="14" x2="13" y2="14"/><line x1="7" y1="17" x2="11" y2="17"/><path d="M19 10v6a2 2 0 0 1-2 2"/><circle cx="19" cy="8" r="2"/></svg> Carburant</button>
-  <button class="tab-btn" onclick="showTab('centrage',this)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><line x1="12" y1="3" x2="12" y2="21"/><polyline points="4 14 12 18 20 14"/><polyline points="4 10 12 6 20 10"/></svg> Masse &amp; Centrage</button>
+  <button class="tab-btn active" onclick="showTab('carbu',this)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><path d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 4 0v-6.998a2 2 0 0 0-.59-1.42L18 5"/><path d="M14 21V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v16"/><path d="M2 21h13"/><path d="M3 9h11"/></svg> Carburant</button>
+  <button class="tab-btn" onclick="showTab('centrage',this)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><path d="M12 3v18"/><path d="m19 8 3 8a5 5 0 0 1-6 0z"/><path d="M3 7h1a17 17 0 0 0 8-2 17 17 0 0 0 8 2h1"/><path d="m5 8 3 8a5 5 0 0 1-6 0z"/><path d="M7 21h10"/></svg> Masse &amp; Centrage</button>
   <button class="tab-btn" onclick="showTab('perf',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><path d="M2 22h20"/><path d="M6.36 17.4 4 17l-2-4 1.1-.55a2 2 0 0 1 1.8 0l.17.1a2 2 0 0 0 1.8 0L8 12 5 6l.9-.45a2 2 0 0 1 2.09.2l4.02 3a2 2 0 0 0 2.1.2l4.19-2.06a2.41 2.41 0 0 1 1.73-.17L21 7a1.4 1.4 0 0 1 .87 1.99l-.38.76c-.23.46-.6.84-1.07 1.08L7.58 17.2a2 2 0 0 1-1.22.18Z"/></svg> Décollage</button>
   <button class="tab-btn" onclick="showTab('atterro',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><path d="M2 22h20"/><path d="M3.77 10.77 2 9l2-4.5 1.1.55c.55.28.9.84.9 1.45s.35 1.17.9 1.45L8 8.5l3-6 1.05.53a2 2 0 0 1 1.09 1.52l.72 5.4a2 2 0 0 0 1.09 1.52l4.4 2.2c.42.22.78.55 1.01.96l.6 1.03c.49.88-.06 1.98-1.06 2.1l-1.18.15c-.47.06-.95-.02-1.37-.24L4.29 11.15a2 2 0 0 1-.52-.38Z"/></svg> Atterrissage</button>
   <button class="tab-btn" onclick="showTab('montee',this)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> Montée</button>
@@ -623,7 +631,7 @@ canvas{display:block;max-width:100%;}
         </div>
         <div class="sl-row">
           <label>Altitude pression <span id="altVal">4000 ft</span></label>
-          <input type="range" id="alt" min="0" max="8000" value="4000" step="1000" oninput="compute()">
+          <input type="range" id="alt" min="0" max="8000" value="4000" step="500" oninput="compute()">
         </div>
         <div class="sl-row">
           <label>Masse au décollage <span id="massVal">700 kg</span></label>
@@ -1079,7 +1087,7 @@ canvas{display:block;max-width:100%;}
         </div>
         <div class="sl-row">
           <label>Altitude pression <span id="att-altVal">1000 ft</span></label>
-          <input type="range" id="att-alt" min="0" max="8000" value="1000" step="1000" oninput="computeAtt()">
+          <input type="range" id="att-alt" min="0" max="8000" value="1000" step="500" oninput="computeAtt()">
         </div>
         <div class="sl-row">
           <label>Masse à l'atterrissage <span id="att-massVal">650 kg</span></label>
@@ -2818,10 +2826,12 @@ function setMargeAtt(pct) {
   MARGE_ATT = pct;
   [15,30,50].forEach(v => {
     const b = document.getElementById("att-marge-"+v);
-    if(b) b.className = "piste-btn" + (v===pct?" on":"");
+    if(b) b.className = "piste-btn piste-marge-btn" + (v===pct?" on":"");
   });
   const lbl = document.getElementById("att-marge-lbl");
   if(lbl) lbl.textContent = (1 + pct/100).toFixed(2);
+  const lbl2 = document.getElementById("att-marge-lbl2");
+  if(lbl2) lbl2.textContent = (1 + pct/100).toFixed(2);
   // Ne recalculer que si l'onglet atterrissage est actif
   const tab = document.getElementById("tab-atterro");
   if(tab && tab.classList.contains("active")) computeAtt();
@@ -4355,12 +4365,13 @@ function printPreparation() {
       if (!val || inp.type === 'hidden' || inp.style.display === 'none') return;
       const span = document.createElement('span');
       span.style.cssText = 'font-weight:700;color:#16213e;font-size:inherit;';
-      span.textContent = val + (inp.nextElementSibling?.textContent?.match(/^(L\/h|min|kg|ft|m|°C|L|%)/) ? ' ' + inp.nextElementSibling.textContent.trim() : '');
+      span.textContent = val;
       inp.parentNode.replaceChild(span, inp);
     });
 
-    // Bandeau données saisies pour l'onglet Carburant
-    let carbuBanner = '';
+    // Bandeau données saisies pour chaque onglet
+    let tabBanner = '';
+    
     if (tabIds[i] === 'tab-carbu') {
       const cDep   = document.getElementById('c-dep-icao')?.value || dep || '—';
       const cArr   = document.getElementById('c-arr-icao')?.value || dest || '—';
@@ -4376,7 +4387,7 @@ function printPreparation() {
       const cMarge = document.getElementById('c-marge')?.value || '—';
       const cDateV = document.getElementById('c-date-vol')?.value || '';
       const cDateFmt = cDateV ? new Date(cDateV).toLocaleDateString('fr-FR') : date;
-      carbuBanner = `<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr;gap:4px;margin-bottom:4px;font-size:8px;">
+      tabBanner = `<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr;gap:4px;margin-bottom:4px;font-size:8px;">
         <div style="background:#f0f4ff;border:1px solid #bee3f8;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
           <div style="font-size:6px;font-weight:700;color:#3182ce;text-transform:uppercase;margin-bottom:1px;">Identification</div>
           <div style="color:#16213e;line-height:1.4;">
@@ -4421,9 +4432,236 @@ function printPreparation() {
         </div>
       </div>`;
     }
+    
+    // Bandeau Masse & Centrage
+    else if (tabIds[i] === 'tab-centrage') {
+      const p1    = document.getElementById('sl-p1')?.value || '—';
+      const p2    = document.getElementById('sl-p2')?.value || '—';
+      const bag   = document.getElementById('sl-bag')?.value || '—';
+      const essDep = document.getElementById('sl-ess-dep')?.value || '—';
+      const essArr = document.getElementById('sl-ess-arr')?.value || '—';
+      const masseDep = document.getElementById('rv-masse-dep')?.textContent || '—';
+      const cgDep    = document.getElementById('rv-cg-dep')?.textContent || '—';
+      const masseArr = document.getElementById('rv-masse-arr')?.textContent || '—';
+      const cgArr    = document.getElementById('rv-cg-arr')?.textContent || '—';
+      const badgeDep = document.getElementById('badge-dep')?.textContent || '';
+      const badgeArr = document.getElementById('badge-arr')?.textContent || '';
+      tabBanner = `<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:4px;margin-bottom:4px;font-size:8px;">
+        <div style="background:#f0f4ff;border:1px solid #bee3f8;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+          <div style="font-size:6px;font-weight:700;color:#3182ce;text-transform:uppercase;margin-bottom:1px;">Équipage & Charge</div>
+          <div style="color:#16213e;line-height:1.4;">
+            Pilote : <strong>${p1} kg</strong> · Passager : <strong>${p2} kg</strong><br>
+            Bagages : <strong>${bag} kg</strong>
+          </div>
+        </div>
+        <div style="background:#fffbeb;border:1px solid #fbd38d;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+          <div style="font-size:6px;font-weight:700;color:#d69e2e;text-transform:uppercase;margin-bottom:1px;">Carburant</div>
+          <div style="color:#16213e;line-height:1.4;">
+            Essence départ : <strong>${essDep} L</strong><br>
+            Essence arrivée : <strong>${essArr} L</strong>
+          </div>
+        </div>
+        <div style="background:#ebf8ff;border:1px solid #90cdf4;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+          <div style="font-size:6px;font-weight:700;color:#3182ce;text-transform:uppercase;margin-bottom:1px;">Résultats Départ</div>
+          <div style="color:#16213e;line-height:1.4;">
+            Masse : <strong>${masseDep} kg</strong> · CG : <strong>${cgDep} mm</strong><br>
+            Verdict : <strong style="color:${badgeDep.includes('OK')?'#38a169':'#e53e3e'};">${badgeDep}</strong>
+          </div>
+        </div>
+        <div style="background:#faf5ff;border:1px solid #d6bcfa;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+          <div style="font-size:6px;font-weight:700;color:#805ad5;text-transform:uppercase;margin-bottom:1px;">Résultats Arrivée</div>
+          <div style="color:#16213e;line-height:1.4;">
+            Masse : <strong>${masseArr} kg</strong> · CG : <strong>${cgArr} mm</strong><br>
+            Verdict : <strong style="color:${badgeArr.includes('OK')?'#38a169':'#e53e3e'};">${badgeArr}</strong>
+          </div>
+        </div>
+      </div>`;
+    }
+    
+    // Bandeau Décollage
+    else if (tabIds[i] === 'tab-perf') {
+      const perfTemp  = document.getElementById('temp')?.value || '—';
+      const perfAlt   = document.getElementById('alt')?.value || '—';
+      const perfMass  = document.getElementById('mass')?.value || '—';
+      const perfWind  = document.getElementById('wind')?.value || '—';
+      const perfWD    = WD === 'arr' ? 'Arrière' : 'Face';
+      const perfPiste = {dur_sec:'Dur sèche',herbe_sec:'Herbe +25%',molle:'Molle +40%',humide:'Humide +10%'}[PT] || 'Dur sèche';
+      const perfRoul  = document.getElementById('resRoul')?.textContent || '—';
+      const perf50    = document.getElementById('res50')?.textContent || '—';
+      const perfISA   = document.getElementById('detISA')?.textContent || '—';
+      tabBanner = `<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:4px;margin-bottom:4px;font-size:8px;">
+        <div style="background:#f0f4ff;border:1px solid #bee3f8;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+          <div style="font-size:6px;font-weight:700;color:#3182ce;text-transform:uppercase;margin-bottom:1px;">Conditions</div>
+          <div style="color:#16213e;line-height:1.4;">
+            Temp : <strong>${perfTemp}°C</strong> (ISA ${perfISA})<br>
+            Alt. pression : <strong>${Number(perfAlt).toLocaleString('fr-FR')} ft</strong>
+          </div>
+        </div>
+        <div style="background:#ebf8ff;border:1px solid #90cdf4;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+          <div style="font-size:6px;font-weight:700;color:#3182ce;text-transform:uppercase;margin-bottom:1px;">Masse</div>
+          <div style="color:#16213e;line-height:1.4;">
+            Masse au décollage :<br><strong style="font-size:12px;">${perfMass} kg</strong>
+          </div>
+        </div>
+        <div style="background:#fffbeb;border:1px solid #fbd38d;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+          <div style="font-size:6px;font-weight:700;color:#d69e2e;text-transform:uppercase;margin-bottom:1px;">Vent</div>
+          <div style="color:#16213e;line-height:1.4;">
+            Vent : <strong>${perfWind} kt</strong><br>
+            Direction : <strong>${perfWD}</strong>
+          </div>
+        </div>
+        <div style="background:#faf5ff;border:1px solid #d6bcfa;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+          <div style="font-size:6px;font-weight:700;color:#805ad5;text-transform:uppercase;margin-bottom:1px;">Type de piste</div>
+          <div style="color:#16213e;line-height:1.4;">
+            <strong>${perfPiste}</strong>
+          </div>
+        </div>
+        <div style="background:#fff5f5;border:1px solid #feb2b2;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+          <div style="font-size:6px;font-weight:700;color:#e94560;text-transform:uppercase;margin-bottom:1px;">Résultats</div>
+          <div style="color:#16213e;line-height:1.4;">
+            Roulement : <strong>${perfRoul} m</strong><br>
+            Décollage 50ft : <strong>${perf50} m</strong>
+          </div>
+        </div>
+      </div>`;
+    }
+    
+    // Bandeau Atterrissage
+    else if (tabIds[i] === 'tab-atterro') {
+      const attTemp  = document.getElementById('att-temp')?.value || '—';
+      const attAlt   = document.getElementById('att-alt')?.value || '—';
+      const attMass  = document.getElementById('att-mass')?.value || '—';
+      const attWind  = document.getElementById('att-wind')?.value || '—';
+      const attWD    = WD_ATT === 'arr' ? 'Arrière' : 'Face';
+      const attPiste = {dur_sec:'Dur sèche',herbe_sec:'Herbe +25%',molle:'Molle +40%',humide:'Humide +10%'}[PT_ATT] || 'Dur sèche';
+      const attRoul  = document.getElementById('att-resRoul')?.textContent || '—';
+      const att50    = document.getElementById('att-res50')?.textContent || '—';
+      const attISA   = document.getElementById('att-detISA')?.textContent || '—';
+      const attPisteNec = document.getElementById('att-piste-nec')?.textContent || '—';
+      const attMarge = MARGE_ATT || 30;
+      tabBanner = `<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr;gap:4px;margin-bottom:4px;font-size:8px;">
+        <div style="background:#f0f4ff;border:1px solid #bee3f8;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+          <div style="font-size:6px;font-weight:700;color:#3182ce;text-transform:uppercase;margin-bottom:1px;">Conditions</div>
+          <div style="color:#16213e;line-height:1.4;">
+            Temp : <strong>${attTemp}°C</strong> (ISA ${attISA})<br>
+            Alt. pression : <strong>${Number(attAlt).toLocaleString('fr-FR')} ft</strong>
+          </div>
+        </div>
+        <div style="background:#ebf8ff;border:1px solid #90cdf4;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+          <div style="font-size:6px;font-weight:700;color:#3182ce;text-transform:uppercase;margin-bottom:1px;">Masse</div>
+          <div style="color:#16213e;line-height:1.4;">
+            Masse à l'atterrissage :<br><strong style="font-size:12px;">${attMass} kg</strong>
+          </div>
+        </div>
+        <div style="background:#fffbeb;border:1px solid #fbd38d;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+          <div style="font-size:6px;font-weight:700;color:#d69e2e;text-transform:uppercase;margin-bottom:1px;">Vent</div>
+          <div style="color:#16213e;line-height:1.4;">
+            Vent : <strong>${attWind} kt</strong><br>
+            Direction : <strong>${attWD}</strong>
+          </div>
+        </div>
+        <div style="background:#faf5ff;border:1px solid #d6bcfa;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+          <div style="font-size:6px;font-weight:700;color:#805ad5;text-transform:uppercase;margin-bottom:1px;">Type de piste</div>
+          <div style="color:#16213e;line-height:1.4;">
+            <strong>${attPiste}</strong>
+          </div>
+        </div>
+        <div style="background:#fff5f5;border:1px solid #feb2b2;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+          <div style="font-size:6px;font-weight:700;color:#e94560;text-transform:uppercase;margin-bottom:1px;">Marge sécurité</div>
+          <div style="color:#16213e;line-height:1.4;">
+            <strong style="font-size:12px;">+${attMarge}%</strong>
+          </div>
+        </div>
+        <div style="background:#f0fff4;border:1px solid #9ae6b4;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+          <div style="font-size:6px;font-weight:700;color:#38a169;text-transform:uppercase;margin-bottom:1px;">Résultats</div>
+          <div style="color:#16213e;line-height:1.4;">
+            Att 50ft : <strong>${att50} m</strong> · Roul : <strong>${attRoul} m</strong><br>
+            Piste néc. (marge incl.) : <strong>${attPisteNec} m</strong>
+          </div>
+        </div>
+      </div>`;
+    }
+    
+    // Bandeau Autonomie
+    else if (tabIds[i] === 'tab-autonomie') {
+      const autTemp    = document.getElementById('aut-temp')?.value || '—';
+      const autAlt     = document.getElementById('aut-alt')?.value || '—';
+      const autAltDens = document.getElementById('aut-alt-dens')?.textContent || '—';
+      const autResPG   = document.getElementById('aut-res-pg')?.textContent || '—';
+      const autRes65   = document.getElementById('aut-res-65')?.textContent || '—';
+      const autRes85   = document.getElementById('aut-res-85')?.textContent || '—';
+      const autRes75   = document.getElementById('aut-res-75')?.textContent || '—';
+      const autRes55   = document.getElementById('aut-res-55')?.textContent || '—';
+      tabBanner = `<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:4px;margin-bottom:4px;font-size:8px;">
+        <div style="background:#f0f4ff;border:1px solid #bee3f8;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+          <div style="font-size:6px;font-weight:700;color:#3182ce;text-transform:uppercase;margin-bottom:1px;">Conditions</div>
+          <div style="color:#16213e;line-height:1.4;">
+            Temp extérieure : <strong>${autTemp}°C</strong><br>
+            Alt. pression : <strong>${Number(autAlt).toLocaleString('fr-FR')} ft</strong>
+          </div>
+        </div>
+        <div style="background:#fffbeb;border:1px solid #fbd38d;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+          <div style="font-size:6px;font-weight:700;color:#d69e2e;text-transform:uppercase;margin-bottom:1px;">Altitude densité</div>
+          <div style="color:#16213e;line-height:1.4;">
+            <strong style="font-size:12px;">${autAltDens} ft</strong>
+          </div>
+        </div>
+        <div style="background:#fff5f5;border:1px solid #feb2b2;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+          <div style="font-size:6px;font-weight:700;color:#e94560;text-transform:uppercase;margin-bottom:1px;">Autonomie 100%</div>
+          <div style="color:#16213e;line-height:1.4;">
+            Plein gaz :<br><strong style="font-size:12px;">${autResPG} h</strong>
+          </div>
+        </div>
+        <div style="background:#f0fff4;border:1px solid #9ae6b4;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+          <div style="font-size:6px;font-weight:700;color:#38a169;text-transform:uppercase;margin-bottom:1px;">Autonomies croisière</div>
+          <div style="color:#16213e;line-height:1.4;">
+            65% : <strong>${autRes65}h</strong> · 75% : <strong>${autRes75}h</strong><br>
+            85% : <strong>${autRes85}h</strong> · 55% : <strong>${autRes55}h</strong>
+          </div>
+        </div>
+      </div>`;
+    }
+    
+    // Bandeau Montée
+    else if (tabIds[i] === 'tab-montee') {
+      const monTemp    = document.getElementById('mon-temp')?.value || '—';
+      const monAlt     = document.getElementById('mon-alt')?.value || '—';
+      const monMass    = document.getElementById('mon-mass')?.value || '—';
+      const monRes     = document.getElementById('mon-res')?.textContent || '—';
+      const monResMs   = document.getElementById('mon-res-ms')?.textContent || '—';
+      const monISA     = document.getElementById('mon-detISA')?.textContent || '—';
+      tabBanner = `<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:4px;margin-bottom:4px;font-size:8px;">
+        <div style="background:#f0f4ff;border:1px solid #bee3f8;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+          <div style="font-size:6px;font-weight:700;color:#3182ce;text-transform:uppercase;margin-bottom:1px;">Température</div>
+          <div style="color:#16213e;line-height:1.4;">
+            Temp extérieure : <strong>${monTemp}°C</strong><br>
+            ISA : <strong>${monISA}</strong>
+          </div>
+        </div>
+        <div style="background:#ebf8ff;border:1px solid #90cdf4;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+          <div style="font-size:6px;font-weight:700;color:#3182ce;text-transform:uppercase;margin-bottom:1px;">Altitude pression</div>
+          <div style="color:#16213e;line-height:1.4;">
+            <strong style="font-size:12px;">${Number(monAlt).toLocaleString('fr-FR')} ft</strong>
+          </div>
+        </div>
+        <div style="background:#fffbeb;border:1px solid #fbd38d;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+          <div style="font-size:6px;font-weight:700;color:#d69e2e;text-transform:uppercase;margin-bottom:1px;">Masse</div>
+          <div style="color:#16213e;line-height:1.4;">
+            <strong style="font-size:12px;">${monMass} kg</strong>
+          </div>
+        </div>
+        <div style="background:#f0fff4;border:1px solid #9ae6b4;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+          <div style="font-size:6px;font-weight:700;color:#38a169;text-transform:uppercase;margin-bottom:1px;">Taux de montée</div>
+          <div style="color:#16213e;line-height:1.4;">
+            <strong style="font-size:12px;">${monRes} ft/min</strong><br>
+            (${monResMs} m/s)
+          </div>
+        </div>
+      </div>`;
+    }
 
     // Classes spéciales pour carburant et centrage
-    const pageClass = (tabIds[i] === 'tab-carbu' || tabIds[i] === 'tab-centrage') ? 'page page-compact' : 'page';
+    const pageClass = tabIds[i] === 'tab-carbu' ? 'page page-carbu' : tabIds[i] === 'tab-centrage' ? 'page page-centrage' : 'page';
 
     pagesHtml += `<div class="${pageClass}">
       <div class="page-header">
@@ -4434,7 +4672,7 @@ function printPreparation() {
         ${dep ? '&nbsp;·&nbsp; ' + dep + (dest ? ' → ' + dest : '') : ''}
         &nbsp;·&nbsp; <span class="tab-name">${tabNames[i]}</span>
       </div>
-      ${carbuBanner}
+      ${tabBanner}
       <div class="tab-body">${clone.innerHTML}</div>
     </div>`;
   }
@@ -4501,17 +4739,28 @@ body {
   transform-origin: top left;
 }
 
-/* Pages compactes (Carburant, Centrage) — scale adapté A4 paysage */
-.page-compact .tab-body {
+/* Page Carburant — compact */
+.page-carbu .tab-body {
   font-size: 9px;
   transform: scale(0.82);
   transform-origin: top left;
   width: 121.9%;
 }
-.page-compact .tab-body .card { padding: 3px 5px; margin-bottom: 2px; }
-.page-compact .tab-body .card h3 { font-size: 8px; margin-bottom: 2px; }
-.page-compact .tab-body .rv { font-size: 16px; }
-.page-compact .canvas-img { max-width: 50% !important; max-height: 120mm; margin: 0 auto; }
+.page-carbu .tab-body .card { padding: 3px 5px; margin-bottom: 2px; }
+.page-carbu .tab-body .card h3 { font-size: 8px; margin-bottom: 2px; }
+.page-carbu .tab-body .rv { font-size: 16px; }
+
+/* Page Masse & Centrage — plus grand que carburant */
+.page-centrage .tab-body {
+  font-size: 10px;
+  transform: scale(0.88);
+  transform-origin: top left;
+  width: 113.6%;
+}
+.page-centrage .tab-body .card { padding: 4px 6px; margin-bottom: 3px; }
+.page-centrage .tab-body .card h3 { font-size: 9px; margin-bottom: 3px; }
+.page-centrage .tab-body .rv { font-size: 18px; }
+.page-centrage .canvas-img { max-width: 55% !important; max-height: 130mm; margin: 0 auto; }
 
 /* Mise en page 2 colonnes */
 .tab-body .two-col {
@@ -4561,7 +4810,7 @@ body {
   object-fit: contain;
 }
 /* Centrage canvas plus petit */
-.page:nth-child(3) .canvas-img { max-width: 50% !important; max-height: 120mm; margin: 0 auto; }
+/* Centrage canvas géré par .page-centrage */
 
 /* Masquer les controles interactifs (les inputs sont remplacés par des spans dans le JS) */
 .tab-body input[type="range"],
