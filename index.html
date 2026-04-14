@@ -4101,6 +4101,25 @@ function buildPrepaPage(immat, date, cdb, dest) {
     </div>`;
   }).join('');
 
+  // ---- Données carburant saisies ----
+  const cDep   = document.getElementById('c-dep-icao')?.value || fpDep || '—';
+  const cArr   = document.getElementById('c-arr-icao')?.value || fpArr || '—';
+  const cConso = document.getElementById('c-conso')?.value || document.getElementById('conso')?.value || '—';
+  const cRoula = document.getElementById('c-roulage')?.value || '—';
+  const cNavB  = document.getElementById('c-nav-base')?.value || '—';
+  const cNavM  = document.getElementById('c-nav-meteo')?.value || '0';
+  const cNavR  = document.getElementById('c-nav-retard')?.value || '0';
+  const cNavE  = document.getElementById('c-etapes')?.value || '1';
+  const cDega  = document.getElementById('c-dega')?.value || '—';
+  const cDiver = document.getElementById('c-diver')?.value || '—';
+  const cResLbl = document.getElementById('c-res-lbl')?.textContent || '30 min';
+  const cMarge = document.getElementById('c-marge')?.value || '—';
+  const crNav  = document.getElementById('cr-nav')?.textContent || '—';
+  const crDiver = document.getElementById('cr-diver')?.textContent || '—';
+  const crMarge = document.getElementById('cr-marge')?.textContent || '—';
+  const crTotal = document.getElementById('cr-min-total')?.textContent || '—';
+  const crAuto = document.getElementById('cr-autonomie')?.textContent || '—';
+
   return `<div class="page" style="font-family:Arial,sans-serif;font-size:8px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
 
     <!-- En-tête page -->
@@ -4139,6 +4158,60 @@ function buildPrepaPage(immat, date, cdb, dest) {
       </div>` : ''}
       <div style="margin-top:4px;padding:3px 6px;background:rgba(255,255,255,.08);border-radius:4px;font-size:8px;font-weight:700;color:#ebf8ff;letter-spacing:1px;">
         Route : ${fpRoute}
+      </div>
+    </div>
+
+    <!-- ═══ DONNÉES CARBURANT SAISIES ═══ -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:4px;margin-bottom:5px;">
+      <!-- Aérodromes -->
+      <div style="background:#f0f4ff;border:1px solid #bee3f8;border-radius:4px;padding:4px 6px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+        <div style="font-size:5.5px;font-weight:700;color:#3182ce;text-transform:uppercase;margin-bottom:2px;">Aérodromes</div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <div><span style="font-size:5px;color:#718096;">DEP</span><div style="font-size:9px;font-weight:900;color:#16213e;letter-spacing:1px;">${cDep}</div></div>
+          <span style="font-size:8px;color:#718096;">→</span>
+          <div><span style="font-size:5px;color:#718096;">ARR</span><div style="font-size:9px;font-weight:900;color:#16213e;letter-spacing:1px;">${cArr}</div></div>
+        </div>
+      </div>
+      <!-- Navigation -->
+      <div style="background:#ebf8ff;border:1px solid #90cdf4;border-radius:4px;padding:4px 6px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+        <div style="font-size:5.5px;font-weight:700;color:#3182ce;text-transform:uppercase;margin-bottom:2px;">Navigation</div>
+        <div style="font-size:6.5px;color:#16213e;line-height:1.5;">
+          Temps sans vent : <strong>${cNavB} min</strong><br>
+          Correction météo : <strong>${cNavM} min</strong><br>
+          Intégr./retards : <strong>${cNavR} min/ét.</strong>
+          × ${cNavE} ét.<br>
+          Roulage : <strong>${cRoula} min</strong>
+        </div>
+        <div style="font-size:7px;font-weight:700;color:#3182ce;margin-top:2px;">Total nav : ${crNav}</div>
+      </div>
+      <!-- Diversion -->
+      <div style="background:#faf5ff;border:1px solid #d6bcfa;border-radius:4px;padding:4px 6px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+        <div style="font-size:5.5px;font-weight:700;color:#805ad5;text-transform:uppercase;margin-bottom:2px;">Diversion</div>
+        <div style="font-size:6.5px;color:#16213e;line-height:1.5;">
+          Terrain : <strong>${cDega}</strong><br>
+          Durée : <strong>${cDiver} min</strong>
+        </div>
+        <div style="font-size:7px;font-weight:700;color:#805ad5;margin-top:2px;">Carbu div : ${crDiver}</div>
+      </div>
+      <!-- Consommation + Réserve -->
+      <div style="background:#fffbeb;border:1px solid #fbd38d;border-radius:4px;padding:4px 6px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+        <div style="font-size:5.5px;font-weight:700;color:#d69e2e;text-transform:uppercase;margin-bottom:2px;">Consommation</div>
+        <div style="font-size:6.5px;color:#16213e;line-height:1.5;">
+          Conso moteur : <strong>${cConso} L/h</strong><br>
+          Réserve finale : <strong>${cResLbl}</strong>
+        </div>
+      </div>
+      <!-- Marge sécurité + Total -->
+      <div style="background:#fff5f5;border:1px solid #feb2b2;border-radius:4px;padding:4px 6px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+        <div style="font-size:5.5px;font-weight:700;color:#e94560;text-transform:uppercase;margin-bottom:2px;">Marge sécurité</div>
+        <div style="font-size:6.5px;color:#16213e;line-height:1.5;">
+          Marge CDB : <strong>${cMarge} min</strong><br>
+          Carbu marge : <strong>${crMarge}</strong>
+        </div>
+        <div style="border-top:1px solid #feb2b2;margin-top:3px;padding-top:2px;">
+          <div style="font-size:7px;font-weight:800;color:#e94560;">TOTAL : ${crTotal}</div>
+          <div style="font-size:6px;color:#16213e;">Autonomie : ${crAuto}</div>
+        </div>
       </div>
     </div>
 
