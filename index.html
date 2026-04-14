@@ -3642,23 +3642,23 @@ function attUpdateCompar(d_att_man, d_roul_man) {
 
       if (Math.abs(delta_piste) <= 30) {
         bgColor='#f0fff4'; borderColor='#38a169'; textColor='#276749';
-        icon='?';
+        icon='●';
         msg = `Lecture nominale - ecart piste <= 30 m. Coherence Manuel / Auto satisfaisante.`;
       } else if (delta_piste > 30 && delta_piste <= 80) {
         bgColor='#fffbeb'; borderColor='#d69e2e'; textColor='#744210';
-        icon='??';
+        icon='▲';
         msg = `Ecart modere (+${delta_piste} m). Verifier le trace sur le nomogramme - la lecture manuelle est legerement plus conservatrice.`;
       } else if (delta_piste < -30 && delta_piste >= -80) {
         bgColor='#fffbeb'; borderColor='#d69e2e'; textColor='#744210';
-        icon='??';
+        icon='▲';
         msg = `Ecart modere (${delta_piste} m). La lecture manuelle donne une distance plus courte - verifier le trace.`;
       } else if (delta_piste > 80) {
         bgColor='#fff5f5'; borderColor='#e53e3e'; textColor='#c53030';
-        icon='?';
+        icon='✕';
         msg = `Ecart important (+${delta_piste} m) - lecture manuelle significativement superieure a l'auto. Reprendre le trace nomogramme.`;
       } else {
         bgColor='#fff5f5'; borderColor='#e53e3e'; textColor='#c53030';
-        icon='?';
+        icon='✕';
         msg = `Ecart important (${delta_piste} m) - lecture manuelle nettement inferieure a l'auto. Verifier les etapes de trace sur le nomogramme.`;
       }
 
@@ -4275,7 +4275,7 @@ function buildPrepaPage(immat, date, cdb, dest) {
 
         <!-- Notes manuscrites -->
         <div style="border:1px solid #e0e0e0;border-radius:4px;padding:4px 5px;background:#fafafa;">
-          <div style="font-size:6px;font-weight:700;color:#718096;text-transform:uppercase;margin-bottom:3px;">Notes Notes</div>
+          <div style="font-size:6px;font-weight:700;color:#718096;text-transform:uppercase;margin-bottom:3px;">Notes</div>
           <div style="font-size:6px;color:#999;margin-bottom:1px;">Route / Trajet</div>
           <div style="border-bottom:1px solid #ccc;height:10px;margin-bottom:2px;"></div>
           <div style="border-bottom:1px solid #ccc;height:10px;margin-bottom:3px;"></div>
@@ -4309,6 +4309,7 @@ function printPreparation() {
   const date  = dateRaw ? new Date(dateRaw).toLocaleDateString('fr-FR') : new Date().toLocaleDateString('fr-FR');
   const cdb   = document.getElementById('vol-cdb')?.value  || '';
   const dest  = document.getElementById('vol-dest')?.value || '';
+  const dep   = document.getElementById('vol-dep')?.value  || getCarbuDep() || '';
 
   // ── Sauvegarder dans l'historique ──
   const _snapFP    = (() => { try { return JSON.parse(localStorage.getItem('aquila_fp_v1') || 'null'); } catch(e){return null;} })();
@@ -4318,7 +4319,7 @@ function printPreparation() {
              snapFP: _snapFP, snapPrepa: _snapPrepa, snapParam: _snapParam });
 
   const tabIds   = ['tab-carbu','tab-centrage','tab-perf','tab-atterro','tab-montee','tab-autonomie'];
-  const tabNames = ['? Carburant','?? Masse & Centrage','? Decollage','? Atterrissage','? Montee','? Autonomie'];
+  const tabNames = ['Carburant','Masse & Centrage','Décollage','Atterrissage','Montée','Autonomie'];
 
   const activeTab = document.querySelector('.tab-content.active');
   let pagesHtml = '';
@@ -4348,12 +4349,12 @@ function printPreparation() {
 
     pagesHtml += `<div class="page">
       <div class="page-header">
-        <strong>AQUILA AT01</strong> &nbsp;?&nbsp; Preparation de vol
-        &nbsp;?&nbsp; <strong>${immat}</strong>
-        &nbsp;?&nbsp; ${date}
-        ${cdb ? '&nbsp;?&nbsp; CDB : <strong>' + cdb + '</strong>' : ''}
-        ${dest ? '&nbsp;?&nbsp; Destination : <strong>' + dest + '</strong>' : ''}
-        &nbsp;?&nbsp; <span class="tab-name">${tabNames[i]}</span>
+        <strong>AQUILA AT01</strong> &nbsp;·&nbsp; Préparation de vol
+        &nbsp;·&nbsp; <strong>${immat}</strong>
+        &nbsp;·&nbsp; ${date}
+        ${cdb ? '&nbsp;·&nbsp; CDB : <strong>' + cdb + '</strong>' : ''}
+        ${dep ? '&nbsp;·&nbsp; ' + dep + (dest ? ' → ' + dest : '') : ''}
+        &nbsp;·&nbsp; <span class="tab-name">${tabNames[i]}</span>
       </div>
       <div class="tab-body">${clone.innerHTML}</div>
     </div>`;
