@@ -784,6 +784,15 @@ canvas{display:block;max-width:100%;}
           <div>Vent ×<span id="detWF">—</span></div>
           <div>Piste ×<span id="detCF">—</span></div>
         </div>
+        <div style="height:1px;background:#e2e8f0;margin:12px 0;"></div>
+        <!-- Piste nécessaire -->
+        <div style="background:#f7f8fa;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;text-align:center;">
+          <div style="font-size:11px;color:#718096;margin-bottom:4px;">Piste nécessaire (roulement + décollage 50ft)</div>
+          <div style="display:flex;align-items:baseline;justify-content:center;gap:5px;">
+            <div style="font-size:32px;font-weight:900;color:#1a1a2e;" id="piste-nec-dec">—</div>
+            <div style="font-size:14px;color:#718096;">m</div>
+          </div>
+        </div>
         <div id="warnEl">▲ Distance &gt; 700m — vérifier la piste disponible</div>
         <!-- Comparatif mode manuel -->
         <div id="manual-compar" style="display:none;margin-top:10px;background:#f7f8fa;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;"></div>
@@ -4562,7 +4571,8 @@ function printPreparation() {
       const perfRoul  = document.getElementById('resRoul')?.textContent || '—';
       const perf50    = document.getElementById('res50')?.textContent || '—';
       const perfISA   = document.getElementById('detISA')?.textContent || '—';
-      tabBanner = `<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:4px;margin-bottom:4px;font-size:8px;">
+      const perfPisteNec = document.getElementById('piste-nec-dec')?.textContent || '—';
+      tabBanner = `<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr;gap:4px;margin-bottom:4px;font-size:8px;">
         <div style="background:#f0f4ff;border:1px solid #bee3f8;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
           <div style="font-size:6px;font-weight:700;color:#3182ce;text-transform:uppercase;margin-bottom:1px;">Conditions</div>
           <div style="color:#16213e;line-height:1.4;">
@@ -4590,10 +4600,16 @@ function printPreparation() {
           </div>
         </div>
         <div style="background:#fff5f5;border:1px solid #feb2b2;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
-          <div style="font-size:6px;font-weight:700;color:#e94560;text-transform:uppercase;margin-bottom:1px;">Résultats</div>
+          <div style="font-size:6px;font-weight:700;color:#e94560;text-transform:uppercase;margin-bottom:1px;">Distances</div>
           <div style="color:#16213e;line-height:1.4;">
             Roulement : <strong>${perfRoul} m</strong><br>
             Décollage 50ft : <strong>${perf50} m</strong>
+          </div>
+        </div>
+        <div style="background:#f0fff4;border:1px solid #9ae6b4;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+          <div style="font-size:6px;font-weight:700;color:#38a169;text-transform:uppercase;margin-bottom:1px;">Piste nécessaire</div>
+          <div style="color:#16213e;line-height:1.4;">
+            <strong style="font-size:14px;">${perfPisteNec} m</strong>
           </div>
         </div>
       </div>`;
@@ -5185,6 +5201,11 @@ function compute(){
   document.getElementById("detMF").textContent="x"+mf.toFixed(2);
   document.getElementById("detWF").textContent="x"+wf.toFixed(2);
   document.getElementById("detCF").textContent="x"+cf.toFixed(2);
+  
+  // Piste nécessaire = roulement + décollage 50ft
+  const pisteNec = roul + d50;
+  document.getElementById("piste-nec-dec").textContent = pisteNec;
+  
   document.getElementById("warnEl").style.display=d50>700?"block":"none";
 
   // Pour le trace: les index SANS correction piste (la correction piste ne change pas
