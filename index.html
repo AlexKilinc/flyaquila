@@ -393,42 +393,65 @@ canvas{display:block;max-width:100%;}
     font-size:16px !important; /* évite zoom */
   }
 
-  /* Barre avion-bar : conso + date + cdb + dest empilés proprement */
+  /* ===== BARRE AVION - MOBILE ===== */
+  #avion-bar{
+    flex-direction:column;
+    align-items:stretch;
+    gap:8px;
+    padding:8px 10px;
+  }
+  /* Ligne 1 : Avion + boutons avion + conso */
+  #avion-bar > label{display:none;} /* Masquer "Avion :" */
+  .avion-btn{
+    padding:6px 10px;
+    font-size:11px;
+    min-height:32px;
+  }
+  
+  /* Ligne 2 : Date + CDB + Dép + Arr + PDF */
   #avion-bar-right{
     width:100%;
-    justify-content:flex-start;
+    display:grid;
+    grid-template-columns: 1fr 1fr;
     gap:6px;
   }
   #avion-bar-right > div{
-    flex:1 1 auto;
-    min-width:0;
-    max-width:100%;
+    display:flex;
+    align-items:center;
+    gap:4px;
+  }
+  #avion-bar-right > div label{
+    font-size:9px !important;
+    min-width:28px;
   }
   #avion-bar-right > div input{
-    width:100% !important;
+    flex:1;
     min-width:0 !important;
     box-sizing:border-box !important;
+    font-size:12px !important;
+    padding:6px 4px !important;
   }
-  /* Date plus compacte */
+  /* Date */
   #avion-bar-right input[type="date"]{
-    padding:4px 4px !important;
     font-size:11px !important;
+    padding:6px 2px !important;
   }
-  /* CDB : largeur auto */
+  /* CDB */
   #avion-bar-right input#vol-cdb{
     width:100% !important;
-    max-width:120px;
   }
-  /* Aérodromes : compacts */
+  /* Aérodromes */
   #avion-bar-right input#vol-dep,
   #avion-bar-right input#vol-dest{
-    width:50px !important;
-    flex-shrink:0;
+    width:100% !important;
+    text-align:center;
   }
-  /* Bouton PDF compact */
-  #avion-bar-right button{
-    padding:6px 8px !important;
-    font-size:11px !important;
+  /* Bouton PDF - pleine largeur en bas */
+  #avion-bar-right > button{
+    grid-column: 1 / -1;
+    padding:8px 12px !important;
+    font-size:12px !important;
+    justify-content:center;
   }
 
   /* Prépa: 1 colonne */
@@ -1613,7 +1636,20 @@ canvas{display:block;max-width:100%;}
 /* Plan de vol responsive */
 #prepa-flightplan-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
 @media(max-width:700px){ #prepa-flightplan-grid { grid-template-columns:1fr 1fr; } }
-@media(max-width:420px){ #prepa-flightplan-grid { grid-template-columns:1fr; } }
+@media(max-width:480px){ 
+  #prepa-flightplan-grid { grid-template-columns:1fr; gap:8px; }
+  #prepa-flightplan-grid input { 
+    width:100% !important; 
+    min-width:0 !important; 
+    max-width:100% !important;
+    box-sizing:border-box !important;
+    font-size:16px !important; /* évite zoom iOS */
+  }
+  #prepa-flightplan-grid input[type="date"] {
+    -webkit-appearance:none;
+    appearance:none;
+  }
+}
 
 /* Zones de validation responsive */
 #zone-buttons { display:flex; flex-direction:row; gap:5px; flex-wrap:wrap; }
