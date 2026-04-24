@@ -394,8 +394,42 @@ canvas{display:block;max-width:100%;}
   }
 
   /* Barre avion-bar : conso + date + cdb + dest empilés proprement */
-  #avion-bar-right{width:100%;justify-content:flex-start;}
-  #avion-bar-right > div{flex:1;min-width:130px;}
+  #avion-bar-right{
+    width:100%;
+    justify-content:flex-start;
+    gap:6px;
+  }
+  #avion-bar-right > div{
+    flex:1 1 auto;
+    min-width:0;
+    max-width:100%;
+  }
+  #avion-bar-right > div input{
+    width:100% !important;
+    min-width:0 !important;
+    box-sizing:border-box !important;
+  }
+  /* Date plus compacte */
+  #avion-bar-right input[type="date"]{
+    padding:4px 4px !important;
+    font-size:11px !important;
+  }
+  /* CDB : largeur auto */
+  #avion-bar-right input#vol-cdb{
+    width:100% !important;
+    max-width:120px;
+  }
+  /* Aérodromes : compacts */
+  #avion-bar-right input#vol-dep,
+  #avion-bar-right input#vol-dest{
+    width:50px !important;
+    flex-shrink:0;
+  }
+  /* Bouton PDF compact */
+  #avion-bar-right button{
+    padding:6px 8px !important;
+    font-size:11px !important;
+  }
 
   /* Prépa: 1 colonne */
   .prepa-grid{grid-template-columns:1fr !important;}
@@ -413,7 +447,7 @@ canvas{display:block;max-width:100%;}
   #user-badge{padding:4px 6px;gap:0;}
 }
 
-/* ===== RESPONSIVE TABLETTE (481px–860px iPad portrait) ===== */
+/* ===== RESPONSIVE TABLETTE (481px–860px iPad mini/portrait) ===== */
 @media(min-width:481px) and (max-width:860px){
   #header{padding:8px 14px;}
   #header h1{font-size:15px;}
@@ -426,7 +460,45 @@ canvas{display:block;max-width:100%;}
 
   .prepa-grid{grid-template-columns:1fr 1fr;}
 
-  #avion-bar-right{flex-wrap:wrap;gap:6px;}
+  /* Barre avion : bien alignée sur iPad mini */
+  #avion-bar{
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  #avion-bar-right{
+    flex-wrap:wrap;
+    gap:8px;
+    width:auto;
+    margin-left:auto;
+  }
+  #avion-bar-right > div{
+    flex:0 0 auto;
+  }
+  #avion-bar-right input[type="date"]{
+    width:auto;
+    min-width:130px;
+  }
+  #avion-bar-right input#vol-cdb{
+    width:140px;
+  }
+  #avion-bar-right input#vol-dep,
+  #avion-bar-right input#vol-dest{
+    width:60px;
+  }
+  
+  /* Carburant : aérodromes côte à côte */
+  .carbu-aero-row{
+    flex-direction:row !important;
+    gap:10px !important;
+  }
+  .carbu-aero-arrow{
+    display:block !important;
+  }
+  .carbu-date-conso-row{
+    flex-direction:row !important;
+    gap:12px !important;
+  }
+  
   /* iPad : icône seule pour Historique/Admin/Déco */
   .hdr-btn{padding:5px 8px;font-size:0;gap:0;}
   .hdr-btn svg{margin:0;}
