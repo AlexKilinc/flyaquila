@@ -266,8 +266,13 @@ canvas{display:block;max-width:100%;}
   padding: 5px 2px;
   font-size: 11px;
   border-radius: 10px;
-  min-height: 38px;
-  white-space: nowrap;
+  min-height: 44px;
+  white-space: normal;
+  line-height: 1.2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .dec-piste-inline {
@@ -775,12 +780,13 @@ canvas{display:block;max-width:100%;}
         ">
     </div>
     <!-- QNH du jour -->
-    <div style="display:flex;align-items:center;gap:4px;background:#1e2d4a;border-radius:8px;padding:5px 8px;border:1px solid rgba(233,69,96,0.4);">
+    <div style="display:flex;align-items:center;gap:4px;">
       <label style="font-size:10px;color:#e94560;white-space:nowrap;font-weight:700;">QNH</label>
       <input type="number" id="qnh-input" value="1013" min="950" max="1050" step="1" placeholder="hPa"
-        style="width:56px;background:#0f1d33;border:1px solid #e94560;color:#fff;
-               padding:4px 5px;border-radius:5px;font-size:13px;font-weight:700;text-align:center;min-height:32px;"
+        style="width:64px;background:#1e2d4a;border:1px solid #2d3748;color:#fff;
+               padding:4px 6px;border-radius:5px;font-size:12px;font-weight:700;text-align:center;min-height:32px;"
         oninput="applyQNH()">
+      <span style="font-size:9px;color:#a0aec0;white-space:nowrap;">hPa</span>
       <span id="qnh-zp-lbl" style="font-size:10px;color:#a0aec0;white-space:nowrap;display:none;">→ ZP <strong id="qnh-zp-val" style="color:#fff;"></strong> ft</span>
     </div>
     <button onclick="printPreparation()"
@@ -901,8 +907,8 @@ canvas{display:block;max-width:100%;}
             <div class="piste-4-grid">
               <button class="piste-btn on" id="p_dur_sec" onclick="setPiste('dur_sec')">Dur sèche<br><span style="font-size:9px;opacity:0.85;">Réf.</span></button>
               <button class="piste-btn" id="p_herbe_sec" onclick="setPiste('herbe_sec')">Herbe<br><span style="font-size:9px;opacity:0.85;">+25%</span></button>
-              <button class="piste-btn" id="p_molle" onclick="setPiste('molle')">Molle<br><span style="font-size:9px;opacity:0.85;">+40%</span></button>
               <button class="piste-btn" id="p_humide" onclick="setPiste('humide')">Humide<br><span style="font-size:9px;opacity:0.85;">+10%</span></button>
+              <button class="piste-btn" id="p_molle" onclick="setPiste('molle')">Molle<br><span style="font-size:9px;opacity:0.85;">+40%</span></button>
             </div>
           </div>
         </div>
@@ -1380,7 +1386,7 @@ canvas{display:block;max-width:100%;}
               <button class="piste-btn on" id="att-pt-dur_sec"    onclick="setPisteAtt('dur_sec')">Dur sèche<br><span style="font-size:9px;opacity:0.85;">Réf.</span></button>
               <button class="piste-btn"    id="att-pt-herbe_sec"  onclick="setPisteAtt('herbe_sec')">Herbe<br><span style="font-size:9px;opacity:0.85;">+15%</span></button>
               <button class="piste-btn"    id="att-pt-humide"     onclick="setPisteAtt('humide')">Humide<br><span style="font-size:9px;opacity:0.85;">+15%</span></button>
-              <button class="piste-btn"    id="att-pt-contaminee" onclick="setPisteAtt('contaminee')">Contaminée<br><span style="font-size:9px;opacity:0.85;">+30%</span></button>
+              <button class="piste-btn"    id="att-pt-contaminee" onclick="setPisteAtt('contaminee')">Contam.<br><span style="font-size:9px;opacity:0.85;">+30%</span></button>
             </div>
           </div>
         </div>
@@ -4913,7 +4919,7 @@ function printPreparation() {
       const attMass  = document.getElementById('att-mass')?.value || '—';
       const attWind  = document.getElementById('att-wind')?.value || '—';
       const attWD    = WD_ATT === 'arr' ? 'Arrière' : 'Face';
-      const attPiste = {dur_sec:'Dur sèche',herbe_sec:'Herbe +25%',molle:'Molle +40%',humide:'Humide +10%'}[PT_ATT] || 'Dur sèche';
+      const attPiste = {dur_sec:'Dur sèche',herbe_sec:'Herbe +15%',humide:'Humide +15%',contaminee:'Contam. +30%'}[PT_ATT] || 'Dur sèche';
       const attRoul  = document.getElementById('att-resRoul')?.textContent || '—';
       const att50    = document.getElementById('att-res50')?.textContent || '—';
       const attISA   = document.getElementById('att-detISA')?.textContent || '—';
