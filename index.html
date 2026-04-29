@@ -1830,15 +1830,21 @@ canvas{display:block;max-width:100%;}
     <div style="margin-top:10px;">
       <label style="font-size:10px;color:#90cdf4;display:block;margin-bottom:4px;">Étapes facultatives (ICAO)</label>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <input type="text" id="fp-wpt1" placeholder="WPT 1" maxlength="4"
-          style="flex:1;min-width:70px;padding:7px 10px;border-radius:6px;border:1px solid #2c5282;background:#0d2354;color:#fff;font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;box-sizing:border-box;min-height:36px;"
-          oninput="this.value=this.value.toUpperCase();saveFP()">
-        <input type="text" id="fp-wpt2" placeholder="WPT 2" maxlength="4"
-          style="flex:1;min-width:70px;padding:7px 10px;border-radius:6px;border:1px solid #2c5282;background:#0d2354;color:#fff;font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;box-sizing:border-box;min-height:36px;"
-          oninput="this.value=this.value.toUpperCase();saveFP()">
-        <input type="text" id="fp-wpt3" placeholder="WPT 3" maxlength="4"
-          style="flex:1;min-width:70px;padding:7px 10px;border-radius:6px;border:1px solid #2c5282;background:#0d2354;color:#fff;font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;box-sizing:border-box;min-height:36px;"
-          oninput="this.value=this.value.toUpperCase();saveFP()">
+        <div style="flex:1;min-width:70px;position:relative;">
+          <input type="text" id="fp-wpt1" placeholder="WPT 1" maxlength="4"
+            style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid #2c5282;background:#0d2354;color:#fff;font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;box-sizing:border-box;min-height:36px;"
+            oninput="this.value=this.value.toUpperCase();saveFP()">
+        </div>
+        <div style="flex:1;min-width:70px;position:relative;">
+          <input type="text" id="fp-wpt2" placeholder="WPT 2" maxlength="4"
+            style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid #2c5282;background:#0d2354;color:#fff;font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;box-sizing:border-box;min-height:36px;"
+            oninput="this.value=this.value.toUpperCase();saveFP()">
+        </div>
+        <div style="flex:1;min-width:70px;position:relative;">
+          <input type="text" id="fp-wpt3" placeholder="WPT 3" maxlength="4"
+            style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid #2c5282;background:#0d2354;color:#fff;font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;box-sizing:border-box;min-height:36px;"
+            oninput="this.value=this.value.toUpperCase();saveFP()">
+        </div>
       </div>
     </div>
 
@@ -2502,7 +2508,7 @@ function showAeroDropdown(inp) {
 
 // Setup autocomplete sur tous les champs ICAO au chargement
 document.addEventListener('DOMContentLoaded', function() {
-  ['vol-dep','vol-dest','aero-txt','att-aero-txt','c-dep-icao','c-arr-icao','fp-dep-icao','fp-arr-icao'].forEach(id => {
+  ['vol-dep','vol-dest','aero-txt','att-aero-txt','c-dep-icao','c-arr-icao','fp-dep-icao','fp-arr-icao','c-dega','fp-wpt1','fp-wpt2','fp-wpt3'].forEach(id => {
     setupAeroAutocomplete(id);
   });
 });
