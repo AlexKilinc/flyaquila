@@ -270,6 +270,38 @@ canvas{display:block;max-width:100%;}
   white-space: nowrap;
 }
 
+.dec-piste-inline {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: nowrap;
+}
+.dec-piste-left { flex: 1; min-width: 0; max-width: 180px; }
+.dec-piste-right {
+  flex: 1;
+  background: #f7f8fa;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px 14px;
+  text-align: center;
+  min-width: 140px;
+}
+.dec-piste-label {
+  font-size: 11px;
+  color: #718096;
+  margin-bottom: 2px;
+  line-height: 1.3;
+}
+@media (max-width: 480px) {
+  .dec-piste-inline {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .dec-piste-left { max-width: 100%; }
+  .dec-piste-right { min-width: 100%; }
+}
+
 /* Atterrissage résultats + piste en ligne */
 .att-piste-inline {
   display: flex;
@@ -733,13 +765,23 @@ canvas{display:block;max-width:100%;}
         oninput="
           this.value=this.value.toUpperCase();
           var v=this.value.trim();
-          var arrIcao=document.getElementById('c-arr-icao');if(arrIcao){arrIcao.value=v;arrIcao.dispatchEvent(new Event('input'));}
+          var arrIcao=document.getElementById('c-arr-icao');if(arrIcao&&arrIcao.value!==v){arrIcao.value=v;arrIcao.dispatchEvent(new Event('input'));}
+          var attAt=document.getElementById('att-aero-txt');if(attAt&&attAt.value!==v){attAt.value=v;attAt.dispatchEvent(new Event('input'));}
           var fpArrIcao=document.getElementById('fp-arr-icao');if(fpArrIcao){fpArrIcao.value=v;}
           var fpArr=document.getElementById('fp-arr');if(fpArr){fpArr.value=v;}
           if(typeof updateCarbu==='function')updateCarbu();
           if(typeof updateFPRoute==='function')updateFPRoute();
           if(typeof saveFP==='function')saveFP();
         ">
+    </div>
+    <!-- QNH du jour -->
+    <div style="display:flex;align-items:center;gap:4px;background:#1e2d4a;border-radius:8px;padding:5px 8px;border:1px solid rgba(233,69,96,0.4);">
+      <label style="font-size:10px;color:#e94560;white-space:nowrap;font-weight:700;">QNH</label>
+      <input type="number" id="qnh-input" value="1013" min="950" max="1050" step="1" placeholder="hPa"
+        style="width:56px;background:#0f1d33;border:1px solid #e94560;color:#fff;
+               padding:4px 5px;border-radius:5px;font-size:13px;font-weight:700;text-align:center;min-height:32px;"
+        oninput="applyQNH()">
+      <span id="qnh-zp-lbl" style="font-size:10px;color:#a0aec0;white-space:nowrap;display:none;">→ ZP <strong id="qnh-zp-val" style="color:#fff;"></strong> ft</span>
     </div>
     <button onclick="printPreparation()"
       style="padding:6px 12px;background:#e94560;color:white;border:none;border-radius:6px;
@@ -772,7 +814,14 @@ canvas{display:block;max-width:100%;}
             <div style="display:flex;gap:6px;align-items:center;position:relative;">
               <input type="text" id="aero-txt" value="LFPN" maxlength="4" placeholder="ICAO"
                 style="flex:1;min-width:0;background:#fff;border:2px solid #cbd5e0;border-radius:8px;padding:10px 12px;font-size:18px;font-weight:800;text-transform:uppercase;text-align:center;min-height:44px;color:#1a1a2e;box-sizing:border-box;"
-                oninput="this.value=this.value.toUpperCase();compute()">
+                oninput="this.value=this.value.toUpperCase();
+                  var _v=this.value.trim();
+                  var _vd=document.getElementById('vol-dep');if(_vd&&_vd.value!==_v)_vd.value=_v;
+                  var _cd=document.getElementById('c-dep-icao');if(_cd&&_cd.value!==_v){_cd.value=_v;_cd.dispatchEvent(new Event('input'));}
+                  var _fpi=document.getElementById('fp-dep-icao');if(_fpi)_fpi.value=_v;
+                  var _fpd=document.getElementById('fp-dep');if(_fpd)_fpd.value=_v;
+                  compute();
+                  if(_v.length===4){var _a=AERODROMES.find(function(x){return x.icao===_v;});if(_a)snapAltToAero('aero-menu',_a);}">
               <button onclick="toggleAeroMenu('aero-menu')" type="button"
                 style="min-width:44px;min-height:44px;background:#f7f8fa;border:1px solid #cbd5e0;border-radius:8px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">▾</button>
               <div id="aero-menu" style="display:none;position:absolute;top:48px;left:0;right:0;z-index:999;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.15);min-width:220px;overflow:hidden;"></div>
@@ -792,8 +841,8 @@ canvas{display:block;max-width:100%;}
           <input type="range" id="temp" min="-30" max="40" value="20" step="1" oninput="compute()">
         </div>
         <div class="sl-row">
-          <label>Altitude pression <span id="altVal">4000 ft</span></label>
-          <input type="range" id="alt" min="0" max="8000" value="4000" step="100" oninput="compute()">
+          <label>Altitude pression <span id="altVal">4000 ft</span><span id="dec-zp-lbl" style="font-size:11px;color:#e94560;margin-left:6px;display:none;">(<span id="dec-zp-val"></span>)</span></label>
+          <input type="range" id="alt" min="0" max="8000" value="4000" step="50" oninput="compute();var l=document.getElementById('dec-zp-lbl');if(l)l.style.display='none';">
         </div>
         <div class="sl-row">
           <label>Masse au décollage <span id="massVal">700 kg</span></label>
@@ -860,17 +909,16 @@ canvas{display:block;max-width:100%;}
       </div>
 
       <div class="card">
-        <h3>Résultats</h3>
-        <div class="res-grid">
-          <div class="res-box">
-            <div class="rl">Distance roulement</div>
-            <div class="rv" id="resRoul">—</div>
-            <div class="ru">m</div>
+        <h3>Résultat distance de décollage</h3>
+        <!-- Résultat principal : Distance décollage 50ft -->
+        <div style="background:#fff8f0;border:2px solid #e94560;border-radius:10px;padding:14px;text-align:center;margin-bottom:12px;">
+          <div style="font-size:12px;color:#e94560;font-weight:600;text-transform:uppercase;margin-bottom:4px;">Distance de Décollage 50ft</div>
+          <div style="display:flex;align-items:baseline;justify-content:center;gap:6px;">
+            <div style="font-size:42px;font-weight:900;color:#1a1a2e;" id="res50">—</div>
+            <div style="font-size:16px;color:#718096;font-weight:600;">m</div>
           </div>
-          <div class="res-box">
-            <div class="rl">Décollage 50ft</div>
-            <div class="rv" id="res50">—</div>
-            <div class="ru">m</div>
+          <div style="font-size:11px;color:#718096;margin-top:6px;">
+            dont roulement : <strong id="resRoul">—</strong> m
           </div>
         </div>
         <div class="det-row">
@@ -880,12 +928,23 @@ canvas{display:block;max-width:100%;}
           <div>Piste ×<span id="detCF">—</span></div>
         </div>
         <div style="height:1px;background:#e2e8f0;margin:12px 0;"></div>
-        <!-- Piste nécessaire -->
-        <div style="background:#f7f8fa;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;text-align:center;">
-          <div style="font-size:11px;color:#718096;margin-bottom:4px;">Piste nécessaire (roulement + décollage 50ft)</div>
-          <div style="display:flex;align-items:baseline;justify-content:center;gap:5px;">
-            <div style="font-size:32px;font-weight:900;color:#1a1a2e;" id="piste-nec-dec">—</div>
-            <div style="font-size:14px;color:#718096;">m</div>
+        <!-- Longueur piste nécessaire avec marge -->
+        <div class="dec-piste-inline">
+          <div class="dec-piste-left">
+            <div style="font-size:11px;color:#718096;margin-bottom:4px;">Marge de sécurité</div>
+            <div class="piste-marge-row">
+              <button class="piste-btn piste-marge-btn"    id="dec-marge-15" onclick="setMargeDec(15)">15%</button>
+              <button class="piste-btn piste-marge-btn on" id="dec-marge-30" onclick="setMargeDec(30)">30%</button>
+              <button class="piste-btn piste-marge-btn"    id="dec-marge-50" onclick="setMargeDec(50)">50%</button>
+            </div>
+          </div>
+          <div class="dec-piste-right">
+            <div class="dec-piste-label">Piste nécessaire<br>(avec marges) <span style="color:#e94560;font-weight:700;">×<span id="dec-marge-lbl">1.30</span></span></div>
+            <div style="display:flex;align-items:baseline;justify-content:center;gap:5px;">
+              <div style="font-size:32px;font-weight:900;color:#1a1a2e;" id="piste-nec-dec">—</div>
+              <div style="font-size:14px;color:#718096;">m</div>
+            </div>
+            <div style="font-size:10px;color:#718096;margin-top:4px;">= Distance déc. 50ft × marge</div>
           </div>
         </div>
         <div id="warnEl">▲ Distance &gt; 700m — vérifier la piste disponible</div>
@@ -1004,9 +1063,11 @@ canvas{display:block;max-width:100%;}
               <input type="text" id="c-dep-icao" value="LFPN" maxlength="4" placeholder="ICAO"
                 style="flex:1;min-width:0;background:#fff;border:2px solid #16213e;border-radius:8px;padding:10px 12px;font-size:18px;font-weight:800;text-transform:uppercase;text-align:center;min-height:44px;color:#16213e;box-sizing:border-box;"
                 oninput="this.value=this.value.toUpperCase();updateCarbu();
-                  var fp=document.getElementById('fp-dep');if(fp)fp.value=this.value;
-                  var fpi=document.getElementById('fp-dep-icao');if(fpi)fpi.value=this.value;
-                  var vd=document.getElementById('vol-dep');if(vd)vd.value=this.value;
+                  var _v2=this.value.trim();
+                  var fp=document.getElementById('fp-dep');if(fp)fp.value=_v2;
+                  var fpi=document.getElementById('fp-dep-icao');if(fpi)fpi.value=_v2;
+                  var vd=document.getElementById('vol-dep');if(vd&&vd.value!==_v2)vd.value=_v2;
+                  var at=document.getElementById('aero-txt');if(at&&at.value!==_v2){at.value=_v2;at.dispatchEvent(new Event('input'));}
                   if(typeof updateFPRoute==='function')updateFPRoute();">
               <button onclick="toggleAeroMenu('c-dep-menu')" type="button"
                 style="min-width:44px;min-height:44px;background:#fff;border:2px solid #16213e;border-radius:8px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#16213e;font-weight:700;">▾</button>
@@ -1025,7 +1086,8 @@ canvas{display:block;max-width:100%;}
                 style="flex:1;min-width:0;background:#fff;border:2px solid #16213e;border-radius:8px;padding:10px 12px;font-size:18px;font-weight:800;text-transform:uppercase;text-align:center;min-height:44px;color:#16213e;box-sizing:border-box;"
                 oninput="this.value=this.value.toUpperCase();updateCarbu();
                   var v=this.value.trim();
-                  var d=document.getElementById('vol-dest');if(d)d.value=v;
+                  var d=document.getElementById('vol-dest');if(d&&d.value!==v)d.value=v;
+                  var attAt=document.getElementById('att-aero-txt');if(attAt&&attAt.value!==v){attAt.value=v;attAt.dispatchEvent(new Event('input'));}
                   var f=document.getElementById('fp-arr');if(f)f.value=v;
                   var fi=document.getElementById('fp-arr-icao');if(fi)fi.value=v;
                   if(typeof updateFPRoute==='function')updateFPRoute();
@@ -1244,7 +1306,13 @@ canvas{display:block;max-width:100%;}
             <div style="display:flex;gap:6px;align-items:center;position:relative;">
               <input type="text" id="att-aero-txt" value="LFPN" maxlength="4" placeholder="ICAO"
                 style="flex:1;min-width:0;background:#fff;border:2px solid #cbd5e0;border-radius:8px;padding:10px 12px;font-size:18px;font-weight:800;text-transform:uppercase;text-align:center;min-height:44px;color:#1a1a2e;box-sizing:border-box;"
-                oninput="this.value=this.value.toUpperCase();">
+                oninput="this.value=this.value.toUpperCase();
+                  var _va=this.value.trim();
+                  var _vdst=document.getElementById('vol-dest');if(_vdst&&_vdst.value!==_va)_vdst.value=_va;
+                  var _carr=document.getElementById('c-arr-icao');if(_carr&&_carr.value!==_va){_carr.value=_va;_carr.dispatchEvent(new Event('input'));}
+                  var _fpa=document.getElementById('fp-arr-icao');if(_fpa)_fpa.value=_va;
+                  var _fpra=document.getElementById('fp-arr');if(_fpra)_fpra.value=_va;
+                  if(_va.length===4){var _aa=AERODROMES.find(function(x){return x.icao===_va;});if(_aa)snapAltToAero('att-aero-menu',_aa);}">
               <button onclick="toggleAeroMenu('att-aero-menu')" type="button"
                 style="min-width:44px;min-height:44px;background:#f7f8fa;border:1px solid #cbd5e0;border-radius:8px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">▾</button>
               <div id="att-aero-menu" style="display:none;position:absolute;top:48px;left:0;right:0;z-index:999;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.15);min-width:220px;overflow:hidden;"></div>
@@ -1263,8 +1331,8 @@ canvas{display:block;max-width:100%;}
           <input type="range" id="att-temp" min="-30" max="40" value="20" step="1" oninput="computeAtt()">
         </div>
         <div class="sl-row">
-          <label>Altitude pression <span id="att-altVal">1000 ft</span></label>
-          <input type="range" id="att-alt" min="0" max="8000" value="1000" step="100" oninput="computeAtt()">
+          <label>Altitude pression <span id="att-altVal">1000 ft</span><span id="att-zp-lbl" style="font-size:11px;color:#e94560;margin-left:6px;display:none;">(<span id="att-zp-val"></span>)</span></label>
+          <input type="range" id="att-alt" min="0" max="8000" value="1000" step="50" oninput="computeAtt();var l=document.getElementById('att-zp-lbl');if(l)l.style.display='none';">
         </div>
         <div class="sl-row">
           <label>Masse à l'atterrissage <span id="att-massVal">650 kg</span></label>
@@ -1320,16 +1388,15 @@ canvas{display:block;max-width:100%;}
 
       <div class="card">
         <h3>Résultats &amp; Longueur de piste</h3>
-        <div class="res-grid">
-          <div class="res-box">
-            <div class="rl">Distance att. 50ft</div>
-            <div class="rv" id="att-res50">—</div>
-            <div class="ru">m</div>
+        <!-- Résultat principal : Distance att. 50ft -->
+        <div style="background:#f0fff4;border:2px solid #38a169;border-radius:10px;padding:14px;text-align:center;margin-bottom:12px;">
+          <div style="font-size:12px;color:#38a169;font-weight:600;text-transform:uppercase;margin-bottom:4px;">Distance atterrissage 50ft</div>
+          <div style="display:flex;align-items:baseline;justify-content:center;gap:6px;">
+            <div style="font-size:42px;font-weight:900;color:#1a1a2e;" id="att-res50">—</div>
+            <div style="font-size:16px;color:#718096;font-weight:600;">m</div>
           </div>
-          <div class="res-box">
-            <div class="rl">Distance roulement</div>
-            <div class="rv" id="att-resRoul">—</div>
-            <div class="ru">m</div>
+          <div style="font-size:11px;color:#718096;margin-top:6px;">
+            dont roulement : <strong id="att-resRoul">—</strong> m
           </div>
         </div>
         <div class="det-row">
@@ -1358,13 +1425,14 @@ canvas{display:block;max-width:100%;}
               <div style="font-size:32px;font-weight:900;color:#1a1a2e;" id="att-piste-nec">—</div>
               <div style="font-size:14px;color:#718096;">m</div>
             </div>
+            <div style="font-size:10px;color:#718096;margin-top:4px;">= Distance att. 50ft × marge</div>
           </div>
         </div>
         <!-- Résultat longueur piste (hidden duplicate kept for compat) -->
         <div style="display:none;">
           <div style="background:#f7f8fa;border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin-bottom:10px;">
             <div style="font-size:11px;color:#718096;margin-bottom:4px;">
-              (Distance att 50ft + Roulement) × <span id="att-marge-lbl2" style="color:#e94560;font-weight:700;">1.30</span>
+              Distance att 50ft × <span id="att-marge-lbl2" style="color:#e94560;font-weight:700;">1.30</span>
             </div>
           </div>
         </div>
@@ -1415,8 +1483,8 @@ canvas{display:block;max-width:100%;}
           <input type="range" id="mon-temp" min="-30" max="40" value="20" step="1" oninput="computeMontee()">
         </div>
         <div class="sl-row">
-          <label>Altitude pression <span id="mon-altVal">2000 ft</span></label>
-          <input type="range" id="mon-alt" min="0" max="14000" value="2000" step="100" oninput="computeMontee()">
+          <label>Altitude pression <span id="mon-altVal">2000 ft</span><span id="mon-zp-lbl" style="font-size:11px;color:#e94560;margin-left:6px;display:none;">(<span id="mon-zp-val"></span>)</span></label>
+          <input type="range" id="mon-alt" min="0" max="14000" value="2000" step="50" oninput="computeMontee();var l=document.getElementById('mon-zp-lbl');if(l)l.style.display='none';">
         </div>
         <div class="sl-row">
           <label>Masse <span id="mon-massVal">700 kg</span></label>
@@ -1470,8 +1538,8 @@ canvas{display:block;max-width:100%;}
           <input type="range" id="aut-temp" min="-60" max="40" value="-10" step="1" oninput="computeAutonomie()">
         </div>
         <div class="sl-row">
-          <label>Altitude pression <span id="aut-altVal">6000 ft</span></label>
-          <input type="range" id="aut-alt" min="0" max="14000" value="6000" step="1000" oninput="computeAutonomie()">
+          <label>Altitude pression <span id="aut-altVal">6000 ft</span><span id="aut-zp-lbl" style="font-size:11px;color:#e94560;margin-left:6px;display:none;">(<span id="aut-zp-val"></span>)</span></label>
+          <input type="range" id="aut-alt" min="0" max="14000" value="6000" step="50" oninput="computeAutonomie();var l=document.getElementById('aut-zp-lbl');if(l)l.style.display='none';">
         </div>
         <div style="margin-top:6px;padding:8px 10px;background:#f7f8fa;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;color:#718096;">
           Altitude densité : <strong id="aut-alt-dens" style="color:#1a1a2e;">—</strong> ft
@@ -2109,19 +2177,27 @@ canvas{display:block;max-width:100%;}
 <script>
 // ===== LISTE AÉRODROMES (persistante) =====
 const AERO_DEFAULTS = [
-  { icao:'LFPN', name:'Toussus-le-Noble' },
-  { icao:'LPOX', name:'Étampes' },
-  { icao:'LFPM', name:'Melun' },
-  { icao:'LFOR', name:'Chartres' },
-  { icao:'LFOZ', name:'Orléans StD' },
-  { icao:'LFOP', name:'Rouen' },
-  { icao:'LFPT', name:'Pontoise' },
-  { icao:'LFOQ', name:'Blois' },
-  { icao:'LFOB', name:'Beauvais' },
-  { icao:'LFAT', name:'Le Touquet' },
-  { icao:'LFRG', name:'Deauville' },
+  { icao:'LFPN', name:'Toussus-le-Noble', elev:538 },
+  { icao:'LFOX', name:'Étampes',          elev:494 },
+  { icao:'LFPM', name:'Melun',            elev:304 },
+  { icao:'LFOR', name:'Chartres',         elev:509 },
+  { icao:'LFOZ', name:'Orléans StD',      elev:397 },
+  { icao:'LFOP', name:'Rouen',            elev:512 },
+  { icao:'LFPT', name:'Pontoise',         elev:325 },
+  { icao:'LFOQ', name:'Blois',            elev:398 },
+  { icao:'LFOB', name:'Beauvais',         elev:359 },
+  { icao:'LFAT', name:'Le Touquet',       elev:21  },
+  { icao:'LFRG', name:'Deauville',        elev:479 },
 ];
 let AERODROMES = JSON.parse(localStorage.getItem('aquila_aerodromes') || 'null') || JSON.parse(JSON.stringify(AERO_DEFAULTS));
+// Migration : injecter elev si absent (données localStorage antérieures à v18)
+AERODROMES = AERODROMES.map(a => {
+  if (a.elev == null) {
+    const def = AERO_DEFAULTS.find(d => d.icao === a.icao);
+    if (def && def.elev != null) return Object.assign({}, a, { elev: def.elev });
+  }
+  return a;
+});
 function saveAerodromes() { localStorage.setItem('aquila_aerodromes', JSON.stringify(AERODROMES)); }
 
 // Force re-render de tous les menus
@@ -2163,8 +2239,10 @@ function buildAeroMenuContent(menu, menuId) {
   AERODROMES.forEach(a => {
     const row = document.createElement('div');
     row.style.cssText = 'padding:10px 14px;cursor:pointer;border-bottom:1px solid #e8ebf0;display:flex;justify-content:space-between;align-items:center;transition:background .15s;';
+    const elevTxt = (a.elev != null) ? '<span style="font-size:10px;color:#718096;margin-left:6px;background:#f0f2f7;padding:1px 5px;border-radius:4px;">' + a.elev + ' ft</span>' : '';
     row.innerHTML = '<span style="font-weight:800;color:#16213e;font-size:14px;">'+a.icao+'</span>'
-                  + '<span style="font-size:12px;color:#16213e;opacity:.6;">'+a.name+'</span>';
+                  + '<span style="font-size:12px;color:#16213e;opacity:.6;">'+a.name+'</span>'
+                  + elevTxt;
     row.onmouseenter = () => row.style.background='#f0f2f7';
     row.onmouseleave = () => row.style.background='';
     row.onclick = () => {
@@ -2176,6 +2254,8 @@ function buildAeroMenuContent(menu, menuId) {
       const inp = document.getElementById(inputId);
       if (inp) { inp.value = a.icao; inp.dispatchEvent(new Event('input')); }
       menu.style.display = 'none';
+      // Snap altitude pression + QNH si aérodrome favori avec élévation connue
+      if (typeof snapAltToAero === 'function') snapAltToAero(menuId, a);
     };
     menu.appendChild(row);
   });
@@ -2228,7 +2308,7 @@ function renderAeroManager() {
         <button onclick="moveAero(${i},1)" style="border:none;background:none;cursor:pointer;font-size:10px;color:#718096;padding:0;line-height:1;" ${i===AERODROMES.length-1?'disabled style="opacity:.3;border:none;background:none;cursor:default;font-size:10px;color:#718096;padding:0;line-height:1;"':''}>▼</button>
       </div>
       <span style="font-weight:800;color:#1a1a2e;font-size:14px;width:50px;flex-shrink:0;">${a.icao}</span>
-      <span style="font-size:12px;color:#718096;flex:1;">${a.name}</span>
+      <span style="font-size:12px;color:#718096;flex:1;">${a.name}${a.elev != null ? ' <span style="font-size:10px;background:#f0f2f7;padding:1px 4px;border-radius:3px;">'+a.elev+' ft</span>' : ''}</span>
       <button onclick="deleteAero(${i})" title="Supprimer" style="width:28px;height:28px;border-radius:6px;border:1px solid #fed7d7;background:#fff5f5;color:#e53e3e;cursor:pointer;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;">✕</button>
     `;
     list.appendChild(row);
@@ -2762,12 +2842,102 @@ window.addEventListener('DOMContentLoaded', () => {
     const startAction = function(e) {
       e.preventDefault();
       e.stopPropagation();
-      showTab('carbu', document.querySelector(".tab-btn[onclick*='carbu']"));
+      resetVol();
     };
     btnStart.addEventListener('touchend', startAction, {passive: false});
     btnStart.addEventListener('click', startAction);
   }
 });
+
+// ═══════════════════════════════════════════════════════
+// RESET VOL — remet tous les paramètres à leurs valeurs par défaut
+// ═══════════════════════════════════════════════════════
+function resetVol() {
+  // ── Helpers ──────────────────────────────────────────
+  function setVal(id, val) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.value = val;
+    el.dispatchEvent(new Event('input'));
+  }
+  function setSlider(id, val) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.value = val;
+  }
+
+  // ── Date du jour ─────────────────────────────────────
+  const today = new Date().toISOString().slice(0,10);
+  setVal('vol-date', today);
+  setVal('dateVol', today);
+
+  // ── Aérodromes : vider (montrer juste le placeholder) ─
+  ['vol-dep','vol-dest','aero-txt','att-aero-txt',
+   'c-dep-icao','c-arr-icao','fp-dep-icao','fp-arr-icao'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.value = '';
+    el.dispatchEvent(new Event('input'));
+  });
+  AERO_ELEV_DEC = null;
+  AERO_ELEV_ATT = null;
+
+  // ── Masse & Centrage ──────────────────────────────────
+  setSlider('sl-p1', 75);  // pilote 75 kg
+  setSlider('sl-p2', 75);  // passager 75 kg
+  setSlider('sl-bag', 10); // bagages 10 kg
+  // On ne touche pas sl-ess-dep / sl-ess-arr (rester aux valeurs actuelles)
+  if (typeof updateCentrage === 'function') updateCentrage();
+
+  // ── Décollage ─────────────────────────────────────────
+  setSlider('temp', 20);  setSlider('alt', 550);
+  setSlider('mass', 700); setSlider('wind', 10);
+  document.getElementById('tempVal')  && (document.getElementById('tempVal').textContent  = '20°C');
+  document.getElementById('altVal')   && (document.getElementById('altVal').textContent   = '550 ft');
+  document.getElementById('massVal')  && (document.getElementById('massVal').textContent  = '700 kg');
+  document.getElementById('windVal')  && (document.getElementById('windVal').textContent  = '10 kt');
+  setWind('face');
+  setPiste('dur_sec');
+  if (typeof compute === 'function') compute();
+
+  // ── Atterrissage ──────────────────────────────────────
+  setSlider('att-temp', 20); setSlider('att-alt', 550);
+  setSlider('att-mass', 650); setSlider('att-wind', 10);
+  document.getElementById('att-tempVal') && (document.getElementById('att-tempVal').textContent = '20°C');
+  document.getElementById('att-altVal')  && (document.getElementById('att-altVal').textContent  = '550 ft');
+  document.getElementById('att-massVal') && (document.getElementById('att-massVal').textContent = '650 kg');
+  document.getElementById('att-windVal') && (document.getElementById('att-windVal').textContent = '10 kt');
+  setWindAtt('face');
+  setPisteAtt('dur_sec');
+  if (typeof computeAtt === 'function') computeAtt();
+
+  // ── Montée ────────────────────────────────────────────
+  setSlider('mon-temp', 20); setSlider('mon-alt', 550);
+  document.getElementById('mon-tempVal') && (document.getElementById('mon-tempVal').textContent = '20°C');
+  document.getElementById('mon-altVal')  && (document.getElementById('mon-altVal').textContent  = '550 ft');
+  if (typeof computeMontee === 'function') computeMontee();
+
+  // ── Autonomie ─────────────────────────────────────────
+  setSlider('aut-temp', 20); setSlider('aut-alt', 550);
+  document.getElementById('aut-tempVal') && (document.getElementById('aut-tempVal').textContent = '20°C');
+  document.getElementById('aut-altVal')  && (document.getElementById('aut-altVal').textContent  = '550 ft');
+  if (typeof computeAutonomie === 'function') computeAutonomie();
+
+  // ── QNH → 1013 (ZP = 0 + élév = 0 car pas d'aérodrome sélectionné) ──
+  const qnhEl = document.getElementById('qnh-input');
+  if (qnhEl) { qnhEl.value = 1013; }
+  updateZPLabels(null); // pas d'aérodrome → pas de ZP à afficher
+
+  // ── Masquer les labels ZP ──────────────────────────────
+  ['dec-zp-lbl','att-zp-lbl','mon-zp-lbl','aut-zp-lbl'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+
+  // ── Naviguer vers onglet Carburant ────────────────────
+  const tabBtn = document.querySelector(".tab-btn[onclick*='carbu']");
+  showTab('carbu', tabBtn);
+}
 
 
 // ===== CARBURANT =====
@@ -3068,10 +3238,15 @@ function computeAtt(){
   const wf  = wF_att(w, WD_ATT);
   const cf  = PS_ATT[PT_ATT].r;
 
-  // Distance de base puis corrections
+  // Distance de base (piste dure sèche) puis corrections masse/vent
   const base = bR_att(t,a);
-  const d50  = Math.round(base * mf * wf * cf / 5) * 5;
-  const roul = Math.round(d50 * 0.461 / 5) * 5;  // roulement ~ 46.1% de la dist 50ft
+  const d50_base  = Math.round(base * mf * wf / 5) * 5;  // distance 50ft sur piste dure sèche
+  const roul_base = Math.round(d50_base * 0.461 / 5) * 5;  // roulement de base ~ 46.1% de la dist 50ft
+  const descente  = d50_base - roul_base;  // partie descente (50ft → toucher des roues)
+  
+  // Coefficient piste appliqué UNIQUEMENT sur le roulement
+  const roul = Math.round(roul_base * cf / 5) * 5;
+  const d50  = descente + roul;  // distance totale = descente + roulement corrigé
 
   document.getElementById("att-res50").textContent   = d50;
   document.getElementById("att-resRoul").textContent = roul;
@@ -3087,8 +3262,8 @@ function computeAtt(){
   document.getElementById("att-detWF").textContent   = wf.toFixed(2);
   document.getElementById("att-detCF").textContent   = cf.toFixed(2);
 
-  // Longueur piste necessaire
-  const piste_nec = Math.round((d50 + roul) * (1 + MARGE_ATT/100) / 5) * 5;
+  // Longueur piste necessaire = Distance att 50ft × marge
+  const piste_nec = Math.round(d50 * (1 + MARGE_ATT/100) / 5) * 5;
   const pn = document.getElementById("att-piste-nec");
   if(pn) pn.textContent = piste_nec;
 
@@ -4680,12 +4855,21 @@ function printPreparation() {
       const perf50    = document.getElementById('res50')?.textContent || '—';
       const perfISA   = document.getElementById('detISA')?.textContent || '—';
       const perfPisteNec = document.getElementById('piste-nec-dec')?.textContent || '—';
-      tabBanner = `<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr;gap:4px;margin-bottom:4px;font-size:8px;">
+      const perfQNH = document.getElementById('qnh-input')?.value || '1013';
+      const perfZP  = (() => { const q=parseInt(perfQNH); const e=AERO_ELEV_DEC??0; return (q>=950&&q<=1050&&e)?Math.round(snapTo50((1013-q)*28+e)):null; })();
+      tabBanner = `<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr 1fr;gap:4px;margin-bottom:4px;font-size:8px;">
         <div style="background:#f0f4ff;border:1px solid #bee3f8;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
           <div style="font-size:6px;font-weight:700;color:#3182ce;text-transform:uppercase;margin-bottom:1px;">Conditions</div>
           <div style="color:#16213e;line-height:1.4;">
             Temp : <strong>${perfTemp}°C</strong> (ISA ${perfISA})<br>
             Alt. pression : <strong>${Number(perfAlt).toLocaleString('fr-FR')} ft</strong>
+          </div>
+        </div>
+        <div style="background:#e8f4fd;border:1px solid #90cdf4;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+          <div style="font-size:6px;font-weight:700;color:#2b6cb0;text-transform:uppercase;margin-bottom:1px;">QNH / ZP</div>
+          <div style="color:#16213e;line-height:1.4;">
+            QNH : <strong>${perfQNH} hPa</strong><br>
+            ${perfZP!=null?'ZP : <strong>'+perfZP.toLocaleString('fr-FR')+' ft</strong>':'ZP : <strong>—</strong>'}
           </div>
         </div>
         <div style="background:#ebf8ff;border:1px solid #90cdf4;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
@@ -4695,27 +4879,26 @@ function printPreparation() {
           </div>
         </div>
         <div style="background:#fffbeb;border:1px solid #fbd38d;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
-          <div style="font-size:6px;font-weight:700;color:#d69e2e;text-transform:uppercase;margin-bottom:1px;">Vent</div>
+          <div style="font-size:6px;font-weight:700;color:#d69e2e;text-transform:uppercase;margin-bottom:1px;">Vent · Piste</div>
           <div style="color:#16213e;line-height:1.4;">
-            Vent : <strong>${perfWind} kt</strong><br>
-            Direction : <strong>${perfWD}</strong>
-          </div>
-        </div>
-        <div style="background:#faf5ff;border:1px solid #d6bcfa;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
-          <div style="font-size:6px;font-weight:700;color:#805ad5;text-transform:uppercase;margin-bottom:1px;">Type de piste</div>
-          <div style="color:#16213e;line-height:1.4;">
+            <strong>${perfWind} kt</strong> ${perfWD}<br>
             <strong>${perfPiste}</strong>
           </div>
         </div>
         <div style="background:#fff5f5;border:1px solid #feb2b2;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
-          <div style="font-size:6px;font-weight:700;color:#e94560;text-transform:uppercase;margin-bottom:1px;">Distances</div>
+          <div style="font-size:6px;font-weight:700;color:#e94560;text-transform:uppercase;margin-bottom:1px;">Déc. 50ft</div>
           <div style="color:#16213e;line-height:1.4;">
-            Roulement : <strong>${perfRoul} m</strong><br>
-            Décollage 50ft : <strong>${perf50} m</strong>
+            <strong style="font-size:14px;">${perf50} m</strong>
+          </div>
+        </div>
+        <div style="background:#fff0f0;border:1px solid #feb2b2;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+          <div style="font-size:6px;font-weight:700;color:#e94560;text-transform:uppercase;margin-bottom:1px;">dont roulement</div>
+          <div style="color:#16213e;line-height:1.4;">
+            <strong style="font-size:14px;">${perfRoul} m</strong>
           </div>
         </div>
         <div style="background:#f0fff4;border:1px solid #9ae6b4;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
-          <div style="font-size:6px;font-weight:700;color:#38a169;text-transform:uppercase;margin-bottom:1px;">Piste nécessaire</div>
+          <div style="font-size:6px;font-weight:700;color:#38a169;text-transform:uppercase;margin-bottom:1px;">Piste néc. (×${(1+MARGE_DEC/100).toFixed(2)})</div>
           <div style="color:#16213e;line-height:1.4;">
             <strong style="font-size:14px;">${perfPisteNec} m</strong>
           </div>
@@ -4736,7 +4919,9 @@ function printPreparation() {
       const attISA   = document.getElementById('att-detISA')?.textContent || '—';
       const attPisteNec = document.getElementById('att-piste-nec')?.textContent || '—';
       const attMarge = MARGE_ATT || 30;
-      tabBanner = `<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr;gap:4px;margin-bottom:4px;font-size:8px;">
+      const attQNH = document.getElementById('qnh-input')?.value || '1013';
+      const attZP  = (() => { const q=parseInt(attQNH); const e=AERO_ELEV_ATT??0; return (q>=950&&q<=1050&&e)?Math.round(snapTo50((1013-q)*28+e)):null; })();
+      tabBanner = `<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr 1fr;gap:4px;margin-bottom:4px;font-size:8px;">
         <div style="background:#f0f4ff;border:1px solid #bee3f8;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
           <div style="font-size:6px;font-weight:700;color:#3182ce;text-transform:uppercase;margin-bottom:1px;">Conditions</div>
           <div style="color:#16213e;line-height:1.4;">
@@ -4744,36 +4929,42 @@ function printPreparation() {
             Alt. pression : <strong>${Number(attAlt).toLocaleString('fr-FR')} ft</strong>
           </div>
         </div>
+        <div style="background:#e8f4fd;border:1px solid #90cdf4;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+          <div style="font-size:6px;font-weight:700;color:#2b6cb0;text-transform:uppercase;margin-bottom:1px;">QNH / ZP</div>
+          <div style="color:#16213e;line-height:1.4;">
+            QNH : <strong>${attQNH} hPa</strong><br>
+            ${attZP!=null?'ZP : <strong>'+attZP.toLocaleString('fr-FR')+' ft</strong>':'ZP : <strong>—</strong>'}
+          </div>
+        </div>
         <div style="background:#ebf8ff;border:1px solid #90cdf4;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
           <div style="font-size:6px;font-weight:700;color:#3182ce;text-transform:uppercase;margin-bottom:1px;">Masse</div>
           <div style="color:#16213e;line-height:1.4;">
-            Masse à l'atterrissage :<br><strong style="font-size:12px;">${attMass} kg</strong>
+            Masse att. :<br><strong style="font-size:12px;">${attMass} kg</strong>
           </div>
         </div>
         <div style="background:#fffbeb;border:1px solid #fbd38d;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
-          <div style="font-size:6px;font-weight:700;color:#d69e2e;text-transform:uppercase;margin-bottom:1px;">Vent</div>
+          <div style="font-size:6px;font-weight:700;color:#d69e2e;text-transform:uppercase;margin-bottom:1px;">Vent · Piste</div>
           <div style="color:#16213e;line-height:1.4;">
-            Vent : <strong>${attWind} kt</strong><br>
-            Direction : <strong>${attWD}</strong>
-          </div>
-        </div>
-        <div style="background:#faf5ff;border:1px solid #d6bcfa;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
-          <div style="font-size:6px;font-weight:700;color:#805ad5;text-transform:uppercase;margin-bottom:1px;">Type de piste</div>
-          <div style="color:#16213e;line-height:1.4;">
+            <strong>${attWind} kt</strong> ${attWD}<br>
             <strong>${attPiste}</strong>
           </div>
         </div>
         <div style="background:#fff5f5;border:1px solid #feb2b2;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
-          <div style="font-size:6px;font-weight:700;color:#e94560;text-transform:uppercase;margin-bottom:1px;">Marge sécurité</div>
+          <div style="font-size:6px;font-weight:700;color:#e94560;text-transform:uppercase;margin-bottom:1px;">Att. 50ft</div>
           <div style="color:#16213e;line-height:1.4;">
-            <strong style="font-size:12px;">+${attMarge}%</strong>
+            <strong style="font-size:14px;">${att50} m</strong>
+          </div>
+        </div>
+        <div style="background:#fff0f0;border:1px solid #feb2b2;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+          <div style="font-size:6px;font-weight:700;color:#e94560;text-transform:uppercase;margin-bottom:1px;">dont roulement</div>
+          <div style="color:#16213e;line-height:1.4;">
+            <strong style="font-size:14px;">${attRoul} m</strong>
           </div>
         </div>
         <div style="background:#f0fff4;border:1px solid #9ae6b4;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
-          <div style="font-size:6px;font-weight:700;color:#38a169;text-transform:uppercase;margin-bottom:1px;">Résultats</div>
+          <div style="font-size:6px;font-weight:700;color:#38a169;text-transform:uppercase;margin-bottom:1px;">Piste néc. (×${(1+attMarge/100).toFixed(2)})</div>
           <div style="color:#16213e;line-height:1.4;">
-            Att 50ft : <strong>${att50} m</strong> · Roul : <strong>${attRoul} m</strong><br>
-            Piste néc. (marge incl.) : <strong>${attPisteNec} m</strong>
+            <strong style="font-size:14px;">${attPisteNec} m</strong>
           </div>
         </div>
       </div>`;
@@ -5279,9 +5470,119 @@ function drawNom(t,a,m,w,wd,idx1,idx2,idx3,d50){
 }
 
 
-let WD="face", PT="dur_sec";
-function setWind(d){WD=d;const bf2=document.getElementById("btnFace");const ba2=document.getElementById("btnArr");if(bf2)bf2.className=d==="face"?"on":"";if(ba2)ba2.className=d==="arr"?"on":"";compute();}
+let WD="face", PT="dur_sec", MARGE_DEC=30;
+function setWind(d){WD=d;const bf2=document.getElementById("btnFace");const ba2=document.getElementById("btnArr");if(bf2)bf2.className="piste-btn"+(d==="face"?" on":"");if(ba2)ba2.className="piste-btn"+(d==="arr"?" on":"");compute();}
 function setPiste(p){PT=p;Object.keys(PS).forEach(k=>{const b2=document.getElementById("p_"+k);if(b2)b2.className="piste-btn"+(k===p?" on":"");});compute();}
+
+// ═══════════════════════════════════════════════════════
+// QNH / Zone de Pression
+// ═══════════════════════════════════════════════════════
+
+// Altitude de l'aérodrome actif (ft) — mis à jour lors de la sélection d'un favori
+let AERO_ELEV_DEC = null;  // décollage
+let AERO_ELEV_ATT = null;  // atterrissage
+
+// Arrondir à la graduation de 50ft la plus proche
+function snapTo50(val) { return Math.round(val / 50) * 50; }
+
+// Calculer la ZP à partir du QNH et d'une élévation
+function calcZP(qnh, elev) {
+  if (!qnh || isNaN(qnh) || !elev) return null;
+  return snapTo50(Math.round((1013 - qnh) * 28 + elev));
+}
+
+// Appliquer une valeur d'altitude pression à un slider + recalcul
+function setAltSlider(sliderId, valId, value, min, max) {
+  const sl = document.getElementById(sliderId);
+  const lbl = document.getElementById(valId);
+  if (!sl) return;
+  const clamped = Math.max(min, Math.min(max, value));
+  sl.value = clamped;
+  if (lbl) lbl.textContent = clamped.toLocaleString('fr-FR') + ' ft';
+}
+
+// Mettre à jour les indicateurs ZP (entre parenthèses) sur tous les onglets
+function updateZPLabels(zp) {
+  [
+    ['dec-zp-lbl','dec-zp-val'],
+    ['att-zp-lbl','att-zp-val'],
+    ['mon-zp-lbl','mon-zp-val'],
+    ['aut-zp-lbl','aut-zp-val'],
+  ].forEach(([lblId, valId]) => {
+    const lbl = document.getElementById(lblId);
+    const val = document.getElementById(valId);
+    if (!lbl || !val) return;
+    if (zp !== null) {
+      val.textContent = zp.toLocaleString('fr-FR') + ' ft ZP';
+      lbl.style.display = 'inline';
+    } else {
+      lbl.style.display = 'none';
+    }
+  });
+  // Indicateur résumé dans la barre header
+  const zpLbl = document.getElementById('qnh-zp-lbl');
+  const zpVal = document.getElementById('qnh-zp-val');
+  if (zpLbl && zpVal) {
+    if (zp !== null) { zpVal.textContent = zp.toLocaleString('fr-FR'); zpLbl.style.display = 'inline-flex'; }
+    else { zpLbl.style.display = 'none'; }
+  }
+}
+
+// Appliquer QNH : recalcule ZP et pousse sur les 4 sliders
+function applyQNH() {
+  const qnh = parseInt(document.getElementById('qnh-input')?.value || '');
+  if (!qnh || qnh < 950 || qnh > 1050) {
+    updateZPLabels(null);
+    return;
+  }
+  // Utilise l'élévation déc ou att si connue, sinon 0
+  const elevDec = AERO_ELEV_DEC ?? 0;
+  const elevAtt = AERO_ELEV_ATT ?? 0;
+  const elevRef = AERO_ELEV_DEC ?? AERO_ELEV_ATT ?? 0;
+  const zpDec = calcZP(qnh, elevDec);
+  const zpAtt = calcZP(qnh, elevAtt);
+  const zpRef = calcZP(qnh, elevRef);
+  // Décollage slider (max 8000)
+  if (zpDec !== null) { setAltSlider('alt', 'altVal', zpDec, 0, 8000); compute(); }
+  // Atterrissage slider (max 8000)
+  if (zpAtt !== null) { setAltSlider('att-alt', 'att-altVal', zpAtt, 0, 8000); computeAtt(); }
+  // Montée (max 14000)
+  if (zpRef !== null) { setAltSlider('mon-alt', 'mon-altVal', zpRef, 0, 14000); computeMontee(); }
+  // Autonomie (max 14000)
+  if (zpRef !== null) { setAltSlider('aut-alt', 'aut-altVal', zpRef, 0, 14000); computeAutonomie(); }
+  updateZPLabels(zpRef);
+}
+
+// Snap altitude slider à l'élévation d'aérodrome (arrondie 50ft)
+// appelé lors de la sélection d'un favori depuis un menu donné
+function snapAltToAero(menuId, aero) {
+  const elev = aero.elev;
+  if (elev == null) return;
+  const snapped = snapTo50(elev);
+  const qnh = parseInt(document.getElementById('qnh-input')?.value || '');
+  const hasQNH = qnh >= 950 && qnh <= 1050;
+  if (menuId === 'aero-menu') {
+    AERO_ELEV_DEC = elev;
+    if (!hasQNH) { setAltSlider('alt', 'altVal', snapped, 0, 8000); setTimeout(compute, 0); }
+    else applyQNH();
+  } else if (menuId === 'att-aero-menu') {
+    AERO_ELEV_ATT = elev;
+    if (!hasQNH) { setAltSlider('att-alt', 'att-altVal', snapped, 0, 8000); setTimeout(computeAtt, 0); }
+    else applyQNH();
+  }
+}
+
+function setMargeDec(pct) {
+  MARGE_DEC = pct;
+  [15,30,50].forEach(v => {
+    const b = document.getElementById("dec-marge-"+v);
+    if(b) b.className = "piste-btn piste-marge-btn" + (v===pct?" on":"");
+  });
+  const lbl = document.getElementById("dec-marge-lbl");
+  if(lbl) lbl.textContent = (1 + pct/100).toFixed(2);
+  const tab = document.getElementById("tab-perf");
+  if(tab && tab.classList.contains("active")) compute();
+}
 
 function compute(){
   if(!document.getElementById("temp")) return;
@@ -5299,8 +5600,12 @@ function compute(){
   const idx1=bR(t,a);
   const idx2=idx1*mf;
   const idx3=idx2*wf;
-  const roul=Math.round(idx3*cf/5)*5;
-  const d50 =Math.round(r50(idx3)*cf/5)*5;
+  // Le coefficient piste n'affecte que le roulement (herbe/molle allonge le roulement, pas la phase aérienne)
+  const roul_base = idx3;                                   // roulement piste dure sèche
+  const d50_dry   = Math.round(r50(idx3)/5)*5;             // dist. 50ft piste dure sèche
+  const roul      = Math.round(roul_base * cf / 5) * 5;    // roulement corrigé piste
+  const descente  = d50_dry - Math.round(roul_base/5)*5;   // phase aérienne (invariante)
+  const d50       = roul + descente;                        // dist. 50ft corrigée
   const isa =Math.round(t-ISA(a));
 
   document.getElementById("resRoul").textContent=roul;
@@ -5310,11 +5615,13 @@ function compute(){
   document.getElementById("detWF").textContent="x"+wf.toFixed(2);
   document.getElementById("detCF").textContent="x"+cf.toFixed(2);
   
-  // Piste nécessaire = roulement + décollage 50ft
-  const pisteNec = roul + d50;
+  // Piste nécessaire = Distance déc. 50ft × marge de sécurité
+  const pisteNec = Math.round(d50 * (1 + MARGE_DEC/100) / 5) * 5;
   document.getElementById("piste-nec-dec").textContent = pisteNec;
+  const decMargeLbl = document.getElementById("dec-marge-lbl");
+  if(decMargeLbl) decMargeLbl.textContent = (1 + MARGE_DEC/100).toFixed(2);
   
-  document.getElementById("warnEl").style.display=d50>700?"block":"none";
+  document.getElementById("warnEl").style.display=pisteNec>700?"block":"none";
 
   // Pour le trace: les index SANS correction piste (la correction piste ne change pas
   // la position sur le nomogramme, elle s'applique apres lecture)
@@ -5818,6 +6125,8 @@ document.addEventListener('DOMContentLoaded', function() {
   if (overlay) overlay.addEventListener('click', function(e) {
     if (e.target === this) closeAdmin();
   });
+  // QNH par défaut 1013 -> ZP = élévation aérodrome (affiché dès le chargement)
+  setTimeout(applyQNH, 200);
 });
 
 </script>
