@@ -6132,7 +6132,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (e.target === this) closeAdmin();
   });
   // QNH par défaut 1013 -> ZP = élévation aérodrome (affiché dès le chargement)
-  setTimeout(applyQNH, 200);
+  // Initialiser tous les paramètres par défaut au lancement
+  setTimeout(resetVol, 200);
 });
 
 </script>
