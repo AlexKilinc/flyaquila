@@ -737,7 +737,12 @@ canvas{display:block;max-width:100%;}
       <input type="date" id="vol-date"
         style="background:#1e2d4a;border:1px solid #2d3748;color:#fff;padding:4px 6px;
                border-radius:5px;font-size:12px;min-height:32px;"
-        oninput="var fp=document.getElementById('fp-date');if(fp)fp.value=this.value;if(typeof saveFP==='function')saveFP();">
+        oninput="var v=this.value;
+          var dv=document.getElementById('dateVol');if(dv&&dv.value!==v)dv.value=v;
+          var ad=document.getElementById('att-date');if(ad&&ad.value!==v)ad.value=v;
+          var cd=document.getElementById('c-date-vol');if(cd&&cd.value!==v)cd.value=v;
+          var fp=document.getElementById('fp-date');if(fp&&fp.value!==v)fp.value=v;
+          if(typeof saveFP==='function')saveFP();">
     </div>
     <div style="display:flex;align-items:center;gap:4px;">
       <label style="font-size:10px;color:#a0aec0;white-space:nowrap;">CDB</label>
@@ -838,7 +843,12 @@ canvas{display:block;max-width:100%;}
             <div style="width:100%;overflow:hidden;">
             <input type="date" id="dateVol"
               style="width:100%;min-height:44px;font-size:16px;padding:9px 10px;border-radius:8px;border:1px solid #cbd5e0;background:#f7f8fa;color:#1a1a2e;box-sizing:border-box;-webkit-appearance:none;appearance:none;display:block;"
-              onchange="var v=document.getElementById('vol-date');if(v)v.value=this.value;var fp=document.getElementById('fp-date');if(fp)fp.value=this.value;var cd=document.getElementById('c-date-vol');if(cd)cd.value=this.value;">
+              onchange="var val=this.value;
+              var v=document.getElementById('vol-date');if(v&&v.value!==val)v.value=val;
+              var fp=document.getElementById('fp-date');if(fp&&fp.value!==val)fp.value=val;
+              var cd=document.getElementById('c-date-vol');if(cd&&cd.value!==val)cd.value=val;
+              var ad=document.getElementById('att-date');if(ad&&ad.value!==val)ad.value=val;
+              if(typeof saveFP==='function')saveFP();">
             </div>
           </div>
         </div>
@@ -1113,9 +1123,10 @@ canvas{display:block;max-width:100%;}
               style="width:100%;background:#f7f8fa;border:1px solid #cbd5e0;color:#1a1a2e;padding:9px 10px;border-radius:8px;font-size:16px;font-weight:600;min-height:44px;box-sizing:border-box;-webkit-appearance:none;appearance:none;display:block;"
               onchange="
                 var v=this.value;
-                var vd=document.getElementById('vol-date');if(vd)vd.value=v;
-                var fp=document.getElementById('fp-date');if(fp)fp.value=v;
-                var dv=document.getElementById('dateVol');if(dv)dv.value=v;
+                var vd=document.getElementById('vol-date');if(vd&&vd.value!==v)vd.value=v;
+                var fp=document.getElementById('fp-date');if(fp&&fp.value!==v)fp.value=v;
+                var dv=document.getElementById('dateVol');if(dv&&dv.value!==v)dv.value=v;
+                var ad=document.getElementById('att-date');if(ad&&ad.value!==v)ad.value=v;
                 if(typeof saveFP==='function')saveFP();">
           </div>
           <div class="carbu-conso-col">
@@ -1328,7 +1339,13 @@ canvas{display:block;max-width:100%;}
             <label style="font-size:11px;color:#1a1a2e;display:block;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Date arrivée</label>
             <div style="width:100%;overflow:hidden;">
             <input type="date" id="att-date"
-              style="width:100%;min-height:44px;font-size:16px;padding:9px 10px;border-radius:8px;border:1px solid #cbd5e0;background:#f7f8fa;color:#1a1a2e;box-sizing:border-box;-webkit-appearance:none;appearance:none;display:block;">
+              style="width:100%;min-height:44px;font-size:16px;padding:9px 10px;border-radius:8px;border:1px solid #cbd5e0;background:#f7f8fa;color:#1a1a2e;box-sizing:border-box;-webkit-appearance:none;appearance:none;display:block;"
+              onchange="var val=this.value;
+                var v=document.getElementById('vol-date');if(v&&v.value!==val)v.value=val;
+                var dv=document.getElementById('dateVol');if(dv&&dv.value!==val)dv.value=val;
+                var cd=document.getElementById('c-date-vol');if(cd&&cd.value!==val)cd.value=val;
+                var fp=document.getElementById('fp-date');if(fp&&fp.value!==val)fp.value=val;
+                if(typeof saveFP==='function')saveFP();">
             </div>
           </div>
         </div>
@@ -1758,7 +1775,11 @@ canvas{display:block;max-width:100%;}
         <label style="font-size:10px;color:#90cdf4;display:block;margin-bottom:3px;">Date de vol prévue</label>
         <input type="date" id="fp-date"
           style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid #2c5282;background:#0d2354;color:#fff;font-size:14px;font-weight:600;box-sizing:border-box;min-height:36px;-webkit-appearance:none;appearance:none;"
-          onchange="saveFP();var v=document.getElementById('vol-date');if(v)v.value=this.value;">
+          onchange="saveFP();var val=this.value;
+            var v=document.getElementById('vol-date');if(v&&v.value!==val)v.value=val;
+            var dv=document.getElementById('dateVol');if(dv&&dv.value!==val)dv.value=val;
+            var ad=document.getElementById('att-date');if(ad&&ad.value!==val)ad.value=val;
+            var cd=document.getElementById('c-date-vol');if(cd&&cd.value!==val)cd.value=val;">
       </div>
 
       <!-- Avion -->
@@ -2872,10 +2893,12 @@ function resetVol() {
     el.value = val;
   }
 
-  // ── Date du jour ─────────────────────────────────────
-  const today = new Date().toISOString().slice(0,10);
-  setVal('vol-date', today);
-  setVal('dateVol', today);
+  // ── Date vide par défaut (jj/mm/aaaa) ──────────────
+  setVal('vol-date', '');
+  setVal('dateVol', '');
+  var _attd = document.getElementById('att-date'); if(_attd) _attd.value = '';
+  var _cdv  = document.getElementById('c-date-vol'); if(_cdv) _cdv.value = '';
+  var _fpd  = document.getElementById('fp-date'); if(_fpd) _fpd.value = '';
 
   // ── Aérodromes : vider (montrer juste le placeholder) ─
   ['vol-dep','vol-dest','aero-txt','att-aero-txt',
