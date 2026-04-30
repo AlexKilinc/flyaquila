@@ -5397,125 +5397,105 @@ body {
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
 }
-@page { size: A4 landscape; margin: 6mm; }
+/* ============== EXPORT PDF — A4 paysage pleine page ============== */
+@page { size: A4 landscape; margin: 0; }
 
-/* 1 onglet = 1 page */
+/* 1 onglet = 1 page A4 paysage pleine largeur, marge interne 8mm */
 .page {
-  width: 285mm;
-  height: 198mm;
-  max-height: 198mm;
+  width: 297mm;
+  height: 210mm;
+  padding: 8mm 10mm;
   page-break-after: always;
+  break-after: page;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  background: white;
+  box-sizing: border-box;
 }
-.page:last-child { page-break-after: avoid; }
+.page:last-child { page-break-after: avoid; break-after: auto; }
 
 .page-header {
-  font-size: 8px;
+  font-size: 9px;
   color: #555;
   padding: 1.5mm 0;
   border-bottom: 1.5px solid #16213e;
-  margin-bottom: 2mm;
+  margin-bottom: 3mm;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   flex-shrink: 0;
 }
 .tab-name {
   background: #16213e;
   color: white;
-  padding: 1px 7px;
+  padding: 2px 8px;
   border-radius: 3px;
   font-weight: 700;
-  font-size: 8px;
+  font-size: 9px;
 }
 
 .tab-body {
   flex: 1;
   overflow: hidden;
-  font-size: 9px;
-}
-
-/* Force tout le contenu à tenir dans la page */
-.tab-body > * {
-  transform-origin: top left;
-}
-
-/* Page Carburant — compact */
-.page-carbu .tab-body {
-  font-size: 9px;
-  transform: scale(0.82);
-  transform-origin: top left;
-  width: 121.9%;
-}
-.page-carbu .tab-body .card { padding: 3px 5px; margin-bottom: 2px; }
-.page-carbu .tab-body .card h3 { font-size: 8px; margin-bottom: 2px; }
-.page-carbu .tab-body .rv { font-size: 16px; }
-
-/* Page Masse & Centrage — plus grand que carburant */
-.page-centrage .tab-body {
   font-size: 10px;
-  transform: scale(0.88);
-  transform-origin: top left;
-  width: 113.6%;
+  width: 100%;
 }
-.page-centrage .tab-body .card { padding: 4px 6px; margin-bottom: 3px; }
-.page-centrage .tab-body .card h3 { font-size: 9px; margin-bottom: 3px; }
-.page-centrage .tab-body .rv { font-size: 18px; }
-.page-centrage .canvas-img { max-width: 55% !important; max-height: 130mm; margin: 0 auto; }
 
-/* Mise en page 2 colonnes */
+/* Mise en page 2 colonnes — élargie pour exploiter la largeur paysage */
 .tab-body .two-col {
   display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: 3mm;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 4mm;
 }
-#tab-carbu .two-col { grid-template-columns: 0.6fr 1fr; }
+#tab-carbu .two-col { grid-template-columns: 0.7fr 1fr; }
 
 /* Cards */
 .tab-body .card {
   background: #fff;
   border: 1px solid #e2e8f0;
   border-radius: 5px;
-  padding: 4px 6px;
-  margin-bottom: 3px;
+  padding: 5px 8px;
+  margin-bottom: 4px;
   break-inside: avoid;
 }
-.tab-body .card h3 { font-size: 9px; font-weight: 700; color: #16213e; margin-bottom: 3px; }
-
-/* Tous les onglets : contenu compact */
-.tab-body {
-  font-size: 9px;
-  transform: scale(0.85);
-  transform-origin: top left;
-  width: 117.6%;
+.tab-body .card h3 {
+  font-size: 10px;
+  font-weight: 700;
+  color: #16213e;
+  margin-bottom: 4px;
 }
 
 /* Resultats */
-.tab-body .res-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; }
+.tab-body .res-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
 .tab-body .res-box  {
   background: #f7f8fa; border: 1px solid #e2e8f0;
-  border-radius: 5px; padding: 4px; text-align: center;
+  border-radius: 5px; padding: 5px; text-align: center;
 }
-.tab-body .rl { font-size: 8px; color: #718096; }
-.tab-body .rv { font-size: 16px; font-weight: 800; color: #16213e; }
-.tab-body .ru { font-size: 8px; color: #718096; }
-.tab-body .det-row { display: flex; gap: 6px; font-size: 8px; color: #718096; flex-wrap: wrap; margin-top: 2px; }
+.tab-body .rl { font-size: 9px; color: #718096; }
+.tab-body .rv { font-size: 18px; font-weight: 800; color: #16213e; }
+.tab-body .ru { font-size: 9px; color: #718096; }
+.tab-body .det-row {
+  display: flex; gap: 8px; font-size: 9px;
+  color: #718096; flex-wrap: wrap; margin-top: 3px;
+}
 
-/* Canvas/charts remplacés par images — limiter la taille */
+/* Canvas/charts remplacés par images */
 .canvas-img {
   max-width: 100%;
-  max-height: 140mm;
+  max-height: 165mm;
   height: auto;
   display: block;
   border-radius: 5px;
   object-fit: contain;
 }
-/* Centrage canvas plus petit */
-/* Centrage canvas géré par .page-centrage */
+.page-centrage .canvas-img {
+  max-width: 65% !important;
+  max-height: 155mm;
+  margin: 0 auto;
+}
 
-/* Masquer les controles interactifs (les inputs sont remplacés par des spans dans le JS) */
+/* Masquer les contrôles interactifs */
 .tab-body input[type="range"],
 .tab-body select,
 .tab-body button, .tab-body .btn-grp,
@@ -5523,71 +5503,60 @@ body {
 .tab-body #manual-instr, .tab-body #att-manual-instr,
 .tab-body #manual-compar, .tab-body #att-manual-compar,
 .tab-body #att-piste-compar,
-.tab-body .inp-row, .tab-body .inp-field
+.tab-body .inp-row, .tab-body .inp-field,
+.tab-body .sl-row,
+.tab-body div[id$="-menu"],
+.tab-body button[onclick*="toggleAeroMenu"]
 { display: none !important; }
-/* Masquer les sliders mais garder leur label */
-.tab-body .sl-row { display: none !important; }
-/* Les menus déroulants aérodrome */
-.tab-body div[id$="-menu"] { display: none !important; }
-/* Boutons dropdown ▾ */
-.tab-body button[onclick*="toggleAeroMenu"] { display: none !important; }
 
-/* ===== Identification du vol — impression carburant ===== */
-.tab-body label { 
-  font-size: 8px !important; 
-  margin-bottom: 3px !important; 
+/* Identification du vol — labels */
+.tab-body label {
+  font-size: 9px !important;
+  margin-bottom: 3px !important;
   display: block !important;
 }
 
 /* Aérodromes côte à côte */
-.tab-body .carbu-aero-row { 
+.tab-body .carbu-aero-row {
   display: flex !important;
-  gap: 12px !important; 
+  gap: 14px !important;
   margin-bottom: 8px !important;
   align-items: flex-end !important;
 }
-.tab-body .carbu-aero-col {
-  flex: 1 !important;
-}
-.tab-body .carbu-aero-arrow { 
-  font-size: 16px !important; 
+.tab-body .carbu-aero-col { flex: 1 !important; }
+.tab-body .carbu-aero-arrow {
+  font-size: 18px !important;
   padding-bottom: 6px !important;
   color: #16213e !important;
 }
 
-/* Date + Conso sur une ligne */
-.tab-body .carbu-date-conso-row { 
+/* Date + Conso */
+.tab-body .carbu-date-conso-row {
   display: flex !important;
-  gap: 24px !important; 
+  gap: 24px !important;
   margin-bottom: 8px !important;
   align-items: flex-end !important;
 }
-.tab-body .carbu-date-col {
-  flex: 0 0 auto !important;
-}
-.tab-body .carbu-conso-col { 
-  flex: 0 0 auto !important;
-}
-/* Simplifier affichage conso */
-.tab-body .carbu-conso-col > div { 
-  background: transparent !important; 
-  border: none !important; 
+.tab-body .carbu-date-col { flex: 0 0 auto !important; }
+.tab-body .carbu-conso-col { flex: 0 0 auto !important; }
+.tab-body .carbu-conso-col > div {
+  background: transparent !important;
+  border: none !important;
   padding: 0 !important;
   min-height: auto !important;
   display: inline !important;
 }
-/* Unité L/h - taille réduite et couleur grise */
 .tab-body .conso-unit {
-  font-size: 8px !important;
+  font-size: 9px !important;
   color: #718096 !important;
   font-weight: 500 !important;
 }
 
-/* Afficher l'avion sélectionné */
+/* Avion sélectionné */
 .tab-body #c-avion-btns .avion-btn { display: none !important; }
-.tab-body #c-avion-btns .avion-btn.active { 
-  display: inline-block !important; 
-  font-size: 10px !important;
+.tab-body #c-avion-btns .avion-btn.active {
+  display: inline-block !important;
+  font-size: 11px !important;
   padding: 4px 10px !important;
   background: #16213e !important;
   color: #fff !important;
@@ -5596,19 +5565,21 @@ body {
 }
 
 /* Badges */
-.badge { font-size: 8px; padding: 1px 5px; border-radius: 8px; font-weight: 700; }
+.badge { font-size: 9px; padding: 2px 6px; border-radius: 8px; font-weight: 700; }
 .badge.ok    { background: #c6f6d5; color: #276749; }
 .badge.error { background: #fed7d7; color: #9b2c2c; }
 
-/* Tables carburant */
-table { width: 100%; border-collapse: collapse; font-size: 9px; }
-td    { padding: 2px 4px; border-bottom: 1px solid #f0f0f0; }
+/* Tables */
+table { width: 100%; border-collapse: collapse; font-size: 10px; }
+td    { padding: 3px 5px; border-bottom: 1px solid #f0f0f0; }
 
-/* Blocs colores carburant */
+/* Blocs colorés carburant */
 .tab-body div[style*="background:#ebf8ff"],
 .tab-body div[style*="background:#faf5ff"],
 .tab-body div[style*="background:#fffbeb"],
-.tab-body div[style*="background:#fff5f5"] { padding: 3px 5px; border-radius: 4px; margin-bottom: 3px; font-size: 9px; }
+.tab-body div[style*="background:#fff5f5"] {
+  padding: 4px 6px; border-radius: 4px; margin-bottom: 4px; font-size: 10px;
+}
 
 /* Barre retour — visible à l'écran, masquée à l'impression */
 #back-bar {
@@ -5627,21 +5598,26 @@ td    { padding: 2px 4px; border-bottom: 1px solid #f0f0f0; }
   font-size: 14px; font-weight: 800; cursor: pointer;
   letter-spacing: .3px;
 }
-/* Décaler le contenu sous la barre */
 body { padding-top: 56px; }
 @media print {
   #back-bar { display: none !important; }
-  body { padding-top: 0 !important; }
+  body { padding-top: 0 !important; margin: 0 !important; }
+  .page { margin: 0 !important; }
 }
 </style>
 </head><body>
 <div id="back-bar">
   <div class="logo">AQUILA</div>
-  <div>
+  <div style="flex:1;">
     <div class="title">AT01 — Préparation de vol</div>
     <div class="sub">${immat} · ${date}${cdb ? ' · ' + cdb : ''}</div>
   </div>
-  <button id="back-btn" onclick="window.close()">← Retour à l'app</button>
+  <div style="color:#fbd38d;font-size:11px;line-height:1.3;text-align:right;max-width:280px;">
+    <strong style="color:#fff;">Réglages impression :</strong><br>
+    Marges → <strong>Aucune</strong> · décocher "En-têtes et pieds de page"
+  </div>
+  <button id="reprint-btn" onclick="window.print()" style="padding:8px 14px;background:#16213e;color:white;border:1px solid #fbd38d;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">Imprimer</button>
+  <button id="back-btn" onclick="window.close()">← Retour</button>
 </div>
 ${pagesHtml}
 <script>
