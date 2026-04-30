@@ -105,6 +105,31 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e;mi
 .tab-btn:hover{color:#1a1a2e;}
 .tab-btn.active{color:#e94560;border-bottom-color:#e94560;}
 
+/* Champ nom du voyage — responsive */
+.nom-voyage-wrap{ width:220px; }
+/* iPad mini portrait (~744px) et tablettes : champ passe en pleine largeur sous les onglets */
+@media (min-width:481px) and (max-width:860px){
+  #tabs{ flex-wrap:wrap; row-gap:0; padding-bottom:6px; }
+  .nom-voyage-wrap{
+    width:100% !important;
+    margin:4px 0 6px 0 !important;
+    order:99;
+    flex:1 1 100% !important;
+  }
+  .nom-voyage-wrap input{
+    width:100% !important;
+    font-size:13px !important;
+    padding:8px 12px !important;
+    min-height:36px !important;
+  }
+}
+/* Petits écrans hors tablette */
+@media (max-width: 480px){
+  .nom-voyage-wrap{ width:100% !important; margin:4px 0 6px 0 !important; flex:1 1 100% !important; order:99; }
+  #tabs{ flex-wrap:wrap; row-gap:0; padding-bottom:6px; }
+  .nom-voyage-wrap input{ width:100% !important; font-size:12px !important; padding:7px 10px !important; }
+}
+
 /* ===== CONTENU ===== */
 .tab-content{display:none;padding:12px 14px;}
 .tab-content.active{display:block;}
@@ -733,7 +758,7 @@ canvas{display:block;max-width:100%;}
   </div>
   <div id="avion-bar-right">
     <div style="display:flex;align-items:center;gap:4px;">
-      <label style="font-size:10px;color:#a0aec0;white-space:nowrap;">Date</label>
+      <label style="font-size:9px;color:#a0aec0;white-space:nowrap;line-height:1.1;text-align:center;font-weight:600;letter-spacing:.3px;">Date<br>du vol</label>
       <input type="date" id="vol-date"
         style="background:#1e2d4a;border:1px solid #2d3748;color:#fff;padding:4px 6px;
                border-radius:5px;font-size:12px;min-height:32px;"
@@ -796,8 +821,11 @@ canvas{display:block;max-width:100%;}
     </div>
     <button onclick="printPreparation()"
       style="padding:6px 12px;background:#e94560;color:white;border:none;border-radius:6px;
-             cursor:pointer;font-size:12px;font-weight:700;white-space:nowrap;min-height:32px;">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:2px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> PDF
+             cursor:pointer;font-size:12px;font-weight:700;white-space:nowrap;min-height:32px;display:inline-flex;align-items:center;gap:5px;">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <span>PDF</span>
+      <span style="opacity:.7;font-weight:400;">/</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" title="Enregistrer dans l'historique"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
     </button>
   </div>
 </div>
@@ -811,6 +839,16 @@ canvas{display:block;max-width:100%;}
   <button class="tab-btn" onclick="showTab('montee',this)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> Montée</button>
   <button class="tab-btn" onclick="showTab('autonomie',this)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Autonomie</button>
   <button class="tab-btn" onclick="showTab('prepa',this)" id="tab-btn-prepa" style="position:relative;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M9 14l2 2 4-4"/></svg> Prépa vol <span id="prepa-badge" style="display:none;position:absolute;top:6px;right:4px;width:8px;height:8px;background:#e94560;border-radius:50%;"></span></button>
+  <!-- Champ nom du voyage -->
+  <div class="nom-voyage-wrap" style="display:flex;align-items:center;margin-left:8px;margin-right:8px;flex:0 0 auto;width:220px;">
+    <input type="text" id="nom-voyage" placeholder="Navigations vers ..." maxlength="60"
+      oninput="saveNomVoyage()"
+      style="width:100%;background:#edf2f7;border:1px solid #cbd5e0;border-radius:6px;
+             padding:7px 10px;font-size:12px;color:#2d3748;font-weight:600;
+             min-height:32px;outline:none;transition:all .15s;box-sizing:border-box;"
+      onfocus="this.style.background='#fff';this.style.borderColor='#e94560';"
+      onblur="this.style.background='#edf2f7';this.style.borderColor='#cbd5e0';">
+  </div>
 </div>
 
 <!-- ===== ONGLET DÉCOLLAGE ===== -->
@@ -2739,6 +2777,10 @@ function saveParams() {
     'aut-temp','aut-alt',                  // autonomie
     'sl-p1','sl-p2','sl-bag','sl-ess-dep','sl-ess-arr', // centrage
     'conso','c-conso','c-roulage','c-nav-base','c-diver','c-marge','c-bord', // carbu
+    'c-dep-icao','c-arr-icao','c-date-vol','c-nav-meteo','c-nav-retard','c-etapes','c-dega', // carbu compléments
+    'att-aero-txt','att-date',             // atterro compléments
+    'aero-txt','vol-date','vol-cdb',       // décollage compléments + bandeau
+    'qnh-input',                           // QNH du jour
     'vol-dep','vol-dest',  // aérodromes header
   ];
   const vals = {};
@@ -2967,6 +3009,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // 5b. Restaurer plan de vol
   restoreFP();
+
+  // 5c. Restaurer le nom du voyage
+  restoreNomVoyage();
 
   // 6. Restaurer dernier onglet actif
   const lastTab = lsLoad('aquila_last_tab', 'carbu');
@@ -4851,7 +4896,9 @@ function printPreparation() {
   const _snapFP    = (() => { try { return JSON.parse(localStorage.getItem('aquila_fp_v1') || 'null'); } catch(e){return null;} })();
   const _snapPrepa = (() => { try { return JSON.parse(localStorage.getItem('aquila_prepa_v1') || 'null'); } catch(e){return null;} })();
   const _snapParam = (() => { try { return JSON.parse(localStorage.getItem('aquila_params_v1') || 'null'); } catch(e){return null;} })();
+  const _nomVoyage = document.getElementById('nom-voyage')?.value?.trim() || '';
   histSave({ immat, date, dateRaw, cdb, dep: getCarbuDep(), arr: getCarbuArr() || dest,
+             nomVoyage: _nomVoyage,
              snapFP: _snapFP, snapPrepa: _snapPrepa, snapParam: _snapParam });
 
   const tabIds   = ['tab-carbu','tab-centrage','tab-perf','tab-atterro','tab-montee','tab-autonomie'];
@@ -6418,14 +6465,30 @@ document.addEventListener('DOMContentLoaded', function() {
 <script>
 // ===== HISTORIQUE DES PRÉPARATIONS =====
 const LS_HIST = 'aquila_history_v1';
+const LS_KEY_NOM_VOYAGE = 'aquila_nom_voyage_v1';
 const HIST_MAX = 50;
+
+// ── Persistance du nom de voyage (champ "Navigations vers ...") ──
+function saveNomVoyage() {
+  try {
+    const v = document.getElementById('nom-voyage')?.value || '';
+    localStorage.setItem(LS_KEY_NOM_VOYAGE, v);
+  } catch(e) {}
+}
+function restoreNomVoyage() {
+  try {
+    const v = localStorage.getItem(LS_KEY_NOM_VOYAGE) || '';
+    const el = document.getElementById('nom-voyage');
+    if (el) el.value = v;
+  } catch(e) {}
+}
 
 function histSave(entry) {
   try {
     const hist = histLoad();
-    // Éviter doublons exacts (même immat + même date + même route)
-    const key = `${entry.immat}|${entry.dateRaw}|${entry.dep}|${entry.arr}`;
-    const exists = hist.some(h => `${h.immat}|${h.dateRaw}|${h.dep}|${h.arr}` === key);
+    // Éviter doublons exacts (même immat + même date + même route + même nom de voyage)
+    const key = `${entry.immat}|${entry.dateRaw}|${entry.dep}|${entry.arr}|${entry.nomVoyage||''}`;
+    const exists = hist.some(h => `${h.immat}|${h.dateRaw}|${h.dep}|${h.arr}|${h.nomVoyage||''}` === key);
     if (!exists) {
       hist.unshift({ ...entry, savedAt: new Date().toISOString() });
       if (hist.length > HIST_MAX) hist.pop();
@@ -6460,11 +6523,18 @@ function renderHistList() {
     const savedDate = h.savedAt
       ? new Date(h.savedAt).toLocaleDateString('fr-FR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})
       : '';
+    const nomV = (h.nomVoyage || '').trim();
+    const nomHtml = nomV
+      ? ` &nbsp;<span style="color:#1a1a2e;font-weight:700;">${nomV}</span>`
+      : '';
+    const immatHtml = h.immat
+      ? ` &nbsp;<span style="color:#e94560;font-size:13px;font-weight:800;">${h.immat}</span>`
+      : '';
     return `<div class="hist-item" title="Cliquer pour recharger cette préparation" onclick="restoreFromHist(${i})">
       <div class="hist-num">${i+1}</div>
       <div class="hist-info">
-        <div class="hist-route">${route} &nbsp;<span style="color:#e94560;font-size:12px;font-weight:800;">${h.immat||''}</span></div>
-        <div class="hist-date">Vol du ${h.date || '—'} &nbsp;·&nbsp; Préparé le ${savedDate}${h.cdb ? ' &nbsp;·&nbsp; CDB: ' + h.cdb : ''}</div>
+        <div class="hist-route"><span style="font-weight:800;color:#1a1a2e;">${route}</span>${nomHtml}${immatHtml}</div>
+        <div class="hist-date" style="color:#4a5568;font-size:11px;">Vol du ${h.date || '—'} &nbsp;·&nbsp; Préparé le ${savedDate}${h.cdb ? ' &nbsp;·&nbsp; CDB: ' + h.cdb : ''}</div>
       </div>
       <button onclick="event.stopPropagation();deleteHistEntry(${i})" title="Supprimer ce vol"
         style="flex-shrink:0;width:30px;height:30px;border-radius:6px;border:1px solid #fed7d7;background:#fff5f5;color:#e53e3e;cursor:pointer;font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:center;line-height:1;">✕</button>
@@ -6486,7 +6556,8 @@ function restoreFromHist(index) {
   const hist = histLoad();
   const h = hist[index];
   if (!h) return;
-  if (!confirm(`Recharger la préparation du ${h.date||'—'} (${h.dep||''}→${h.arr||''}) ?\n\nLes données actuelles non sauvegardées seront remplacées.`)) return;
+  const _label = (h.nomVoyage && h.nomVoyage.trim()) ? h.nomVoyage : ((h.dep||'')+' → '+(h.arr||''));
+  if (!confirm(`Recharger la préparation « ${_label} » du ${h.date||'—'} ?\n\nLes données actuelles non sauvegardées seront remplacées.`)) return;
   closeHist();
   // Restaurer les snapshots dans localStorage
   try {
@@ -6502,7 +6573,7 @@ function restoreFromHist(index) {
   }
   // Appliquer date
   if (h.dateRaw) {
-    ['vol-date','fp-date','c-date-vol'].forEach(id => {
+    ['vol-date','fp-date','c-date-vol','att-date'].forEach(id => {
       const el = document.getElementById(id);
       if (el) { el.value = h.dateRaw; el.dispatchEvent(new Event('change')); }
     });
@@ -6513,13 +6584,21 @@ function restoreFromHist(index) {
       const el = document.getElementById(id); if(el) el.value = h.cdb;
     });
   }
+  // Appliquer le nom du voyage
+  const nomEl = document.getElementById('nom-voyage');
+  if (nomEl) {
+    nomEl.value = h.nomVoyage || '';
+    saveNomVoyage();
+  }
+  // ⚠ Réinjecter les paramètres dans les inputs (sliders + champs carburant + ICAO + etc.)
+  if (typeof restoreParams === 'function') restoreParams();
   // Restaurer plan de vol + checklist prépa
   if (typeof restoreFP === 'function') restoreFP();
   if (typeof prepaRestore === 'function') prepaRestore();
   // Naviguer sur l'onglet Prépa
   const prepaBtn = document.getElementById('tab-btn-prepa');
   if (prepaBtn) prepaBtn.click();
-  // Relancer les calculs
+  // Relancer les calculs (qui mettent aussi à jour les labels des sliders)
   setTimeout(() => {
     try{updateCarbu();}catch(e){}
     try{updateCentrage();}catch(e){}
@@ -6528,6 +6607,16 @@ function restoreFromHist(index) {
     try{computeMontee();}catch(e){}
     try{computeAutonomie();}catch(e){}
     try{updateFPRoute();}catch(e){}
+    try{if(typeof applyQNH==='function')applyQNH();}catch(e){}
+    // Forcer le déclenchement des oninput pour rafraîchir tous les affichages liés aux sliders
+    ['temp','alt','mass','wind',
+     'att-temp','att-alt','att-mass','att-wind',
+     'mon-temp','mon-alt','mon-mass',
+     'aut-temp','aut-alt',
+     'sl-p1','sl-p2','sl-bag','sl-ess-dep','sl-ess-arr'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) { try { el.dispatchEvent(new Event('input',{bubbles:true})); } catch(e){} }
+    });
     // Sync header aérodromes
     try{
       var dep=document.getElementById('c-dep-icao');
