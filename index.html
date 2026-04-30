@@ -5414,61 +5414,66 @@ function buildPrepaPage(immat, date, cdb, dest) {
 }
 
 // ===== EXPORT PDF iOS-COMPATIBLE (jsPDF + html2canvas) =====
-// Appelée par la fenêtre fille via window.opener.exportPagesToPDF()
-// Capture chaque .page de la fenêtre fille et assemble un PDF A4 paysage
-async function exportPagesToPDF(childDoc, baseFilename) {
+// Fonctionne aussi bien avec un conteneur dans la fenêtre principale (iOS)
+// qu'avec une fenêtre fille (cas legacy, conservé pour compat)
+async function exportPagesToPDF(rootEl, baseFilename, options) {
+  options = options || {};
+  const isInline = !!options.inline; // true = conteneur dans window principale (iOS)
+  
   try {
     if (!window.jspdf || !window.html2canvas) {
       console.error('jsPDF ou html2canvas non chargés');
-      childDoc.defaultView.print(); // fallback
+      alert('Erreur : librairies PDF non chargées.');
       return;
     }
     
-    var pages = childDoc.querySelectorAll('.page');
+    // rootEl peut être un Document (mode legacy) ou un HTMLElement (mode inline)
+    const pages = rootEl.querySelectorAll('.page');
     if (pages.length === 0) {
       console.error('Aucune page .page trouvée');
-      childDoc.defaultView.print();
+      alert('Aucune page à exporter.');
       return;
     }
     
-    // Indicateur visuel dans la fenêtre fille
-    var loader = childDoc.createElement('div');
+    // Overlay sur la fenêtre courante (toujours window principale en mode inline)
+    const overlayDoc = isInline ? document : (rootEl.defaultView ? rootEl.defaultView.document : document);
+    const loader = overlayDoc.createElement('div');
     loader.id = 'pdf-loader';
     loader.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(26,26,46,0.92);color:white;display:flex;align-items:center;justify-content:center;z-index:99999;font-family:Arial,sans-serif;font-size:18px;flex-direction:column;gap:12px;';
     loader.innerHTML = '<div style="font-size:24px;font-weight:700;">Génération du PDF…</div><div id="pdf-progress" style="font-size:14px;opacity:0.85;">Préparation</div>';
-    childDoc.body.appendChild(loader);
-    var progressEl = childDoc.getElementById('pdf-progress');
+    overlayDoc.body.appendChild(loader);
+    const progressEl = overlayDoc.getElementById('pdf-progress');
     
-    // Masquer le bouton "Retour à l'app"
-    var backBtn = childDoc.getElementById('back-btn');
-    if (backBtn) backBtn.style.display = 'none';
+    // Si mode legacy, masquer le bouton retour
+    if (!isInline) {
+      const backBtn = overlayDoc.getElementById('back-btn');
+      if (backBtn) backBtn.style.display = 'none';
+    }
     
     // Petit délai pour laisser le navigateur peindre l'overlay
     await new Promise(function(r){ setTimeout(r, 100); });
     
     // jsPDF en paysage A4 : 297mm x 210mm
-    var jsPDF = window.jspdf.jsPDF;
-    var pdf = new jsPDF({
+    const jsPDF = window.jspdf.jsPDF;
+    const pdf = new jsPDF({
       orientation: 'landscape',
       unit: 'mm',
       format: 'a4',
       compress: true
     });
     
-    var pdfW = 297;
-    var pdfH = 210;
+    const pdfW = 297;
+    const pdfH = 210;
     
-    for (var i = 0; i < pages.length; i++) {
+    for (let i = 0; i < pages.length; i++) {
       progressEl.textContent = 'Page ' + (i+1) + ' / ' + pages.length;
       
-      var pageEl = pages[i];
-      
-      // Rendre la page visible si elle ne l'est pas déjà (cas de page-break)
-      var savedDisplay = pageEl.style.display;
+      const pageEl = pages[i];
+      const savedDisplay = pageEl.style.display;
       pageEl.style.display = 'block';
       
-      // Capture en haute résolution
-      var canvas = await window.html2canvas(pageEl, {
+      // Capture haute résolution
+      const canvas = await window.html2canvas(pageEl, {
         scale: 2,
         useCORS: true,
         backgroundColor: '#ffffff',
@@ -5479,21 +5484,17 @@ async function exportPagesToPDF(childDoc, baseFilename) {
       
       pageEl.style.display = savedDisplay;
       
-      // Calcul des dimensions pour adapter la capture à la page A4 paysage
-      var imgW = pdfW;
-      var imgH = (canvas.height * imgW) / canvas.width;
-      
-      // Si l'image dépasse la hauteur, on ajuste sur la hauteur
+      // Adapter au A4 paysage
+      let imgW = pdfW;
+      let imgH = (canvas.height * imgW) / canvas.width;
       if (imgH > pdfH) {
         imgH = pdfH;
         imgW = (canvas.width * imgH) / canvas.height;
       }
+      const offsetX = (pdfW - imgW) / 2;
+      const offsetY = (pdfH - imgH) / 2;
       
-      // Centrer
-      var offsetX = (pdfW - imgW) / 2;
-      var offsetY = (pdfH - imgH) / 2;
-      
-      var imgData = canvas.toDataURL('image/jpeg', 0.92);
+      const imgData = canvas.toDataURL('image/jpeg', 0.92);
       
       if (i > 0) pdf.addPage('a4', 'landscape');
       pdf.addImage(imgData, 'JPEG', offsetX, offsetY, imgW, imgH, undefined, 'FAST');
@@ -5501,21 +5502,42 @@ async function exportPagesToPDF(childDoc, baseFilename) {
     
     progressEl.textContent = 'Téléchargement…';
     
-    var safeName = (baseFilename || 'AQUILA_PrepVol').replace(/[^A-Za-z0-9_-]/g, '_');
-    var filename = 'AQUILA_' + safeName + '.pdf';
+    const safeName = (baseFilename || 'AQUILA_PrepVol').replace(/[^A-Za-z0-9_-]/g, '_');
+    const filename = 'AQUILA_' + safeName + '.pdf';
     
-    // Sur iOS, save() déclenche un download qui s'ouvre dans le viewer iOS
+    // Sur iOS, save() déclenche le téléchargement vers le viewer iOS
     pdf.save(filename);
     
-    // Attendre un peu puis fermer la fenêtre fille
-    setTimeout(function(){
-      try { childDoc.defaultView.close(); } catch(e) {}
-    }, 1500);
+    // Nettoyage
+    if (isInline) {
+      // En mode inline : retirer l'overlay et le conteneur après un court délai
+      setTimeout(function(){
+        try { 
+          loader.remove(); 
+          if (options.containerToRemove) {
+            options.containerToRemove.remove();
+          }
+        } catch(e) {}
+      }, 1500);
+    } else {
+      // Mode legacy : fermer la fenêtre fille
+      setTimeout(function(){
+        try { 
+          if (rootEl.defaultView) rootEl.defaultView.close(); 
+        } catch(e) {}
+      }, 1500);
+    }
     
   } catch(err) {
     console.error('Erreur exportPagesToPDF:', err);
-    alert('Erreur lors de la génération du PDF : ' + err.message + '\nUtilisation de l\'impression standard.');
-    try { childDoc.defaultView.print(); } catch(e) {}
+    alert('Erreur lors de la génération du PDF : ' + err.message);
+    // Nettoyage même en cas d'erreur
+    try {
+      const overlayDoc = isInline ? document : (rootEl.defaultView ? rootEl.defaultView.document : document);
+      const ldr = overlayDoc.getElementById('pdf-loader');
+      if (ldr) ldr.remove();
+      if (options.containerToRemove) options.containerToRemove.remove();
+    } catch(e) {}
   }
 }
 
@@ -5913,6 +5935,79 @@ function printPreparation() {
     </div>`;
   }
 
+  // ===== Détection iOS / iPadOS =====
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) 
+              || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  
+  if (isIOS) {
+    // === Mode iOS : rendu dans un conteneur caché de la fenêtre principale ===
+    // On évite window.open() qui pose problème sur Safari iOS
+    
+    const container = document.createElement('div');
+    container.id = 'pdf-render-container';
+    container.style.cssText = 'position:fixed;left:-99999px;top:0;width:300mm;background:white;z-index:-1;';
+    
+    const styleEl = document.createElement('style');
+    styleEl.textContent = `
+#pdf-render-container *, #pdf-render-container *::before, #pdf-render-container *::after { box-sizing: border-box; margin: 0; padding: 0; }
+#pdf-render-container { font-family: Arial, sans-serif; font-size: 10px; color: #16213e; -webkit-print-color-adjust: exact; print-color-adjust: exact; background: white; }
+#pdf-render-container .page { width: 285mm; height: 198mm; max-height: 198mm; display: flex; flex-direction: column; overflow: hidden; background: white; padding: 6mm; margin-bottom: 4mm; }
+#pdf-render-container .page-header { font-size: 8px; color: #555; padding: 1.5mm 0; border-bottom: 1.5px solid #16213e; margin-bottom: 2mm; display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+#pdf-render-container .tab-name { background: #16213e; color: white; padding: 1px 7px; border-radius: 3px; font-weight: 700; font-size: 8px; }
+#pdf-render-container .tab-body { flex: 1; overflow: hidden; font-size: 9px; transform: scale(0.85); transform-origin: top left; width: 117.6%; }
+#pdf-render-container .tab-body > * { transform-origin: top left; }
+#pdf-render-container .page-carbu .tab-body { font-size: 9px; transform: scale(0.82); width: 121.9%; }
+#pdf-render-container .page-carbu .tab-body .card { padding: 3px 5px; margin-bottom: 2px; }
+#pdf-render-container .page-carbu .tab-body .card h3 { font-size: 8px; margin-bottom: 2px; }
+#pdf-render-container .page-carbu .tab-body .rv { font-size: 16px; }
+#pdf-render-container .page-centrage .tab-body { font-size: 10px; transform: scale(0.88); width: 113.6%; }
+#pdf-render-container .page-centrage .tab-body .card { padding: 4px 6px; margin-bottom: 3px; }
+#pdf-render-container .page-centrage .tab-body .card h3 { font-size: 9px; margin-bottom: 3px; }
+#pdf-render-container .page-centrage .tab-body .rv { font-size: 18px; }
+#pdf-render-container .page-centrage .canvas-img { max-width: 55% !important; max-height: 130mm; margin: 0 auto; }
+#pdf-render-container .tab-body .two-col { display: grid; grid-template-columns: 280px 1fr; gap: 3mm; }
+#pdf-render-container #tab-carbu .two-col { grid-template-columns: 0.6fr 1fr; }
+#pdf-render-container .tab-body .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 5px; padding: 4px 6px; margin-bottom: 3px; }
+#pdf-render-container .tab-body .card h3 { font-size: 9px; font-weight: 700; color: #16213e; margin-bottom: 3px; }
+#pdf-render-container .tab-body .res-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; }
+#pdf-render-container .tab-body .res-box { background: #f7f8fa; border: 1px solid #e2e8f0; border-radius: 5px; padding: 4px; text-align: center; }
+#pdf-render-container .tab-body .rl { font-size: 8px; color: #718096; }
+#pdf-render-container .tab-body .rv { font-size: 16px; font-weight: 800; color: #16213e; }
+#pdf-render-container .tab-body .ru { font-size: 8px; color: #718096; }
+#pdf-render-container .tab-body .det-row { display: flex; gap: 6px; font-size: 8px; color: #718096; flex-wrap: wrap; margin-top: 2px; }
+#pdf-render-container .canvas-img { max-width: 100%; max-height: 140mm; height: auto; display: block; border-radius: 5px; object-fit: contain; }
+#pdf-render-container .tab-body input[type="range"],
+#pdf-render-container .tab-body select,
+#pdf-render-container .tab-body button, #pdf-render-container .tab-body .btn-grp,
+#pdf-render-container .tab-body .piste-btn,
+#pdf-render-container .tab-body #manual-instr, #pdf-render-container .tab-body #att-manual-instr,
+#pdf-render-container .tab-body #manual-compar, #pdf-render-container .tab-body #att-manual-compar,
+#pdf-render-container .tab-body #att-piste-compar,
+#pdf-render-container .tab-body .inp-row, #pdf-render-container .tab-body .inp-field,
+#pdf-render-container .tab-body .sl-row,
+#pdf-render-container .tab-body div[id$="-menu"],
+#pdf-render-container .tab-body button[onclick*="toggleAeroMenu"] { display: none !important; }
+#pdf-render-container .tab-body label { font-size: 8px !important; margin-bottom: 3px !important; display: block !important; }
+#pdf-render-container .tab-body .carbu-aero-row { display: flex !important; gap: 12px !important; margin-bottom: 8px !important; align-items: flex-end !important; }
+`;
+    container.appendChild(styleEl);
+    
+    const wrapperDiv = document.createElement('div');
+    wrapperDiv.innerHTML = pagesHtml;
+    container.appendChild(wrapperDiv);
+    
+    document.body.appendChild(container);
+    
+    // Lancer la génération PDF avec le conteneur comme racine
+    exportPagesToPDF(container, immat + '_' + date.replace(/\//g,'-'), {
+      inline: true,
+      containerToRemove: container
+    });
+    
+    return; // sortir, pas de window.open
+  }
+  
+  // === Mode desktop / Android : fenêtre fille + window.print() (comportement original) ===
   const printWin = window.open('', '_blank');
   if(!printWin) { alert('Autorisez les popups pour exporter le PDF.'); return; }
 
@@ -6176,26 +6271,7 @@ body { padding-top: 56px; }
 </div>
 ${pagesHtml}
 <script>
-window.onload = function() {
-  setTimeout(function() {
-    // Détection iOS / iPadOS (incluant iPad Pro qui se déclare Mac)
-    var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) 
-              || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    
-    if (isIOS && window.opener && window.opener.exportPagesToPDF) {
-      // Sur iOS : utiliser jsPDF via la fenêtre parente
-      try {
-        window.opener.exportPagesToPDF(document, '${immat}_${date.replace(/\//g,'-')}');
-      } catch(e) {
-        console.error('Erreur export PDF iOS:', e);
-        window.print(); // fallback
-      }
-    } else {
-      // Desktop / Android : impression native
-      window.print();
-    }
-  }, 800);
-};
+window.onload = function() { setTimeout(function() { window.print(); }, 800); };
 <\/script>
 </body></html>`);
   printWin.document.close();
