@@ -817,7 +817,7 @@ canvas{display:block;max-width:100%;}
                padding:4px 6px;border-radius:5px;font-size:12px;font-weight:700;text-align:center;min-height:32px;"
         oninput="applyQNH()">
       <span style="font-size:9px;color:#a0aec0;white-space:nowrap;">hPa</span>
-      <span id="qnh-zp-lbl" style="font-size:10px;color:#a0aec0;white-space:nowrap;display:none;">→ ZP <strong id="qnh-zp-val" style="color:#fff;"></strong> ft</span>
+      <span id="qnh-zp-lbl" style="font-size:10px;color:#a0aec0;white-space:nowrap;display:none;margin-left:6px;">→&nbsp;ZP&nbsp;<strong id="qnh-zp-val" style="color:#fff;"></strong>&nbsp;ft</span>
     </div>
     <button onclick="printPreparation()"
       style="padding:6px 12px;background:#e94560;color:white;border:none;border-radius:6px;
@@ -1739,6 +1739,14 @@ canvas{display:block;max-width:100%;}
   border-radius:10px; padding:10px 14px; margin-bottom:12px;
   display:flex; align-items:center; gap:12px; flex-wrap:wrap;
 }
+
+/* Barre de progression sticky en haut */
+#prepa-score-bar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+}
 .prepa-score .score-val { font-size:22px; font-weight:900; color:#fff; line-height:1; }
 .prepa-score .score-label { font-size:11px; color:#a0aec0; }
 .prepa-score .score-go {
@@ -1823,7 +1831,7 @@ canvas{display:block;max-width:100%;}
 
   <!-- ═══ BANDEAU PLAN DE VOL ═══ -->
   <div id="prepa-flightplan" style="background:linear-gradient(135deg,#0d2354,#1a3a6e);border-radius:12px;padding:14px 16px;margin-bottom:12px;color:#fff;">
-    <div style="font-size:11px;font-weight:700;color:#90cdf4;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">Plan de vol — Prévol</div>
+    <div style="font-size:11px;font-weight:700;color:#90cdf4;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">Plan de vol</div>
     <div id="prepa-flightplan-grid">
 
       <!-- CDB -->
@@ -1919,7 +1927,6 @@ canvas{display:block;max-width:100%;}
   <!-- Score global en-tête -->
   <div class="prepa-score" id="prepa-score-bar">
     <div>
-      <div class="score-label">Éléments validés</div>
       <div class="score-val"><span id="prepa-checked-count">0</span>/<span id="prepa-total-count">0</span></div>
     </div>
     <div class="prepa-progress">
