@@ -5000,6 +5000,13 @@ function buildPrepaPage(immat, date, cdb, dest) {
   // ---- Données carburant saisies ----
   const cDep   = document.getElementById('c-dep-icao')?.value || fpDep || '—';
   const cArr   = document.getElementById('c-arr-icao')?.value || fpArr || '—';
+  // QNH et ZP pour Départ et Arrivée
+  const pQnhDep = document.getElementById('qnh-dep-input')?.value || '1013';
+  const pQnhArr = document.getElementById('qnh-arr-input')?.value || '1013';
+  const pZpDep  = (() => { const q=parseInt(pQnhDep); const e=AERO_ELEV_DEC; return (q>=950&&q<=1050&&e!=null)?Math.round(snapTo50((1013-q)*28+e)):null; })();
+  const pZpArr  = (() => { const q=parseInt(pQnhArr); const e=AERO_ELEV_ATT; return (q>=950&&q<=1050&&e!=null)?Math.round(snapTo50((1013-q)*28+e)):null; })();
+  const pZpDepStr = pZpDep!=null ? pZpDep.toLocaleString('fr-FR')+' ft' : '—';
+  const pZpArrStr = pZpArr!=null ? pZpArr.toLocaleString('fr-FR')+' ft' : '—';
   const cConso = document.getElementById('c-conso')?.value || document.getElementById('conso')?.value || '—';
   const cRoula = document.getElementById('c-roulage')?.value || '—';
   const cNavB  = document.getElementById('c-nav-base')?.value || '—';
@@ -5061,11 +5068,19 @@ function buildPrepaPage(immat, date, cdb, dest) {
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:4px;margin-bottom:5px;">
       <!-- Aérodromes -->
       <div style="background:#f0f4ff;border:1px solid #bee3f8;border-radius:4px;padding:4px 6px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
-        <div style="font-size:5.5px;font-weight:700;color:#3182ce;text-transform:uppercase;margin-bottom:2px;">Aérodromes</div>
-        <div style="display:flex;gap:6px;align-items:center;">
-          <div><span style="font-size:5px;color:#718096;">DEP</span><div style="font-size:9px;font-weight:900;color:#16213e;letter-spacing:1px;">${cDep}</div></div>
-          <span style="font-size:8px;color:#718096;">→</span>
-          <div><span style="font-size:5px;color:#718096;">ARR</span><div style="font-size:9px;font-weight:900;color:#16213e;letter-spacing:1px;">${cArr}</div></div>
+        <div style="font-size:5.5px;font-weight:700;color:#3182ce;text-transform:uppercase;margin-bottom:2px;">Aérodromes & QNH/ZP</div>
+        <div style="display:flex;gap:6px;align-items:flex-start;">
+          <div style="text-align:center;">
+            <span style="font-size:5px;color:#718096;">DEP</span>
+            <div style="font-size:9px;font-weight:900;color:#16213e;letter-spacing:1px;line-height:1;">${cDep}</div>
+            <div style="font-size:5.5px;color:#16213e;line-height:1.3;margin-top:1px;">QNH <strong>${pQnhDep}</strong><br>ZP <strong>${pZpDepStr}</strong></div>
+          </div>
+          <span style="font-size:8px;color:#718096;align-self:center;">→</span>
+          <div style="text-align:center;">
+            <span style="font-size:5px;color:#718096;">ARR</span>
+            <div style="font-size:9px;font-weight:900;color:#16213e;letter-spacing:1px;line-height:1;">${cArr}</div>
+            <div style="font-size:5.5px;color:#16213e;line-height:1.3;margin-top:1px;">QNH <strong>${pQnhArr}</strong><br>ZP <strong>${pZpArrStr}</strong></div>
+          </div>
         </div>
       </div>
       <!-- Navigation -->
@@ -5273,7 +5288,14 @@ function printPreparation() {
       const cMarge = document.getElementById('c-marge')?.value || '—';
       const cDateV = document.getElementById('c-date-vol')?.value || '';
       const cDateFmt = cDateV ? new Date(cDateV).toLocaleDateString('fr-FR') : date;
-      tabBanner = `<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr;gap:4px;margin-bottom:4px;font-size:8px;">
+      // QNH et ZP pour Départ et Arrivée
+      const cQnhDep = document.getElementById('qnh-dep-input')?.value || '1013';
+      const cQnhArr = document.getElementById('qnh-arr-input')?.value || '1013';
+      const cZpDep  = (() => { const q=parseInt(cQnhDep); const e=AERO_ELEV_DEC; return (q>=950&&q<=1050&&e!=null)?Math.round(snapTo50((1013-q)*28+e)):null; })();
+      const cZpArr  = (() => { const q=parseInt(cQnhArr); const e=AERO_ELEV_ATT; return (q>=950&&q<=1050&&e!=null)?Math.round(snapTo50((1013-q)*28+e)):null; })();
+      const cZpDepStr = cZpDep!=null ? cZpDep.toLocaleString('fr-FR')+' ft' : '—';
+      const cZpArrStr = cZpArr!=null ? cZpArr.toLocaleString('fr-FR')+' ft' : '—';
+      tabBanner = `<div style="display:grid;grid-template-columns:1fr 1.4fr 1fr 1fr 1fr 1fr;gap:4px;margin-bottom:4px;font-size:8px;">
         <div style="background:#f0f4ff;border:1px solid #bee3f8;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
           <div style="font-size:6px;font-weight:700;color:#3182ce;text-transform:uppercase;margin-bottom:1px;">Identification</div>
           <div style="color:#16213e;line-height:1.4;">
@@ -5282,11 +5304,19 @@ function printPreparation() {
           </div>
         </div>
         <div style="background:#f0f4ff;border:1px solid #bee3f8;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
-          <div style="font-size:6px;font-weight:700;color:#3182ce;text-transform:uppercase;margin-bottom:1px;">Aérodromes</div>
-          <div style="display:flex;gap:4px;align-items:center;color:#16213e;">
-            <div><span style="font-size:5px;color:#718096;">DEP</span><div style="font-size:10px;font-weight:900;letter-spacing:1px;">${cDep}</div></div>
-            <span style="color:#718096;">→</span>
-            <div><span style="font-size:5px;color:#718096;">ARR</span><div style="font-size:10px;font-weight:900;letter-spacing:1px;">${cArr}</div></div>
+          <div style="font-size:6px;font-weight:700;color:#3182ce;text-transform:uppercase;margin-bottom:1px;">Aérodromes & QNH/ZP</div>
+          <div style="display:flex;gap:6px;align-items:flex-start;color:#16213e;">
+            <div style="text-align:center;">
+              <span style="font-size:5px;color:#718096;">DEP</span>
+              <div style="font-size:10px;font-weight:900;letter-spacing:1px;line-height:1;">${cDep}</div>
+              <div style="font-size:6.5px;color:#16213e;line-height:1.3;margin-top:1px;">QNH <strong>${cQnhDep}</strong><br>ZP <strong>${cZpDepStr}</strong></div>
+            </div>
+            <span style="color:#718096;align-self:center;">→</span>
+            <div style="text-align:center;">
+              <span style="font-size:5px;color:#718096;">ARR</span>
+              <div style="font-size:10px;font-weight:900;letter-spacing:1px;line-height:1;">${cArr}</div>
+              <div style="font-size:6.5px;color:#16213e;line-height:1.3;margin-top:1px;">QNH <strong>${cQnhArr}</strong><br>ZP <strong>${cZpArrStr}</strong></div>
+            </div>
           </div>
         </div>
         <div style="background:#ebf8ff;border:1px solid #90cdf4;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
