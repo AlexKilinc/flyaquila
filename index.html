@@ -508,6 +508,56 @@ canvas{display:block;max-width:100%;}
     width:100% !important;
     text-align:center;
   }
+  /* === Cadres Aérodrome (fieldsets) sur mobile === */
+  #avion-bar-right .aero-group{
+    grid-column: 1 / -1;       /* pleine largeur sous Date+CDB */
+    padding: 3px 6px 4px 6px;
+    gap: 4px 6px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  #avion-bar-right .aero-group > legend{
+    font-size: 8px;
+    margin-left: 2px;
+    padding: 0 4px;
+  }
+  #avion-bar-right .aero-group > div{
+    flex: 0 1 auto;
+    min-width: 0;
+    gap: 3px;
+    flex-wrap: wrap;
+  }
+  /* Inputs ICAO (Dép./Arr.) plus compacts dans le cadre */
+  #avion-bar-right .aero-group input#vol-dep,
+  #avion-bar-right .aero-group input#vol-dest{
+    width: 64px !important;
+    flex: 0 0 64px !important;
+    padding: 5px 4px !important;
+    font-size: 12px !important;
+  }
+  /* Inputs QNH compacts */
+  #avion-bar-right .aero-group input#qnh-dep-input,
+  #avion-bar-right .aero-group input#qnh-arr-input{
+    width: 56px !important;
+    flex: 0 0 56px !important;
+    padding: 5px 2px !important;
+    font-size: 12px !important;
+  }
+  /* Labels internes très petits sur mobile pour gagner de la place */
+  #avion-bar-right .aero-group label{
+    font-size: 9px !important;
+    min-width: auto !important;
+  }
+  /* Masquer "hPa" sur mobile (redondant avec QNH) */
+  #avion-bar-right .aero-group > div > span:not([id]){
+    display: none;
+  }
+  /* Indicateur ZP : passer en bloc sous le QNH si manque de place */
+  #avion-bar-right .aero-group [id$="-zp-dep-lbl"],
+  #avion-bar-right .aero-group [id$="-zp-arr-lbl"]{
+    font-size: 9px !important;
+    margin-left: 2px !important;
+  }
   /* Bouton PDF - pleine largeur en bas */
   #avion-bar-right > button{
     grid-column: 1 / -1;
@@ -569,6 +619,20 @@ canvas{display:block;max-width:100%;}
   #avion-bar-right input#vol-dep,
   #avion-bar-right input#vol-dest{
     width:60px;
+  }
+  /* === Cadres Aérodrome (fieldsets) sur iPad mini (~744px) === */
+  #avion-bar-right .aero-group{
+    flex-wrap: wrap;
+    gap: 4px 6px;
+    padding: 3px 7px 4px 7px;
+  }
+  #avion-bar-right .aero-group > div{
+    flex: 0 1 auto;
+    flex-wrap: wrap;
+  }
+  #avion-bar-right .aero-group input#qnh-dep-input,
+  #avion-bar-right .aero-group input#qnh-arr-input{
+    width: 60px;
   }
   
   /* Carburant : aérodromes côte à côte */
@@ -660,6 +724,40 @@ canvas{display:block;max-width:100%;}
 #login-session-info {
   margin-top:14px; text-align:center;
   font-size:10px; color:#4a5568;
+}
+/* Cadres (fieldsets) Aérodrome Départ / Arrivée dans le header */
+.aero-group {
+  /* Hack important : <fieldset> a un min-width:min-content par défaut sur Chrome/Safari
+     qui empêche le contenu de wrapper. On force explicitement min-width:0. */
+  min-width: 0 !important;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #4a5568;
+  border-radius: 6px;
+  padding: 4px 8px 5px 8px;
+  margin: 0;
+  background: rgba(30, 45, 74, 0.35);
+  flex-wrap: wrap;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.aero-group > legend {
+  font-size: 9px;
+  color: #a0aec0;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  padding: 0 5px;
+  margin-left: 4px;
+  line-height: 1;
+}
+.aero-group > div {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  min-width: 0;
 }
 </style>
 </head>
@@ -758,7 +856,7 @@ canvas{display:block;max-width:100%;}
   </div>
   <div id="avion-bar-right">
     <div style="display:flex;align-items:center;gap:4px;">
-      <label style="font-size:9px;color:#a0aec0;white-space:nowrap;line-height:1.1;text-align:center;font-weight:600;letter-spacing:.3px;">Date<br>du vol</label>
+      <label style="font-size:10px;color:#a0aec0;white-space:nowrap;">Date du vol</label>
       <input type="date" id="vol-date"
         style="background:#1e2d4a;border:1px solid #2d3748;color:#fff;padding:4px 6px;
                border-radius:5px;font-size:12px;min-height:32px;"
@@ -776,49 +874,65 @@ canvas{display:block;max-width:100%;}
                border-radius:5px;font-size:12px;width:130px;min-height:32px;"
         oninput="var fp=document.getElementById('fp-cdb');if(fp)fp.value=this.value;">
     </div>
-    <div style="display:flex;align-items:center;gap:4px;">
-      <label style="font-size:10px;color:#a0aec0;white-space:nowrap;">Dép.</label>
-      <input type="text" id="vol-dep" value="LFPN" placeholder="ICAO" maxlength="4"
-        style="background:#1e2d4a;border:1px solid #2d3748;color:#fff;padding:4px 6px;
-               border-radius:5px;font-size:12px;width:60px;text-transform:uppercase;min-height:32px;font-weight:700;text-align:center;"
-        oninput="
-          this.value=this.value.toUpperCase();
-          var v=this.value.trim();
-          var cd=document.getElementById('c-dep-icao');if(cd){cd.value=v;cd.dispatchEvent(new Event('input'));}
-          var at=document.getElementById('aero-txt');if(at){at.value=v;at.dispatchEvent(new Event('input'));}
-          var fp=document.getElementById('fp-dep-icao');if(fp){fp.value=v;}
-          var fpd=document.getElementById('fp-dep');if(fpd){fpd.value=v;}
-          if(typeof updateFPRoute==='function')updateFPRoute();
-          if(typeof saveFP==='function')saveFP();
-        ">
-    </div>
-    <div style="display:flex;align-items:center;gap:4px;">
-      <label style="font-size:10px;color:#a0aec0;white-space:nowrap;">Arr.</label>
-      <input type="text" id="vol-dest" placeholder="ICAO" maxlength="4"
-        style="background:#1e2d4a;border:1px solid #2d3748;color:#fff;padding:4px 6px;
-               border-radius:5px;font-size:12px;width:60px;text-transform:uppercase;min-height:32px;font-weight:700;text-align:center;"
-        oninput="
-          this.value=this.value.toUpperCase();
-          var v=this.value.trim();
-          var arrIcao=document.getElementById('c-arr-icao');if(arrIcao&&arrIcao.value!==v){arrIcao.value=v;arrIcao.dispatchEvent(new Event('input'));}
-          var attAt=document.getElementById('att-aero-txt');if(attAt&&attAt.value!==v){attAt.value=v;attAt.dispatchEvent(new Event('input'));}
-          var fpArrIcao=document.getElementById('fp-arr-icao');if(fpArrIcao){fpArrIcao.value=v;}
-          var fpArr=document.getElementById('fp-arr');if(fpArr){fpArr.value=v;}
-          if(typeof updateCarbu==='function')updateCarbu();
-          if(typeof updateFPRoute==='function')updateFPRoute();
-          if(typeof saveFP==='function')saveFP();
-        ">
-    </div>
-    <!-- QNH du jour -->
-    <div style="display:flex;align-items:center;gap:4px;">
-      <label style="font-size:10px;color:#e94560;white-space:nowrap;font-weight:700;">QNH</label>
-      <input type="number" id="qnh-input" value="1013" min="950" max="1050" step="1" placeholder="hPa"
-        style="width:64px;background:#1e2d4a;border:1px solid #2d3748;color:#fff;
-               padding:4px 6px;border-radius:5px;font-size:12px;font-weight:700;text-align:center;min-height:32px;"
-        oninput="applyQNH()">
-      <span style="font-size:9px;color:#a0aec0;white-space:nowrap;">hPa</span>
-      <span id="qnh-zp-lbl" style="font-size:10px;color:#a0aec0;white-space:nowrap;display:none;margin-left:6px;">→&nbsp;ZP&nbsp;<strong id="qnh-zp-val" style="color:#fff;"></strong>&nbsp;ft</span>
-    </div>
+    <fieldset class="aero-group">
+      <legend>Aérodrome départ</legend>
+      <div>
+        <label style="font-size:10px;color:#a0aec0;white-space:nowrap;">Dép.</label>
+        <input type="text" id="vol-dep" value="LFPN" placeholder="ICAO" maxlength="4"
+          style="background:#1e2d4a;border:1px solid #2d3748;color:#fff;padding:4px 6px;
+                 border-radius:5px;font-size:12px;width:60px;text-transform:uppercase;min-height:32px;font-weight:700;text-align:center;"
+          oninput="
+            this.value=this.value.toUpperCase();
+            var v=this.value.trim();
+            var cd=document.getElementById('c-dep-icao');if(cd){cd.value=v;cd.dispatchEvent(new Event('input'));}
+            var at=document.getElementById('aero-txt');if(at){at.value=v;at.dispatchEvent(new Event('input'));}
+            var fp=document.getElementById('fp-dep-icao');if(fp){fp.value=v;}
+            var fpd=document.getElementById('fp-dep');if(fpd){fpd.value=v;}
+            if(typeof updateFPRoute==='function')updateFPRoute();
+            if(typeof saveFP==='function')saveFP();
+          ">
+      </div>
+      <!-- QNH Départ (utilisé pour calcul ZP décollage / montée / autonomie) -->
+      <div>
+        <label style="font-size:10px;color:#e94560;white-space:nowrap;font-weight:700;">QNH Dép.</label>
+        <input type="number" id="qnh-dep-input" value="1013" min="950" max="1050" step="1" placeholder="hPa"
+          style="width:64px;background:#1e2d4a;border:1px solid #2d3748;color:#fff;
+                 padding:4px 6px;border-radius:5px;font-size:12px;font-weight:700;text-align:center;min-height:32px;"
+          oninput="applyQNH()">
+        <span style="font-size:9px;color:#a0aec0;white-space:nowrap;">hPa</span>
+        <span id="qnh-zp-dep-lbl" style="font-size:10px;color:#a0aec0;white-space:nowrap;display:none;margin-left:4px;">→&nbsp;ZP&nbsp;<strong id="qnh-zp-dep-val" style="color:#fff;"></strong>&nbsp;ft</span>
+      </div>
+    </fieldset>
+    <fieldset class="aero-group">
+      <legend>Aérodrome arrivée</legend>
+      <div>
+        <label style="font-size:10px;color:#a0aec0;white-space:nowrap;">Arr.</label>
+        <input type="text" id="vol-dest" placeholder="ICAO" maxlength="4"
+          style="background:#1e2d4a;border:1px solid #2d3748;color:#fff;padding:4px 6px;
+                 border-radius:5px;font-size:12px;width:60px;text-transform:uppercase;min-height:32px;font-weight:700;text-align:center;"
+          oninput="
+            this.value=this.value.toUpperCase();
+            var v=this.value.trim();
+            var arrIcao=document.getElementById('c-arr-icao');if(arrIcao&&arrIcao.value!==v){arrIcao.value=v;arrIcao.dispatchEvent(new Event('input'));}
+            var attAt=document.getElementById('att-aero-txt');if(attAt&&attAt.value!==v){attAt.value=v;attAt.dispatchEvent(new Event('input'));}
+            var fpArrIcao=document.getElementById('fp-arr-icao');if(fpArrIcao){fpArrIcao.value=v;}
+            var fpArr=document.getElementById('fp-arr');if(fpArr){fpArr.value=v;}
+            if(typeof updateCarbu==='function')updateCarbu();
+            if(typeof updateFPRoute==='function')updateFPRoute();
+            if(typeof saveFP==='function')saveFP();
+          ">
+      </div>
+      <!-- QNH Arrivée (utilisé pour calcul ZP atterrissage) -->
+      <div>
+        <label style="font-size:10px;color:#e94560;white-space:nowrap;font-weight:700;">QNH Arr.</label>
+        <input type="number" id="qnh-arr-input" value="1013" min="950" max="1050" step="1" placeholder="hPa"
+          style="width:64px;background:#1e2d4a;border:1px solid #2d3748;color:#fff;
+                 padding:4px 6px;border-radius:5px;font-size:12px;font-weight:700;text-align:center;min-height:32px;"
+          oninput="qnhArrTouched=true; applyQNH();">
+        <span style="font-size:9px;color:#a0aec0;white-space:nowrap;">hPa</span>
+        <span id="qnh-zp-arr-lbl" style="font-size:10px;color:#a0aec0;white-space:nowrap;display:none;margin-left:4px;">→&nbsp;ZP&nbsp;<strong id="qnh-zp-arr-val" style="color:#fff;"></strong>&nbsp;ft</span>
+      </div>
+    </fieldset>
     <button onclick="printPreparation()"
       style="padding:6px 12px;background:#e94560;color:white;border:none;border-radius:6px;
              cursor:pointer;font-size:12px;font-weight:700;white-space:nowrap;min-height:32px;display:inline-flex;align-items:center;gap:5px;">
@@ -1200,8 +1314,11 @@ canvas{display:block;max-width:100%;}
 
       <!-- Roulage -->
       <div style="background:#f7f8fa;border-radius:8px;padding:10px 12px;margin-bottom:10px;border-left:3px solid #718096;">
-        <div style="font-size:11px;font-weight:700;color:#718096;margin-bottom:6px;text-transform:uppercase;">Forfait roulage (min 5 min)</div>
         <div style="display:flex;align-items:center;gap:8px;">
+          <div style="width:130px;">
+            <div style="font-size:11px;font-weight:700;color:#718096;text-transform:uppercase;line-height:1.1;">Forfait roulage</div>
+            <div style="font-size:9px;color:#a0aec0;font-style:italic;line-height:1.1;margin-top:1px;">min 5 min</div>
+          </div>
           <input type="number" id="c-roulage" value="10" min="5" max="30" step="1"
             style="width:60px;background:#fff;border:1px solid #cbd5e0;border-radius:5px;padding:4px 8px;font-size:14px;font-weight:700;text-align:center;"
             oninput="updateCarbu()">
@@ -1259,12 +1376,12 @@ canvas{display:block;max-width:100%;}
       <!-- Réserve finale -->
       <div style="background:#fffbeb;border-radius:8px;padding:10px 12px;margin-bottom:10px;border-left:3px solid #d69e2e;">
         <div style="font-size:11px;font-weight:700;color:#d69e2e;margin-bottom:8px;text-transform:uppercase;">(3) Réserve finale</div>
-        <div class="btn-grp" style="margin-bottom:6px;">
+        <div class="btn-grp">
           <button class="piste-btn" id="res-10" onclick="setReserve(10)">10 min<br><span style="font-size:9px;">local vue terrain</span></button>
           <button class="piste-btn on" id="res-30" onclick="setReserve(30)">30 min<br><span style="font-size:9px;">navigation jour</span></button>
           <button class="piste-btn" id="res-45" onclick="setReserve(45)">45 min<br><span style="font-size:9px;">nuit</span></button>
         </div>
-        <div style="font-size:11px;color:#718096;">Réserve : <strong id="c-res-lbl" style="color:#d69e2e;">30 min</strong></div>
+        <span id="c-res-lbl" style="display:none;">30 min</span>
       </div>
 
       <!-- Marge de sécurité -->
@@ -1280,7 +1397,7 @@ canvas{display:block;max-width:100%;}
 
     <!-- COLONNE DROITE : RÉSULTATS -->
     <div>
-      <div class="card" style="position:sticky;top:16px;">
+      <div class="card" style="position:sticky;top:0;">
         <h3>Carburant en litres</h3>
         <div style="display:flex;align-items:stretch;gap:2px;margin-bottom:14px;border-radius:6px;overflow:hidden;height:22px;">
           <div style="background:#718096;flex:0.5;display:flex;align-items:center;justify-content:center;font-size:9px;color:white;font-weight:700;">Roulage</div>
@@ -1328,19 +1445,44 @@ canvas{display:block;max-width:100%;}
         </table>
         <div style="margin-top:12px;padding:10px 12px;background:#fff;border:2px dashed #e94560;border-radius:8px;">
           <div style="font-size:11px;font-weight:700;color:#e94560;margin-bottom:4px;text-transform:uppercase;"><svg width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='vertical-align:-1px;margin-right:2px;'><path d='M4 4h10l2 2v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4z'/><path d='M14 4v4h4'/><circle cx='19' cy='8' r='2'/></svg> Carburant réel à bord — à remplir devant l'avion</div>
-          <div style="font-size:10px;color:#718096;margin-bottom:8px;padding:4px 8px;background:#fff5f5;border-radius:5px;border-left:2px solid #e94560;">
+          <div style="font-size:10px;color:#718096;margin-bottom:6px;padding:3px 8px;background:#fff5f5;border-radius:5px;border-left:2px solid #e94560;">
             À compléter lors de la prévol · Laisser vide si impression avant arrivée à l'avion
           </div>
-          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-            <input type="number" id="c-bord" value="" placeholder="—" min="0" max="109" step="1"
-              style="width:70px;background:#f7f8fa;border:2px solid #e94560;border-radius:6px;padding:6px 8px;font-size:18px;font-weight:800;text-align:center;color:#1a1a2e;" oninput="updateCarbu()">
-            <span style="font-size:13px;color:#718096;">L utilisables</span>
-            <span style="font-size:13px;color:#718096;">≈</span>
-            <span id="cr-bord-kg" style="font-size:14px;font-weight:700;color:#1a1a2e;">—</span>
-            <span style="font-size:12px;color:#718096;">kg</span>
+          <!-- Aile G + Aile D + AVT = Total (saisie sur 1 ligne, wrap propre sur mobile) -->
+          <div style="display:flex;align-items:flex-end;gap:6px;flex-wrap:wrap;row-gap:4px;">
+            <!-- Sous-groupe 1 : Aile G + Aile D + AVT (reste solidaire) -->
+            <div style="display:flex;align-items:flex-end;gap:6px;">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:1px;">
+                <label style="font-size:9px;color:#718096;font-weight:700;text-transform:uppercase;letter-spacing:.3px;">Aile G</label>
+                <input type="number" id="c-bord-aileG" value="" placeholder="—" min="0" max="60" step="0.5"
+                  style="width:54px;background:#fff;border:1px solid #feb2b2;border-radius:5px;padding:18px 4px 4px 4px;font-size:13px;font-weight:700;text-align:center;color:#1a1a2e;height:38px;box-sizing:border-box;line-height:1;" oninput="sumAileAVT()">
+              </div>
+              <span style="font-size:16px;color:#cbd5e0;font-weight:700;height:38px;display:flex;align-items:flex-end;padding-bottom:8px;">+</span>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:1px;">
+                <label style="font-size:9px;color:#718096;font-weight:700;text-transform:uppercase;letter-spacing:.3px;">Aile D</label>
+                <input type="number" id="c-bord-aileD" value="" placeholder="—" min="0" max="60" step="0.5"
+                  style="width:54px;background:#fff;border:1px solid #feb2b2;border-radius:5px;padding:18px 4px 4px 4px;font-size:13px;font-weight:700;text-align:center;color:#1a1a2e;height:38px;box-sizing:border-box;line-height:1;" oninput="sumAileAVT()">
+              </div>
+              <span style="font-size:16px;color:#cbd5e0;font-weight:700;height:38px;display:flex;align-items:flex-end;padding-bottom:8px;">+</span>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:1px;">
+                <label style="font-size:9px;color:#718096;font-weight:700;text-transform:uppercase;letter-spacing:.3px;">AVT</label>
+                <input type="number" id="c-bord-avt" value="" placeholder="—" min="0" max="109" step="0.5"
+                  style="width:54px;background:#fff;border:1px solid #feb2b2;border-radius:5px;padding:18px 4px 4px 4px;font-size:13px;font-weight:700;text-align:center;color:#1a1a2e;height:38px;box-sizing:border-box;line-height:1;" oninput="sumAileAVT()">
+              </div>
+            </div>
+            <!-- Sous-groupe 2 : = Total L · kg (reste solidaire) -->
+            <div style="display:flex;align-items:flex-end;gap:6px;">
+              <span style="font-size:16px;color:#cbd5e0;font-weight:700;height:38px;display:flex;align-items:flex-end;padding-bottom:8px;">=</span>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:1px;">
+                <label style="font-size:9px;color:#e94560;font-weight:700;text-transform:uppercase;letter-spacing:.3px;">Total</label>
+                <input type="number" id="c-bord" value="" placeholder="—" min="0" max="109" step="1"
+                  style="width:64px;background:#f7f8fa;border:2px solid #e94560;border-radius:6px;padding:18px 6px 4px 6px;font-size:15px;font-weight:800;text-align:center;color:#1a1a2e;height:38px;box-sizing:border-box;line-height:1;" oninput="updateCarbu()">
+              </div>
+              <span style="font-size:11px;color:#718096;height:38px;display:flex;align-items:flex-end;padding-bottom:8px;white-space:nowrap;">L&nbsp;·&nbsp;<span id="cr-bord-kg" style="font-weight:700;color:#1a1a2e;margin:0 3px;">—</span>kg</span>
+            </div>
           </div>
-          <div style="margin-top:8px;padding:6px 10px;background:#f7f8fa;border-radius:6px;border-left:3px solid #16213e;font-size:10px;color:#718096;line-height:1.5;">
-            <div style="font-weight:700;color:#16213e;margin-bottom:2px;text-transform:uppercase;letter-spacing:.3px;">
+          <div style="margin-top:6px;padding:5px 10px;background:#f7f8fa;border-radius:6px;border-left:3px solid #16213e;font-size:9.5px;color:#718096;line-height:1.4;">
+            <div style="font-weight:700;color:#16213e;margin-bottom:1px;text-transform:uppercase;letter-spacing:.3px;">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#16213e" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:3px;"><path d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 4 0v-6.998a2 2 0 0 0-.59-1.42L18 5"/><path d="M14 21V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v16"/><path d="M2 21h13"/><path d="M3 9h11"/></svg>
               Carburant : UL Aero Super +
             </div>
@@ -1349,15 +1491,25 @@ canvas{display:block;max-width:100%;}
             <strong style="color:#1a1a2e;">1 kg → 1,389 L</strong>
           </div>
         </div>
-        <div id="cr-verdict" style="margin-top:10px;padding:10px 12px;border-radius:8px;text-align:center;font-weight:700;font-size:14px;">—</div>
-        <div style="margin-top:8px;padding:10px;background:#f7f8fa;border-radius:8px;">
-          <div style="font-size:11px;color:#718096;margin-bottom:3px;font-weight:600;text-transform:uppercase;">Autonomie avec le carburant réel</div>
-          <div style="font-size:22px;font-weight:800;color:#1a1a2e;" id="cr-autonomie">—</div>
-          <div style="font-size:11px;color:#718096;">h min (soit <span id="cr-autonomie-l">—</span> L)</div>
+        <div id="cr-verdict" style="margin-top:8px;padding:8px 12px;border-radius:8px;text-align:center;font-weight:700;font-size:13px;">—</div>
+        <!-- Bloc Autonomie au départ : compact, calculé auto OU saisie manuelle -->
+        <div style="margin-top:8px;padding:7px 10px;background:#f7f8fa;border-radius:8px;border-left:3px solid #2b6cb0;display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap;row-gap:4px;">
+          <div style="font-size:10px;color:#2b6cb0;font-weight:700;text-transform:uppercase;letter-spacing:.3px;flex-shrink:0;height:38px;display:flex;align-items:flex-end;padding-bottom:8px;">Autonomie au départ</div>
+          <div style="display:flex;align-items:flex-end;gap:4px;">
+            <input type="text" id="c-autonomie-manual" value="" placeholder="hh:mm"
+              style="width:72px;background:#fff;border:1px dashed #2b6cb0;border-radius:5px;padding:18px 5px 4px 5px;font-size:13px;font-weight:700;text-align:center;color:#1a1a2e;height:38px;box-sizing:border-box;line-height:1;" oninput="updateCarbu()">
+            <span style="font-size:10px;color:#a0aec0;height:38px;display:flex;align-items:flex-end;padding-bottom:8px;white-space:nowrap;">manuel</span>
+          </div>
+          <!-- Sous-bloc auto : reste solidaire au wrap -->
+          <div style="display:flex;align-items:flex-end;gap:6px;">
+            <span style="font-size:11px;color:#cbd5e0;height:38px;display:flex;align-items:flex-end;padding-bottom:8px;white-space:nowrap;">ou auto :</span>
+            <span style="font-size:16px;font-weight:800;color:#1a1a2e;height:38px;display:flex;align-items:flex-end;padding-bottom:5px;white-space:nowrap;" id="cr-autonomie">—</span>
+            <span style="font-size:10px;color:#718096;height:38px;display:flex;align-items:flex-end;padding-bottom:8px;white-space:nowrap;">(<span id="cr-autonomie-l">—</span> L)</span>
+          </div>
         </div>
-        <div style="margin-top:8px;padding:8px 10px;background:#f7f8fa;border-radius:6px;border-left:3px solid #3182ce;font-size:10px;color:#718096;line-height:1.5;">
-          <strong style="color:#3182ce;">NCO.OP.125 / SERA.2010</strong><br>
-          Réserve : <strong>10 min</strong> (local) · <strong>30 min</strong> (nav jour) · <strong>45 min</strong> (nuit)<br>
+        <div style="margin-top:6px;padding:6px 10px;background:#f7f8fa;border-radius:6px;border-left:3px solid #3182ce;font-size:9.5px;color:#718096;line-height:1.4;">
+          <strong style="color:#3182ce;">NCO.OP.125 / SERA.2010</strong> &nbsp;·&nbsp;
+          Réserve : <strong>10 min</strong> (local) · <strong>30 min</strong> (nav jour) · <strong>45 min</strong> (nuit) &nbsp;·&nbsp;
           Carburant réel ≥ minimum réglementaire au parking.
         </div>
       </div>
@@ -2809,11 +2961,11 @@ function saveParams() {
     'mon-temp','mon-alt','mon-mass',       // montee
     'aut-temp','aut-alt',                  // autonomie
     'sl-p1','sl-p2','sl-bag','sl-ess-dep','sl-ess-arr', // centrage
-    'conso','c-conso','c-roulage','c-nav-base','c-diver','c-marge','c-bord', // carbu
+    'conso','c-conso','c-roulage','c-nav-base','c-diver','c-marge','c-bord','c-bord-aileG','c-bord-aileD','c-bord-avt','c-autonomie-manual', // carbu
     'c-dep-icao','c-arr-icao','c-date-vol','c-nav-meteo','c-nav-retard','c-etapes','c-dega', // carbu compléments
     'att-aero-txt','att-date',             // atterro compléments
     'aero-txt','vol-date','vol-cdb',       // décollage compléments + bandeau
-    'qnh-input',                           // QNH du jour
+    'qnh-dep-input','qnh-arr-input',       // QNH du jour (départ et arrivée)
     'vol-dep','vol-dest',  // aérodromes header
   ];
   const vals = {};
@@ -3244,8 +3396,11 @@ function resetVol() {
   if (typeof computeAutonomie === 'function') computeAutonomie();
 
   // ── QNH → 1013 (ZP = 0 + élév = 0 car pas d'aérodrome sélectionné) ──
-  const qnhEl = document.getElementById('qnh-input');
-  if (qnhEl) { qnhEl.value = 1013; }
+  const qnhDepEl = document.getElementById('qnh-dep-input');
+  const qnhArrEl = document.getElementById('qnh-arr-input');
+  if (qnhDepEl) { qnhDepEl.value = 1013; }
+  if (qnhArrEl) { qnhArrEl.value = 1013; }
+  qnhArrTouched = false; // reset du drapeau : QNH Arr. suivra à nouveau QNH Dép.
   updateZPLabels(null); // pas d'aérodrome → pas de ZP à afficher
 
   // ── Masquer les labels ZP ──────────────────────────────
@@ -3271,6 +3426,28 @@ function setReserve(min) {
   });
   const lbl = document.getElementById('c-res-lbl');
   if(lbl) lbl.textContent = min + ' min';
+  updateCarbu();
+}
+
+function sumAileAVT() {
+  // Lit Aile G + Aile D + AVT, calcule la somme et met à jour c-bord
+  // Si tous les 3 champs sont vides, ne touche pas à c-bord (préserve la saisie manuelle directe)
+  const aG  = document.getElementById('c-bord-aileG');
+  const aD  = document.getElementById('c-bord-aileD');
+  const avt = document.getElementById('c-bord-avt');
+  const cBord = document.getElementById('c-bord');
+  if (!aG || !aD || !avt || !cBord) return;
+  const vG  = aG.value.trim()  === '' ? null : parseFloat(aG.value);
+  const vD  = aD.value.trim()  === '' ? null : parseFloat(aD.value);
+  const vA  = avt.value.trim() === '' ? null : parseFloat(avt.value);
+  // Si les 3 champs sont vides ET que c-bord a une valeur, on n'écrase pas (respect du mode "saisie totale directe")
+  if (vG === null && vD === null && vA === null) {
+    updateCarbu();
+    return;
+  }
+  // Au moins un des 3 est rempli : on additionne (les vides comptent comme 0)
+  const total = (vG ?? 0) + (vD ?? 0) + (vA ?? 0);
+  cBord.value = +total.toFixed(1);
   updateCarbu();
 }
 
@@ -3328,15 +3505,35 @@ function updateCarbu() {
   set('cr-bord-kg', isNaN(bord) ? '—' : (bord * 0.72).toFixed(1));
 
   // Autonomie reelle
-  if (!isNaN(bord)) {
-    const autoMin = Math.round(bord / conso * 60);
-    const autoH = Math.floor(autoMin/60);
-    const autoM = autoMin % 60;
-    set('cr-autonomie', autoH+'h'+autoM.toString().padStart(2,'0'));
-    set('cr-autonomie-l', bord.toFixed(0));
-  } else {
-    set('cr-autonomie', '—');
-    set('cr-autonomie-l', '—');
+  // Si c-autonomie-manual contient une valeur (format hh:mm ou hhHmm), on l'affiche en priorité
+  const manualRaw = document.getElementById('c-autonomie-manual')?.value?.trim() || '';
+  let manualOK = false;
+  if (manualRaw !== '') {
+    // Accepte "1h30", "1H30", "1:30", "01:30", "1.5" → on prend tel quel
+    const m = manualRaw.match(/^(\d{1,2})\s*[h:H.]\s*(\d{0,2})$/);
+    if (m) {
+      const hh = parseInt(m[1] || '0');
+      const mm = parseInt(m[2] || '0');
+      if (!isNaN(hh) && !isNaN(mm) && hh < 24 && mm < 60) {
+        set('cr-autonomie', hh + 'h' + mm.toString().padStart(2,'0'));
+        // Litres correspondants à cette autonomie manuelle
+        const lManual = +((hh*60 + mm) / 60 * conso).toFixed(0);
+        set('cr-autonomie-l', lManual.toString());
+        manualOK = true;
+      }
+    }
+  }
+  if (!manualOK) {
+    if (!isNaN(bord)) {
+      const autoMin = Math.round(bord / conso * 60);
+      const autoH = Math.floor(autoMin/60);
+      const autoM = autoMin % 60;
+      set('cr-autonomie', autoH+'h'+autoM.toString().padStart(2,'0'));
+      set('cr-autonomie-l', bord.toFixed(0));
+    } else {
+      set('cr-autonomie', '—');
+      set('cr-autonomie-l', '—');
+    }
   }
 
   // Verdict
@@ -5179,7 +5376,7 @@ function printPreparation() {
       const perf50    = document.getElementById('res50')?.textContent || '—';
       const perfISA   = document.getElementById('detISA')?.textContent || '—';
       const perfPisteNec = document.getElementById('piste-nec-dec')?.textContent || '—';
-      const perfQNH = document.getElementById('qnh-input')?.value || '1013';
+      const perfQNH = document.getElementById('qnh-dep-input')?.value || '1013';
       const perfZP  = (() => { const q=parseInt(perfQNH); const e=AERO_ELEV_DEC??0; return (q>=950&&q<=1050&&e)?Math.round(snapTo50((1013-q)*28+e)):null; })();
       tabBanner = `<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr 1fr;gap:4px;margin-bottom:4px;font-size:8px;">
         <div style="background:#f0f4ff;border:1px solid #bee3f8;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
@@ -5243,7 +5440,7 @@ function printPreparation() {
       const attISA   = document.getElementById('att-detISA')?.textContent || '—';
       const attPisteNec = document.getElementById('att-piste-nec')?.textContent || '—';
       const attMarge = MARGE_ATT || 30;
-      const attQNH = document.getElementById('qnh-input')?.value || '1013';
+      const attQNH = document.getElementById('qnh-arr-input')?.value || '1013';
       const attZP  = (() => { const q=parseInt(attQNH); const e=AERO_ELEV_ATT??0; return (q>=950&&q<=1050&&e)?Math.round(snapTo50((1013-q)*28+e)):null; })();
       tabBanner = `<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr 1fr;gap:4px;margin-bottom:4px;font-size:8px;">
         <div style="background:#f0f4ff;border:1px solid #bee3f8;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
@@ -5782,6 +5979,11 @@ function setPiste(p){PT=p;Object.keys(PS).forEach(k=>{const b2=document.getEleme
 let AERO_ELEV_DEC = null;  // décollage
 let AERO_ELEV_ATT = null;  // atterrissage
 
+// Drapeau : QNH Arr. a-t-il été modifié manuellement par l'utilisateur ?
+// Tant qu'il vaut false, toute modif de QNH Dép. est recopiée sur QNH Arr.
+// Dès qu'il passe à true, QNH Arr. devient indépendant.
+let qnhArrTouched = false;
+
 // Arrondir à la graduation de 50ft la plus proche
 function snapTo50(val) { return Math.round(val / 50) * 50; }
 
@@ -5802,55 +6004,94 @@ function setAltSlider(sliderId, valId, value, min, max) {
 }
 
 // Mettre à jour les indicateurs ZP (entre parenthèses) sur tous les onglets
-function updateZPLabels(zp) {
-  [
-    ['dec-zp-lbl','dec-zp-val'],
-    ['att-zp-lbl','att-zp-val'],
-    ['mon-zp-lbl','mon-zp-val'],
-    ['aut-zp-lbl','aut-zp-val'],
-  ].forEach(([lblId, valId]) => {
+// Accepte soit un nombre unique (rétro-compat : applique partout) soit un objet {dec, att}
+function updateZPLabels(zpOrObj) {
+  // Normalisation : on accepte soit un scalaire, soit {dec, att}
+  let zpDec, zpAtt;
+  if (zpOrObj === null || typeof zpOrObj === 'number') {
+    zpDec = zpAtt = zpOrObj;
+  } else {
+    zpDec = (zpOrObj && zpOrObj.dec !== undefined) ? zpOrObj.dec : null;
+    zpAtt = (zpOrObj && zpOrObj.att !== undefined) ? zpOrObj.att : null;
+  }
+
+  // Labels d'onglets : décollage/montée/autonomie utilisent zpDec ; atterrissage utilise zpAtt
+  const tabMap = [
+    ['dec-zp-lbl', 'dec-zp-val', zpDec],
+    ['att-zp-lbl', 'att-zp-val', zpAtt],
+    ['mon-zp-lbl', 'mon-zp-val', zpDec],
+    ['aut-zp-lbl', 'aut-zp-val', zpDec],
+  ];
+  tabMap.forEach(([lblId, valId, zp]) => {
     const lbl = document.getElementById(lblId);
     const val = document.getElementById(valId);
     if (!lbl || !val) return;
-    if (zp !== null) {
+    if (zp !== null && zp !== undefined) {
       val.textContent = zp.toLocaleString('fr-FR') + ' ft ZP';
       lbl.style.display = 'inline';
     } else {
       lbl.style.display = 'none';
     }
   });
-  // Indicateur résumé dans la barre header
-  const zpLbl = document.getElementById('qnh-zp-lbl');
-  const zpVal = document.getElementById('qnh-zp-val');
-  if (zpLbl && zpVal) {
-    if (zp !== null) { zpVal.textContent = zp.toLocaleString('fr-FR'); zpLbl.style.display = 'inline-flex'; }
-    else { zpLbl.style.display = 'none'; }
-  }
+
+  // Indicateurs de header : ZP Dép. à côté du QNH Dép., ZP Arr. à côté du QNH Arr.
+  [
+    ['qnh-zp-dep-lbl', 'qnh-zp-dep-val', zpDec],
+    ['qnh-zp-arr-lbl', 'qnh-zp-arr-val', zpAtt],
+  ].forEach(([lblId, valId, zp]) => {
+    const lbl = document.getElementById(lblId);
+    const val = document.getElementById(valId);
+    if (!lbl || !val) return;
+    if (zp !== null && zp !== undefined) {
+      val.textContent = zp.toLocaleString('fr-FR');
+      lbl.style.display = 'inline-flex';
+    } else {
+      lbl.style.display = 'none';
+    }
+  });
 }
 
 // Appliquer QNH : recalcule ZP et pousse sur les 4 sliders
+// QNH Dép. → décollage / montée / autonomie
+// QNH Arr. → atterrissage
+// Si qnhArrTouched===false, modifier QNH Dép. recopie la valeur sur QNH Arr.
 function applyQNH() {
-  const qnh = parseInt(document.getElementById('qnh-input')?.value || '');
-  if (!qnh || qnh < 950 || qnh > 1050) {
+  const qnhDepEl = document.getElementById('qnh-dep-input');
+  const qnhArrEl = document.getElementById('qnh-arr-input');
+  const qnhDep = parseInt(qnhDepEl?.value || '');
+  let qnhArr = parseInt(qnhArrEl?.value || '');
+
+  // Couplage initial : tant que QNH Arr. n'a pas été modifié manuellement,
+  // il suit QNH Dép. automatiquement
+  if (!qnhArrTouched && qnhDep && qnhDep >= 950 && qnhDep <= 1050 && qnhArrEl) {
+    qnhArrEl.value = qnhDep;
+    qnhArr = qnhDep;
+  }
+
+  const validDep = qnhDep && qnhDep >= 950 && qnhDep <= 1050;
+  const validArr = qnhArr && qnhArr >= 950 && qnhArr <= 1050;
+
+  if (!validDep && !validArr) {
     updateZPLabels(null);
     return;
   }
-  // Utilise l'élévation déc ou att si connue, sinon 0
+
+  // Calcul des ZP : on utilise toujours QNH Dép. pour décollage, montée, autonomie
+  // et QNH Arr. pour atterrissage
   const elevDec = AERO_ELEV_DEC ?? 0;
   const elevAtt = AERO_ELEV_ATT ?? 0;
-  const elevRef = AERO_ELEV_DEC ?? AERO_ELEV_ATT ?? 0;
-  const zpDec = calcZP(qnh, elevDec);
-  const zpAtt = calcZP(qnh, elevAtt);
-  const zpRef = calcZP(qnh, elevRef);
-  // Décollage slider (max 8000)
+  const zpDec = validDep ? calcZP(qnhDep, elevDec) : null;
+  const zpAtt = validArr ? calcZP(qnhArr, elevAtt) : null;
+
+  // Décollage slider (max 8000) — utilise QNH Dép.
   if (zpDec !== null) { setAltSlider('alt', 'altVal', zpDec, 0, 8000); compute(); }
-  // Atterrissage slider (max 8000)
+  // Atterrissage slider (max 8000) — utilise QNH Arr.
   if (zpAtt !== null) { setAltSlider('att-alt', 'att-altVal', zpAtt, 0, 8000); computeAtt(); }
-  // Montée (max 14000)
-  if (zpRef !== null) { setAltSlider('mon-alt', 'mon-altVal', zpRef, 0, 14000); computeMontee(); }
-  // Autonomie (max 14000)
-  if (zpRef !== null) { setAltSlider('aut-alt', 'aut-altVal', zpRef, 0, 14000); computeAutonomie(); }
-  updateZPLabels(zpRef);
+  // Montée (max 14000) — utilise QNH Dép.
+  if (zpDec !== null) { setAltSlider('mon-alt', 'mon-altVal', zpDec, 0, 14000); computeMontee(); }
+  // Autonomie (max 14000) — utilise QNH Dép.
+  if (zpDec !== null) { setAltSlider('aut-alt', 'aut-altVal', zpDec, 0, 14000); computeAutonomie(); }
+  updateZPLabels({ dec: zpDec, att: zpAtt });
 }
 
 // Snap altitude slider à l'élévation d'aérodrome (arrondie 50ft)
@@ -5859,15 +6100,17 @@ function snapAltToAero(menuId, aero) {
   const elev = aero.elev;
   if (elev == null) return;
   const snapped = snapTo50(elev);
-  const qnh = parseInt(document.getElementById('qnh-input')?.value || '');
-  const hasQNH = qnh >= 950 && qnh <= 1050;
+  const qnhDep = parseInt(document.getElementById('qnh-dep-input')?.value || '');
+  const qnhArr = parseInt(document.getElementById('qnh-arr-input')?.value || '');
+  const hasQNHDep = qnhDep >= 950 && qnhDep <= 1050;
+  const hasQNHArr = qnhArr >= 950 && qnhArr <= 1050;
   if (menuId === 'aero-menu') {
     AERO_ELEV_DEC = elev;
-    if (!hasQNH) { setAltSlider('alt', 'altVal', snapped, 0, 8000); setTimeout(compute, 0); }
+    if (!hasQNHDep) { setAltSlider('alt', 'altVal', snapped, 0, 8000); setTimeout(compute, 0); }
     else applyQNH();
   } else if (menuId === 'att-aero-menu') {
     AERO_ELEV_ATT = elev;
-    if (!hasQNH) { setAltSlider('att-alt', 'att-altVal', snapped, 0, 8000); setTimeout(computeAtt, 0); }
+    if (!hasQNHArr) { setAltSlider('att-alt', 'att-altVal', snapped, 0, 8000); setTimeout(computeAtt, 0); }
     else applyQNH();
   }
 }
