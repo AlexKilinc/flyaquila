@@ -1961,12 +1961,12 @@ canvas{display:block;max-width:100%;}
       </label>
       <!-- Prévol (manuel, papier) -->
       <label id="zone-prevol-label" style="display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:7px;cursor:pointer;border:2px solid #2d3748;background:#1a2744;transition:all .2s;" title="Visite prévol effectuée (papier)">
-        <input type="checkbox" id="chk-zone-prevol" style="width:14px;height:14px;accent-color:#38a169;cursor:pointer;" onchange="onZoneCheck('prevol')">
+        <input type="checkbox" id="chk-zone-prevol" style="width:14px;height:14px;accent-color:#38a169;cursor:pointer;" onchange="onZoneCheck('prevol')" disabled>
         <span style="font-size:11px;font-weight:800;color:#a0aec0;letter-spacing:.5px;white-space:nowrap;" id="lbl-zone-prevol">PRÉVOL</span>
       </label>
       <!-- 3R (manuel, papier) -->
       <label id="zone-3r-label" style="display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:7px;cursor:pointer;border:2px solid #2d3748;background:#1a2744;transition:all .2s;" title="Règle des 3R effectuée (papier)">
-        <input type="checkbox" id="chk-zone-3r" style="width:14px;height:14px;accent-color:#38a169;cursor:pointer;" onchange="onZoneCheck('3r')">
+        <input type="checkbox" id="chk-zone-3r" style="width:14px;height:14px;accent-color:#38a169;cursor:pointer;" onchange="onZoneCheck('3r')" disabled>
         <span style="font-size:11px;font-weight:800;color:#a0aec0;letter-spacing:.5px;white-space:nowrap;" id="lbl-zone-3r">3R</span>
       </label>
     </div>
@@ -6218,8 +6218,47 @@ function prepaUpdateScore() {
       lblZonePrepa.style.color = pctPrepaZone > 0 ? '#f6e05e' : '#a0aec0';
     }
   }
-  updateZoneStyle('prevol');
-  updateZoneStyle('3r');
+  // Zone PRÉVOL auto-cochée si 100% des items F validés
+  {
+    const chk = document.getElementById('chk-zone-prevol');
+    const lbl = document.getElementById('lbl-zone-prevol');
+    const wrap = document.getElementById('zone-prevol-label');
+    if (chk && lbl && wrap) {
+      const ratio = PREVOL_IDS.length > 0 ? prevolChecked / PREVOL_IDS.length : 0;
+      const done = ratio === 1;
+      chk.checked = done;
+      if (done) {
+        wrap.style.borderColor = '#38a169';
+        wrap.style.background = 'rgba(56,161,105,0.18)';
+        lbl.style.color = '#68d391';
+      } else {
+        wrap.style.borderColor = ratio > 0 ? '#d69e2e' : '#2d3748';
+        wrap.style.background = ratio > 0 ? 'rgba(214,158,46,0.12)' : '#1a2744';
+        lbl.style.color = ratio > 0 ? '#f6e05e' : '#a0aec0';
+      }
+    }
+  }
+
+  // Zone 3R auto-cochée si 100% des items G validés
+  {
+    const chk = document.getElementById('chk-zone-3r');
+    const lbl = document.getElementById('lbl-zone-3r');
+    const wrap = document.getElementById('zone-3r-label');
+    if (chk && lbl && wrap) {
+      const ratio = IDS_3R.length > 0 ? r3Checked / IDS_3R.length : 0;
+      const done = ratio === 1;
+      chk.checked = done;
+      if (done) {
+        wrap.style.borderColor = '#38a169';
+        wrap.style.background = 'rgba(56,161,105,0.18)';
+        lbl.style.color = '#68d391';
+      } else {
+        wrap.style.borderColor = '#2d3748';
+        wrap.style.background = '#1a2744';
+        lbl.style.color = '#a0aec0';
+      }
+    }
+  }
 
   // Badges par section + état bouton tout-cocher
   Object.entries(PREPA_SECTIONS).forEach(([sec, ids]) => {
