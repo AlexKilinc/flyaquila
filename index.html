@@ -3607,21 +3607,35 @@ function resetVol() {
   AERO_ELEV_DEC = null;
   AERO_ELEV_ATT = null;
 
-  // ── Plan de vol : vider tous les champs (CDB, date, waypoints, anciens fp-dep/fp-arr) ─
-  ['fp-cdb','fp-date','fp-wpt1','fp-wpt2','fp-wpt3','fp-dep','fp-arr','nom-voyage'].forEach(id => {
+  // ── Plan de vol : vider tous les champs (date, waypoints, anciens fp-dep/fp-arr) ─
+  // Le CDB (fp-cdb / vol-cdb) est conservé : on remet le nom CDB par défaut
+  // stocké en admin (LS_KEY_PILOTE.cdb) au lieu de le vider, car c'est une
+  // donnée personnelle stable du pilote propriétaire de l'application.
+  let _cdbDefault = '';
+  try {
+    const _pStored = lsLoad(LS_KEY_PILOTE, {});
+    if (_pStored && typeof _pStored.cdb === 'string' && _pStored.cdb.trim() !== '') {
+      _cdbDefault = _pStored.cdb;
+    }
+  } catch(e) {}
+
+  ['fp-date','fp-wpt1','fp-wpt2','fp-wpt3','fp-dep','fp-arr','nom-voyage'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     el.value = '';
   });
+  // CDB Plan de vol : remettre la valeur par défaut admin (ou vider si rien stocké)
+  const fpCdb = document.getElementById('fp-cdb');
+  if (fpCdb) fpCdb.value = _cdbDefault;
   // Vider aussi le récapitulatif route affiché
   const fpRoute = document.getElementById('fp-route-display');
   if (fpRoute) fpRoute.textContent = '—';
   // Vider le nom du voyage si présent
   const fpVoyage = document.getElementById('fp-voyage');
   if (fpVoyage) fpVoyage.value = '';
-  // Vider CDB global aussi
+  // CDB global : remettre la valeur par défaut admin (ou vider si rien stocké)
   const cdbGlobal = document.getElementById('vol-cdb');
-  if (cdbGlobal) cdbGlobal.value = '';
+  if (cdbGlobal) cdbGlobal.value = _cdbDefault;
   // Effacer le plan de vol persisté en localStorage
   try { localStorage.removeItem(LS_KEY_FP); } catch(e) {}
   // Recalculer / sauvegarder l'état vide
