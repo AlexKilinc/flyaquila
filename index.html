@@ -876,7 +876,7 @@ canvas{display:block;max-width:100%;}
     </div>
     <fieldset class="aero-group">
       <legend>Aérodrome départ</legend>
-      <div>
+      <div style="position:relative;">
         <label style="font-size:10px;color:#a0aec0;white-space:nowrap;">Dép.</label>
         <input type="text" id="vol-dep" value="LFPN" placeholder="ICAO" maxlength="4"
           style="background:#1e2d4a;border:1px solid #2d3748;color:#fff;padding:4px 6px;
@@ -884,13 +884,22 @@ canvas{display:block;max-width:100%;}
           oninput="
             this.value=this.value.toUpperCase();
             var v=this.value.trim();
-            var cd=document.getElementById('c-dep-icao');if(cd){cd.value=v;cd.dispatchEvent(new Event('input'));}
-            var at=document.getElementById('aero-txt');if(at){at.value=v;at.dispatchEvent(new Event('input'));}
-            var fp=document.getElementById('fp-dep-icao');if(fp){fp.value=v;}
-            var fpd=document.getElementById('fp-dep');if(fpd){fpd.value=v;}
+            _icaoSyncing=true;
+            try {
+              var cd=document.getElementById('c-dep-icao');if(cd){cd.value=v;cd.dispatchEvent(new Event('input'));}
+              var at=document.getElementById('aero-txt');if(at){at.value=v;at.dispatchEvent(new Event('input'));}
+              var fp=document.getElementById('fp-dep-icao');if(fp){fp.value=v;}
+              var fpd=document.getElementById('fp-dep');if(fpd){fpd.value=v;}
+            } finally { _icaoSyncing=false; }
+            if(typeof lookupAeroElev==='function')lookupAeroElev(v,'dep');
+            if(typeof showAeroMenuFiltered==='function')showAeroMenuFiltered('vol-dep-menu',v);
             if(typeof updateFPRoute==='function')updateFPRoute();
             if(typeof saveFP==='function')saveFP();
           ">
+        <button onclick="toggleAeroMenu('vol-dep-menu')" type="button"
+          style="margin-left:3px;width:24px;height:32px;background:#1e2d4a;border:1px solid #2d3748;color:#a0aec0;border-radius:5px;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;line-height:1;"
+          title="Aérodromes favoris">▾</button>
+        <div id="vol-dep-menu" style="display:none;position:absolute;top:38px;left:0;z-index:9999;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);min-width:240px;max-height:610px;overflow-y:auto;"></div>
       </div>
       <!-- QNH Départ (utilisé pour calcul ZP décollage / montée / autonomie) -->
       <div>
@@ -905,7 +914,7 @@ canvas{display:block;max-width:100%;}
     </fieldset>
     <fieldset class="aero-group">
       <legend>Aérodrome arrivée</legend>
-      <div>
+      <div style="position:relative;">
         <label style="font-size:10px;color:#a0aec0;white-space:nowrap;">Arr.</label>
         <input type="text" id="vol-dest" placeholder="ICAO" maxlength="4"
           style="background:#1e2d4a;border:1px solid #2d3748;color:#fff;padding:4px 6px;
@@ -913,14 +922,23 @@ canvas{display:block;max-width:100%;}
           oninput="
             this.value=this.value.toUpperCase();
             var v=this.value.trim();
-            var arrIcao=document.getElementById('c-arr-icao');if(arrIcao&&arrIcao.value!==v){arrIcao.value=v;arrIcao.dispatchEvent(new Event('input'));}
-            var attAt=document.getElementById('att-aero-txt');if(attAt&&attAt.value!==v){attAt.value=v;attAt.dispatchEvent(new Event('input'));}
-            var fpArrIcao=document.getElementById('fp-arr-icao');if(fpArrIcao){fpArrIcao.value=v;}
-            var fpArr=document.getElementById('fp-arr');if(fpArr){fpArr.value=v;}
+            _icaoSyncing=true;
+            try {
+              var arrIcao=document.getElementById('c-arr-icao');if(arrIcao&&arrIcao.value!==v){arrIcao.value=v;arrIcao.dispatchEvent(new Event('input'));}
+              var attAt=document.getElementById('att-aero-txt');if(attAt&&attAt.value!==v){attAt.value=v;attAt.dispatchEvent(new Event('input'));}
+              var fpArrIcao=document.getElementById('fp-arr-icao');if(fpArrIcao){fpArrIcao.value=v;}
+              var fpArr=document.getElementById('fp-arr');if(fpArr){fpArr.value=v;}
+            } finally { _icaoSyncing=false; }
+            if(typeof lookupAeroElev==='function')lookupAeroElev(v,'arr');
+            if(typeof showAeroMenuFiltered==='function')showAeroMenuFiltered('vol-dest-menu',v);
             if(typeof updateCarbu==='function')updateCarbu();
             if(typeof updateFPRoute==='function')updateFPRoute();
             if(typeof saveFP==='function')saveFP();
           ">
+        <button onclick="toggleAeroMenu('vol-dest-menu')" type="button"
+          style="margin-left:3px;width:24px;height:32px;background:#1e2d4a;border:1px solid #2d3748;color:#a0aec0;border-radius:5px;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;line-height:1;"
+          title="Aérodromes favoris">▾</button>
+        <div id="vol-dest-menu" style="display:none;position:absolute;top:38px;left:0;z-index:9999;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);min-width:240px;max-height:610px;overflow-y:auto;"></div>
       </div>
       <!-- QNH Arrivée (utilisé pour calcul ZP atterrissage) -->
       <div>
@@ -979,15 +997,19 @@ canvas{display:block;max-width:100%;}
                 style="flex:1;min-width:0;background:#fff;border:2px solid #cbd5e0;border-radius:8px;padding:10px 12px;font-size:18px;font-weight:800;text-transform:uppercase;text-align:center;min-height:44px;color:#1a1a2e;box-sizing:border-box;"
                 oninput="this.value=this.value.toUpperCase();
                   var _v=this.value.trim();
-                  var _vd=document.getElementById('vol-dep');if(_vd&&_vd.value!==_v)_vd.value=_v;
-                  var _cd=document.getElementById('c-dep-icao');if(_cd&&_cd.value!==_v){_cd.value=_v;_cd.dispatchEvent(new Event('input'));}
-                  var _fpi=document.getElementById('fp-dep-icao');if(_fpi)_fpi.value=_v;
-                  var _fpd=document.getElementById('fp-dep');if(_fpd)_fpd.value=_v;
+                  _icaoSyncing=true;
+                  try {
+                    var _vd=document.getElementById('vol-dep');if(_vd&&_vd.value!==_v)_vd.value=_v;
+                    var _cd=document.getElementById('c-dep-icao');if(_cd&&_cd.value!==_v){_cd.value=_v;_cd.dispatchEvent(new Event('input'));}
+                    var _fpi=document.getElementById('fp-dep-icao');if(_fpi)_fpi.value=_v;
+                    var _fpd=document.getElementById('fp-dep');if(_fpd)_fpd.value=_v;
+                  } finally { _icaoSyncing=false; }
                   compute();
+                  if(typeof showAeroMenuFiltered==='function')showAeroMenuFiltered('aero-menu',_v);
                   if(_v.length===4){var _a=AERODROMES.find(function(x){return x.icao===_v;});if(_a)snapAltToAero('aero-menu',_a);}">
               <button onclick="toggleAeroMenu('aero-menu')" type="button"
                 style="min-width:44px;min-height:44px;background:#f7f8fa;border:1px solid #cbd5e0;border-radius:8px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">▾</button>
-              <div id="aero-menu" style="display:none;position:absolute;top:48px;left:0;right:0;z-index:999;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.15);min-width:220px;overflow:hidden;"></div>
+              <div id="aero-menu" style="display:none;position:absolute;top:48px;left:0;right:0;z-index:999;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.15);min-width:220px;max-height:610px;overflow-y:auto;"></div>
             </div>
           </div>
           <div>
@@ -1009,8 +1031,17 @@ canvas{display:block;max-width:100%;}
           <input type="range" id="temp" min="-30" max="40" value="20" step="1" oninput="compute()">
         </div>
         <div class="sl-row">
-          <label>Altitude pression <span id="altVal">4000 ft</span><span id="dec-zp-lbl" style="font-size:11px;color:#e94560;margin-left:6px;display:none;">(<span id="dec-zp-val"></span>)</span></label>
-          <input type="range" id="alt" min="0" max="8000" value="4000" step="50" oninput="compute();var l=document.getElementById('dec-zp-lbl');if(l)l.style.display='none';">
+          <label>Altitude pression <span id="altVal">4000 ft</span><span id="dec-zp-lbl" style="font-size:11px;color:#e94560;margin-left:6px;display:none;">(<span id="dec-zp-val"></span>)</span>
+            <span id="alt-auto-ind" style="display:none;align-items:center;gap:3px;font-size:10px;color:#16213e;margin-left:6px;font-weight:600;vertical-align:middle;">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#16213e" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+              auto
+            </span>
+            <button type="button" id="alt-resync-btn" onclick="resyncAlt('dec')" title="Resynchroniser sur la ZP calculée (QNH + élévation)"
+              style="display:none;align-items:center;font-size:10px;padding:2px 5px;margin-left:4px;border:1px solid #16213e;background:#fff;color:#16213e;border-radius:4px;cursor:pointer;font-weight:600;vertical-align:middle;">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#16213e" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
+            </button>
+          </label>
+          <input type="range" id="alt" min="0" max="8000" value="4000" step="50" oninput="this._exactZP=null;updateAltAutoInd('dec','manuel');compute();var l=document.getElementById('dec-zp-lbl');if(l)l.style.display='none';">
         </div>
         <div class="sl-row">
           <label>Masse au décollage <span id="massVal">700 kg</span>
@@ -1018,13 +1049,13 @@ canvas{display:block;max-width:100%;}
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#16213e" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
               auto
             </span>
-            <button type="button" onclick="resyncMass('dec')" title="Resynchroniser depuis Masse & Centrage"
-              style="display:inline-flex;align-items:center;font-size:10px;padding:2px 5px;margin-left:4px;border:1px solid #16213e;background:#fff;color:#16213e;border-radius:4px;cursor:pointer;font-weight:600;vertical-align:middle;">
+            <button type="button" id="mass-resync-btn" onclick="resyncMass('dec')" title="Resynchroniser depuis Masse & Centrage"
+              style="display:none;align-items:center;font-size:10px;padding:2px 5px;margin-left:4px;border:1px solid #16213e;background:#fff;color:#16213e;border-radius:4px;cursor:pointer;font-weight:600;vertical-align:middle;">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#16213e" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
             </button>
           </label>
           <input type="range" id="mass" min="550" max="750" value="700" step="1"
-            oninput="this._userEdited=true;var i=document.getElementById('mass-auto-ind');if(i){i.innerHTML='<svg width=&quot;11&quot; height=&quot;11&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;#e94560&quot; stroke-width=&quot;2.4&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M12 20h9&quot;/><path d=&quot;M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z&quot;/></svg> manuel';i.style.color='#e94560';}compute()">
+            oninput="this._userEdited=true;setMassMode('dec','manuel');compute()">
         </div>
         <div class="sl-row">
           <label>Vent <span id="windVal">10 kt</span></label>
@@ -1242,14 +1273,19 @@ canvas{display:block;max-width:100%;}
                 style="flex:1;min-width:0;background:#fff;border:2px solid #16213e;border-radius:8px;padding:10px 12px;font-size:18px;font-weight:800;text-transform:uppercase;text-align:center;min-height:44px;color:#16213e;box-sizing:border-box;"
                 oninput="this.value=this.value.toUpperCase();updateCarbu();
                   var _v2=this.value.trim();
-                  var fp=document.getElementById('fp-dep');if(fp)fp.value=_v2;
-                  var fpi=document.getElementById('fp-dep-icao');if(fpi)fpi.value=_v2;
-                  var vd=document.getElementById('vol-dep');if(vd&&vd.value!==_v2)vd.value=_v2;
-                  var at=document.getElementById('aero-txt');if(at&&at.value!==_v2){at.value=_v2;at.dispatchEvent(new Event('input'));}
+                  _icaoSyncing=true;
+                  try {
+                    var fp=document.getElementById('fp-dep');if(fp)fp.value=_v2;
+                    var fpi=document.getElementById('fp-dep-icao');if(fpi)fpi.value=_v2;
+                    var vd=document.getElementById('vol-dep');if(vd&&vd.value!==_v2)vd.value=_v2;
+                    var at=document.getElementById('aero-txt');if(at&&at.value!==_v2){at.value=_v2;at.dispatchEvent(new Event('input'));}
+                  } finally { _icaoSyncing=false; }
+                  if(typeof lookupAeroElev==='function')lookupAeroElev(_v2,'dep');
+                  if(typeof showAeroMenuFiltered==='function')showAeroMenuFiltered('c-dep-menu',_v2);
                   if(typeof updateFPRoute==='function')updateFPRoute();">
               <button onclick="toggleAeroMenu('c-dep-menu')" type="button"
                 style="min-width:44px;min-height:44px;background:#fff;border:2px solid #16213e;border-radius:8px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#16213e;font-weight:700;">▾</button>
-              <div id="c-dep-menu" style="display:none;position:absolute;top:48px;left:0;right:0;z-index:999;background:#fff;border:2px solid #16213e;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.15);min-width:220px;overflow:hidden;"></div>
+              <div id="c-dep-menu" style="display:none;position:absolute;top:48px;left:0;right:0;z-index:999;background:#fff;border:2px solid #16213e;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.15);min-width:220px;max-height:610px;overflow-y:auto;"></div>
             </div>
           </div>
 
@@ -1264,15 +1300,20 @@ canvas{display:block;max-width:100%;}
                 style="flex:1;min-width:0;background:#fff;border:2px solid #16213e;border-radius:8px;padding:10px 12px;font-size:18px;font-weight:800;text-transform:uppercase;text-align:center;min-height:44px;color:#16213e;box-sizing:border-box;"
                 oninput="this.value=this.value.toUpperCase();updateCarbu();
                   var v=this.value.trim();
-                  var d=document.getElementById('vol-dest');if(d&&d.value!==v)d.value=v;
-                  var attAt=document.getElementById('att-aero-txt');if(attAt&&attAt.value!==v){attAt.value=v;attAt.dispatchEvent(new Event('input'));}
-                  var f=document.getElementById('fp-arr');if(f)f.value=v;
-                  var fi=document.getElementById('fp-arr-icao');if(fi)fi.value=v;
+                  _icaoSyncing=true;
+                  try {
+                    var d=document.getElementById('vol-dest');if(d&&d.value!==v)d.value=v;
+                    var attAt=document.getElementById('att-aero-txt');if(attAt&&attAt.value!==v){attAt.value=v;attAt.dispatchEvent(new Event('input'));}
+                    var f=document.getElementById('fp-arr');if(f)f.value=v;
+                    var fi=document.getElementById('fp-arr-icao');if(fi)fi.value=v;
+                  } finally { _icaoSyncing=false; }
+                  if(typeof lookupAeroElev==='function')lookupAeroElev(v,'arr');
+                  if(typeof showAeroMenuFiltered==='function')showAeroMenuFiltered('c-arr-menu',v);
                   if(typeof updateFPRoute==='function')updateFPRoute();
                   if(typeof saveFP==='function')saveFP();">
               <button onclick="toggleAeroMenu('c-arr-menu')" type="button"
                 style="min-width:44px;min-height:44px;background:#fff;border:2px solid #16213e;border-radius:8px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#16213e;font-weight:700;">▾</button>
-              <div id="c-arr-menu" style="display:none;position:absolute;top:48px;left:0;right:0;z-index:999;background:#fff;border:2px solid #16213e;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.15);min-width:220px;overflow:hidden;"></div>
+              <div id="c-arr-menu" style="display:none;position:absolute;top:48px;left:0;right:0;z-index:999;background:#fff;border:2px solid #16213e;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.15);min-width:220px;max-height:610px;overflow-y:auto;"></div>
             </div>
           </div>
         </div>
@@ -1531,14 +1572,18 @@ canvas{display:block;max-width:100%;}
                 style="flex:1;min-width:0;background:#fff;border:2px solid #cbd5e0;border-radius:8px;padding:10px 12px;font-size:18px;font-weight:800;text-transform:uppercase;text-align:center;min-height:44px;color:#1a1a2e;box-sizing:border-box;"
                 oninput="this.value=this.value.toUpperCase();
                   var _va=this.value.trim();
-                  var _vdst=document.getElementById('vol-dest');if(_vdst&&_vdst.value!==_va)_vdst.value=_va;
-                  var _carr=document.getElementById('c-arr-icao');if(_carr&&_carr.value!==_va){_carr.value=_va;_carr.dispatchEvent(new Event('input'));}
-                  var _fpa=document.getElementById('fp-arr-icao');if(_fpa)_fpa.value=_va;
-                  var _fpra=document.getElementById('fp-arr');if(_fpra)_fpra.value=_va;
+                  _icaoSyncing=true;
+                  try {
+                    var _vdst=document.getElementById('vol-dest');if(_vdst&&_vdst.value!==_va)_vdst.value=_va;
+                    var _carr=document.getElementById('c-arr-icao');if(_carr&&_carr.value!==_va){_carr.value=_va;_carr.dispatchEvent(new Event('input'));}
+                    var _fpa=document.getElementById('fp-arr-icao');if(_fpa)_fpa.value=_va;
+                    var _fpra=document.getElementById('fp-arr');if(_fpra)_fpra.value=_va;
+                  } finally { _icaoSyncing=false; }
+                  if(typeof showAeroMenuFiltered==='function')showAeroMenuFiltered('att-aero-menu',_va);
                   if(_va.length===4){var _aa=AERODROMES.find(function(x){return x.icao===_va;});if(_aa)snapAltToAero('att-aero-menu',_aa);}">
               <button onclick="toggleAeroMenu('att-aero-menu')" type="button"
                 style="min-width:44px;min-height:44px;background:#f7f8fa;border:1px solid #cbd5e0;border-radius:8px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">▾</button>
-              <div id="att-aero-menu" style="display:none;position:absolute;top:48px;left:0;right:0;z-index:999;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.15);min-width:220px;overflow:hidden;"></div>
+              <div id="att-aero-menu" style="display:none;position:absolute;top:48px;left:0;right:0;z-index:999;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.15);min-width:220px;max-height:610px;overflow-y:auto;"></div>
             </div>
           </div>
           <div>
@@ -1560,8 +1605,17 @@ canvas{display:block;max-width:100%;}
           <input type="range" id="att-temp" min="-30" max="40" value="20" step="1" oninput="computeAtt()">
         </div>
         <div class="sl-row">
-          <label>Altitude pression <span id="att-altVal">1000 ft</span><span id="att-zp-lbl" style="font-size:11px;color:#e94560;margin-left:6px;display:none;">(<span id="att-zp-val"></span>)</span></label>
-          <input type="range" id="att-alt" min="0" max="8000" value="1000" step="50" oninput="computeAtt();var l=document.getElementById('att-zp-lbl');if(l)l.style.display='none';">
+          <label>Altitude pression <span id="att-altVal">1000 ft</span><span id="att-zp-lbl" style="font-size:11px;color:#e94560;margin-left:6px;display:none;">(<span id="att-zp-val"></span>)</span>
+            <span id="att-alt-auto-ind" style="display:none;align-items:center;gap:3px;font-size:10px;color:#16213e;margin-left:6px;font-weight:600;vertical-align:middle;">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#16213e" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+              auto
+            </span>
+            <button type="button" id="att-alt-resync-btn" onclick="resyncAlt('att')" title="Resynchroniser sur la ZP calculée (QNH + élévation)"
+              style="display:none;align-items:center;font-size:10px;padding:2px 5px;margin-left:4px;border:1px solid #16213e;background:#fff;color:#16213e;border-radius:4px;cursor:pointer;font-weight:600;vertical-align:middle;">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#16213e" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
+            </button>
+          </label>
+          <input type="range" id="att-alt" min="0" max="8000" value="1000" step="50" oninput="this._exactZP=null;updateAltAutoInd('att','manuel');computeAtt();var l=document.getElementById('att-zp-lbl');if(l)l.style.display='none';">
         </div>
         <div class="sl-row">
           <label>Masse à l'atterrissage <span id="att-massVal">650 kg</span>
@@ -1569,13 +1623,13 @@ canvas{display:block;max-width:100%;}
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#16213e" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
               auto
             </span>
-            <button type="button" onclick="resyncMass('att')" title="Resynchroniser depuis Masse & Centrage − conso vol"
-              style="display:inline-flex;align-items:center;font-size:10px;padding:2px 5px;margin-left:4px;border:1px solid #16213e;background:#fff;color:#16213e;border-radius:4px;cursor:pointer;font-weight:600;vertical-align:middle;">
+            <button type="button" id="att-mass-resync-btn" onclick="resyncMass('att')" title="Resynchroniser depuis Masse & Centrage − conso vol"
+              style="display:none;align-items:center;font-size:10px;padding:2px 5px;margin-left:4px;border:1px solid #16213e;background:#fff;color:#16213e;border-radius:4px;cursor:pointer;font-weight:600;vertical-align:middle;">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#16213e" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
             </button>
           </label>
           <input type="range" id="att-mass" min="550" max="750" value="650" step="1"
-            oninput="this._userEdited=true;var i=document.getElementById('att-mass-auto-ind');if(i){i.innerHTML='<svg width=&quot;11&quot; height=&quot;11&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;#e94560&quot; stroke-width=&quot;2.4&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M12 20h9&quot;/><path d=&quot;M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z&quot;/></svg> manuel';i.style.color='#e94560';}computeAtt()">
+            oninput="this._userEdited=true;setMassMode('att','manuel');computeAtt()">
         </div>
         <div class="sl-row">
           <label>Vent <span id="att-windVal">10 kt</span></label>
@@ -1723,7 +1777,7 @@ canvas{display:block;max-width:100%;}
         </div>
         <div class="sl-row">
           <label>Altitude pression <span id="mon-altVal">2000 ft</span><span id="mon-zp-lbl" style="font-size:11px;color:#e94560;margin-left:6px;display:none;">(<span id="mon-zp-val"></span>)</span></label>
-          <input type="range" id="mon-alt" min="0" max="14000" value="2000" step="50" oninput="computeMontee();var l=document.getElementById('mon-zp-lbl');if(l)l.style.display='none';">
+          <input type="range" id="mon-alt" min="0" max="14000" value="2000" step="50" oninput="this._exactZP=null;computeMontee();var l=document.getElementById('mon-zp-lbl');if(l)l.style.display='none';">
         </div>
         <div class="sl-row">
           <label>Masse <span id="mon-massVal">700 kg</span></label>
@@ -1778,7 +1832,7 @@ canvas{display:block;max-width:100%;}
         </div>
         <div class="sl-row">
           <label>Altitude pression <span id="aut-altVal">6000 ft</span><span id="aut-zp-lbl" style="font-size:11px;color:#e94560;margin-left:6px;display:none;">(<span id="aut-zp-val"></span>)</span></label>
-          <input type="range" id="aut-alt" min="0" max="14000" value="6000" step="50" oninput="computeAutonomie();var l=document.getElementById('aut-zp-lbl');if(l)l.style.display='none';">
+          <input type="range" id="aut-alt" min="0" max="14000" value="6000" step="50" oninput="this._exactZP=null;computeAutonomie();var l=document.getElementById('aut-zp-lbl');if(l)l.style.display='none';">
         </div>
         <div style="margin-top:6px;padding:8px 10px;background:#f7f8fa;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;color:#718096;">
           Altitude densité : <strong id="aut-alt-dens" style="color:#1a1a2e;">—</strong> ft
@@ -2020,13 +2074,17 @@ canvas{display:block;max-width:100%;}
           <input type="text" id="fp-dep-icao" value="LFPN" maxlength="4" placeholder="ICAO"
             style="flex:1;min-width:0;background:#0d2354;border:1px solid #2c5282;border-radius:6px;padding:7px 10px;font-size:16px;font-weight:800;text-transform:uppercase;text-align:center;min-height:36px;color:#fff;box-sizing:border-box;"
             oninput="this.value=this.value.toUpperCase();saveFP();
-              var fp=document.getElementById('fp-dep');if(fp)fp.value=this.value;
-              var cd=document.getElementById('c-dep-icao');if(cd){cd.value=this.value;cd.dispatchEvent(new Event('input'));}
-              var vd=document.getElementById('vol-dep');if(vd)vd.value=this.value;
+              _icaoSyncing=true;
+              try {
+                var fp=document.getElementById('fp-dep');if(fp)fp.value=this.value;
+                var cd=document.getElementById('c-dep-icao');if(cd){cd.value=this.value;cd.dispatchEvent(new Event('input'));}
+                var vd=document.getElementById('vol-dep');if(vd)vd.value=this.value;
+              } finally { _icaoSyncing=false; }
+              if(typeof showAeroMenuFiltered==='function')showAeroMenuFiltered('fp-dep-menu',this.value);
               if(typeof updateFPRoute==='function')updateFPRoute();">
           <button onclick="toggleAeroMenu('fp-dep-menu')" type="button"
             style="min-width:36px;min-height:36px;background:rgba(255,255,255,.1);border:1px solid #2c5282;border-radius:6px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;">▾</button>
-          <div id="fp-dep-menu" style="display:none;position:absolute;top:42px;left:0;right:0;z-index:999;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);min-width:220px;overflow:hidden;"></div>
+          <div id="fp-dep-menu" style="display:none;position:absolute;top:42px;left:0;right:0;z-index:999;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);min-width:220px;max-height:610px;overflow-y:auto;"></div>
         </div>
       </div>
 
@@ -2038,13 +2096,17 @@ canvas{display:block;max-width:100%;}
             style="flex:1;min-width:0;background:#0d2354;border:1px solid #2c5282;border-radius:6px;padding:7px 10px;font-size:16px;font-weight:800;text-transform:uppercase;text-align:center;min-height:36px;color:#fff;box-sizing:border-box;"
             oninput="this.value=this.value.toUpperCase();saveFP();
               var v=this.value.trim();
-              var d=document.getElementById('vol-dest');if(d)d.value=v;
-              var f=document.getElementById('fp-arr');if(f)f.value=v;
-              var ca=document.getElementById('c-arr-icao');if(ca){ca.value=v;ca.dispatchEvent(new Event('input'));}
+              _icaoSyncing=true;
+              try {
+                var d=document.getElementById('vol-dest');if(d)d.value=v;
+                var f=document.getElementById('fp-arr');if(f)f.value=v;
+                var ca=document.getElementById('c-arr-icao');if(ca){ca.value=v;ca.dispatchEvent(new Event('input'));}
+              } finally { _icaoSyncing=false; }
+              if(typeof showAeroMenuFiltered==='function')showAeroMenuFiltered('fp-arr-menu',v);
               if(typeof updateFPRoute==='function')updateFPRoute();">
           <button onclick="toggleAeroMenu('fp-arr-menu')" type="button"
             style="min-width:36px;min-height:36px;background:rgba(255,255,255,.1);border:1px solid #2c5282;border-radius:6px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;">▾</button>
-          <div id="fp-arr-menu" style="display:none;position:absolute;top:42px;left:0;right:0;z-index:999;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);min-width:220px;overflow:hidden;"></div>
+          <div id="fp-arr-menu" style="display:none;position:absolute;top:42px;left:0;right:0;z-index:999;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);min-width:220px;max-height:610px;overflow-y:auto;"></div>
         </div>
       </div>
 
@@ -2057,17 +2119,26 @@ canvas{display:block;max-width:100%;}
         <div style="flex:1;min-width:70px;position:relative;">
           <input type="text" id="fp-wpt1" placeholder="WPT 1" maxlength="4"
             style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid #2c5282;background:#0d2354;color:#fff;font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;box-sizing:border-box;min-height:36px;"
-            oninput="this.value=this.value.toUpperCase();saveFP()">
+            oninput="this.value=this.value.toUpperCase();saveFP();
+              if(typeof showAeroMenuFiltered==='function')showAeroMenuFiltered('fp-wpt1-menu',this.value);
+              if(typeof updateFPRoute==='function')updateFPRoute();">
+          <div id="fp-wpt1-menu" style="display:none;position:absolute;top:42px;left:0;right:0;z-index:999;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);min-width:220px;max-height:610px;overflow-y:auto;"></div>
         </div>
         <div style="flex:1;min-width:70px;position:relative;">
           <input type="text" id="fp-wpt2" placeholder="WPT 2" maxlength="4"
             style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid #2c5282;background:#0d2354;color:#fff;font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;box-sizing:border-box;min-height:36px;"
-            oninput="this.value=this.value.toUpperCase();saveFP()">
+            oninput="this.value=this.value.toUpperCase();saveFP();
+              if(typeof showAeroMenuFiltered==='function')showAeroMenuFiltered('fp-wpt2-menu',this.value);
+              if(typeof updateFPRoute==='function')updateFPRoute();">
+          <div id="fp-wpt2-menu" style="display:none;position:absolute;top:42px;left:0;right:0;z-index:999;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);min-width:220px;max-height:610px;overflow-y:auto;"></div>
         </div>
         <div style="flex:1;min-width:70px;position:relative;">
           <input type="text" id="fp-wpt3" placeholder="WPT 3" maxlength="4"
             style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid #2c5282;background:#0d2354;color:#fff;font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;box-sizing:border-box;min-height:36px;"
-            oninput="this.value=this.value.toUpperCase();saveFP()">
+            oninput="this.value=this.value.toUpperCase();saveFP();
+              if(typeof showAeroMenuFiltered==='function')showAeroMenuFiltered('fp-wpt3-menu',this.value);
+              if(typeof updateFPRoute==='function')updateFPRoute();">
+          <div id="fp-wpt3-menu" style="display:none;position:absolute;top:42px;left:0;right:0;z-index:999;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);min-width:220px;max-height:610px;overflow-y:auto;"></div>
         </div>
       </div>
     </div>
@@ -2459,7 +2530,7 @@ function saveAerodromes() { localStorage.setItem('aquila_aerodromes', JSON.strin
 
 // Force re-render de tous les menus
 function invalidateAeroMenus() {
-  ['aero-menu','att-aero-menu','c-dep-menu','c-arr-menu','fp-dep-menu','fp-arr-menu'].forEach(id => {
+  ['aero-menu','att-aero-menu','c-dep-menu','c-arr-menu','fp-dep-menu','fp-arr-menu','vol-dep-menu','vol-dest-menu','fp-wpt1-menu','fp-wpt2-menu','fp-wpt3-menu'].forEach(id => {
     const m = document.getElementById(id);
     if (m) { m.innerHTML = ''; m.style.display = 'none'; }
   });
@@ -2467,7 +2538,7 @@ function invalidateAeroMenus() {
 
 // Ouvre/ferme le menu déroulant aérodrome
 function toggleAeroMenu(menuId) {
-  ['aero-menu','att-aero-menu','c-dep-menu','c-arr-menu','fp-dep-menu','fp-arr-menu'].forEach(id => {
+  ['aero-menu','att-aero-menu','c-dep-menu','c-arr-menu','fp-dep-menu','fp-arr-menu','vol-dep-menu','vol-dest-menu','fp-wpt1-menu','fp-wpt2-menu','fp-wpt3-menu'].forEach(id => {
     if (id !== menuId) { const m = document.getElementById(id); if(m) m.style.display='none'; }
   });
   const menu = document.getElementById(menuId);
@@ -2479,7 +2550,7 @@ function toggleAeroMenu(menuId) {
   menu.style.display = 'block';
 }
 
-function buildAeroMenuContent(menu, menuId) {
+function buildAeroMenuContent(menu, menuId, filter) {
   // Header avec bouton éditer
   const hdr = document.createElement('div');
   hdr.style.cssText = 'padding:8px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #16213e;background:#f0f2f7;';
@@ -2492,30 +2563,171 @@ function buildAeroMenuContent(menu, menuId) {
   hdr.appendChild(editBtn);
   menu.appendChild(hdr);
 
-  // Liste des aérodromes
-  AERODROMES.forEach(a => {
+  // Filtre des aérodromes : si filter est fourni, on ne garde que ceux dont l'ICAO commence par filter (insensible à la casse)
+  // Le nom est aussi consulté pour matcher (ex: taper "TOUS" trouve LFPN Toussus-le-Noble)
+  let list = AERODROMES;
+  if (filter && typeof filter === 'string') {
+    const f = filter.trim().toUpperCase();
+    if (f.length > 0) {
+      list = AERODROMES.filter(a =>
+        (a.icao || '').toUpperCase().startsWith(f) ||
+        (a.name || '').toUpperCase().includes(f)
+      );
+    }
+  }
+
+  // Aérodromes complémentaires depuis la base nationale FR_AERODROMES (~250 aérodromes français)
+  // Affichés UNIQUEMENT lors d'une recherche filtrée, en complément des favoris
+  // Évite les doublons avec les favoris (par ICAO)
+  let extraList = [];
+  if (filter && typeof filter === 'string' && typeof FR_AERODROMES !== 'undefined') {
+    const f = filter.trim().toUpperCase();
+    const fLow = filter.trim().toLowerCase();
+    if (f.length >= 1) {
+      const favSet = new Set(AERODROMES.map(a => (a.icao || '').toUpperCase()));
+      extraList = FR_AERODROMES.filter(a =>
+        !favSet.has((a.i || '').toUpperCase()) && (
+          (a.i || '').toUpperCase().startsWith(f) ||
+          (a.n || '').toLowerCase().includes(fLow) ||
+          (a.c || '').toLowerCase().includes(fLow)
+        )
+      ).slice(0, 50); // Limite raisonnable pour éviter une liste interminable
+    }
+  }
+
+  // Si tout est vide, fermer le menu silencieusement (pas de message gênant)
+  if (list.length === 0 && extraList.length === 0) {
+    menu.style.display = 'none';
+    return;
+  }
+
+  // Helper : crée une row d'aérodrome dans le menu
+  // 'a' est un objet aérodrome au format favoris ({icao, name, elev}) OU au format FR_AERODROMES ({i, n, e, c})
+  // 'isExtra' = true pour les aérodromes hors favoris (style légèrement différent)
+  function makeRow(a, isExtra) {
+    // Normaliser les champs (favoris vs base FR)
+    const icao = a.icao || a.i || '';
+    const name = a.name || a.n || '';
+    const elev = (a.elev != null) ? a.elev : (a.e != null ? a.e : null);
     const row = document.createElement('div');
-    row.style.cssText = 'padding:10px 14px;cursor:pointer;border-bottom:1px solid #e8ebf0;display:flex;justify-content:space-between;align-items:center;transition:background .15s;';
-    const elevTxt = (a.elev != null) ? '<span style="font-size:10px;color:#718096;margin-left:6px;background:#f0f2f7;padding:1px 5px;border-radius:4px;">' + a.elev + ' ft</span>' : '';
-    row.innerHTML = '<span style="font-weight:800;color:#16213e;font-size:14px;">'+a.icao+'</span>'
-                  + '<span style="font-size:12px;color:#16213e;opacity:.6;">'+a.name+'</span>'
+    const bg = isExtra ? '#fafbfc' : '#fff';
+    row.style.cssText = 'padding:10px 14px;cursor:pointer;border-bottom:1px solid #e8ebf0;display:flex;justify-content:space-between;align-items:center;transition:background .15s;background:' + bg + ';';
+    const elevTxt = (elev != null) ? '<span style="font-size:10px;color:#718096;margin-left:6px;background:#f0f2f7;padding:1px 5px;border-radius:4px;">' + elev + ' ft</span>' : '';
+    const opacity = isExtra ? '.55' : '.6';
+    row.innerHTML = '<span style="font-weight:800;color:#16213e;font-size:14px;">' + icao + '</span>'
+                  + '<span style="font-size:12px;color:#16213e;opacity:' + opacity + ';">' + name + '</span>'
                   + elevTxt;
-    row.onmouseenter = () => row.style.background='#f0f2f7';
-    row.onmouseleave = () => row.style.background='';
+    row.onmouseenter = () => row.style.background = '#f0f2f7';
+    row.onmouseleave = () => row.style.background = bg;
     row.onclick = () => {
       const inputId = {
         'aero-menu':'aero-txt','att-aero-menu':'att-aero-txt',
         'c-dep-menu':'c-dep-icao','c-arr-menu':'c-arr-icao',
-        'fp-dep-menu':'fp-dep-icao','fp-arr-menu':'fp-arr-icao'
+        'fp-dep-menu':'fp-dep-icao','fp-arr-menu':'fp-arr-icao',
+        'vol-dep-menu':'vol-dep','vol-dest-menu':'vol-dest',
+        'fp-wpt1-menu':'fp-wpt1','fp-wpt2-menu':'fp-wpt2','fp-wpt3-menu':'fp-wpt3'
       }[menuId];
       const inp = document.getElementById(inputId);
-      if (inp) { inp.value = a.icao; inp.dispatchEvent(new Event('input')); }
+      if (inp) {
+        // Verrou : empêche showAeroMenuFiltered de rouvrir le menu pendant le dispatch
+        _aeroMenuPicking = true;
+        try {
+          inp.value = icao;
+          inp.dispatchEvent(new Event('input'));
+        } finally {
+          _aeroMenuPicking = false;
+        }
+      }
       menu.style.display = 'none';
-      // Snap altitude pression + QNH si aérodrome favori avec élévation connue
-      if (typeof snapAltToAero === 'function') snapAltToAero(menuId, a);
+      // Snap altitude pression + QNH si aérodrome avec élévation connue (favoris uniquement)
+      if (!isExtra && typeof snapAltToAero === 'function' && (menuId === 'aero-menu' || menuId === 'att-aero-menu')) {
+        snapAltToAero(menuId, a);
+      }
+      // Pour vol-dep/vol-dest : déclencher manuellement le lookup de l'élévation
+      // Si aérodrome extra, on injecte temporairement son élévation dans AERO_ELEV_DEC/ATT
+      if (menuId === 'vol-dep-menu') {
+        if (isExtra && elev != null) {
+          AERO_ELEV_DEC = elev;
+          if (typeof applyQNH === 'function') applyQNH();
+        } else if (typeof lookupAeroElev === 'function') {
+          lookupAeroElev(icao, 'dep');
+        }
+      }
+      if (menuId === 'vol-dest-menu') {
+        if (isExtra && elev != null) {
+          AERO_ELEV_ATT = elev;
+          if (typeof applyQNH === 'function') applyQNH();
+        } else if (typeof lookupAeroElev === 'function') {
+          lookupAeroElev(icao, 'arr');
+        }
+      }
     };
-    menu.appendChild(row);
+    return row;
+  }
+
+  // Liste des aérodromes favoris (filtrée ou non)
+  list.forEach(a => menu.appendChild(makeRow(a, false)));
+
+  // Section "autres aérodromes" depuis FR_AERODROMES (si filtre actif et résultats)
+  if (extraList.length > 0) {
+    const sep = document.createElement('div');
+    sep.style.cssText = 'padding:6px 12px;background:#eef2f7;border-top:1px solid #cbd5e0;border-bottom:1px solid #e2e8f0;font-size:9px;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.5px;';
+    sep.textContent = 'Autres aérodromes (base nationale)';
+    menu.appendChild(sep);
+    extraList.forEach(a => menu.appendChild(makeRow(a, true)));
+  }
+}
+
+// Flag global : à true pendant qu'un click sur favori est en cours
+// Empêche showAeroMenuFiltered de rouvrir le menu pendant le dispatch d'event input
+let _aeroMenuPicking = false;
+
+// Flag global : à true pendant qu'on est en train de synchroniser des champs ICAO entre eux
+// Empêche les cascades de dispatchEvent qui multiplieraient inutilement les appels showAeroMenuFiltered
+let _icaoSyncing = false;
+
+// Affiche le menu déroulant en filtrant la liste selon le contenu de l'input
+// Appelé à chaque oninput sur les champs ICAO
+function showAeroMenuFiltered(menuId, filter) {
+  // Si on est en train de sélectionner un favori, ne pas réouvrir le menu
+  if (_aeroMenuPicking) return;
+  // Si on est en train de synchroniser les champs ICAO entre eux (cascade dispatchEvent),
+  // ne pas réouvrir un menu d'un autre champ — le menu cible sera ouvert en fin de cascade
+  if (_icaoSyncing) return;
+  // Fermer les autres menus
+  ['aero-menu','att-aero-menu','c-dep-menu','c-arr-menu','fp-dep-menu','fp-arr-menu','vol-dep-menu','vol-dest-menu','fp-wpt1-menu','fp-wpt2-menu','fp-wpt3-menu'].forEach(id => {
+    if (id !== menuId) { const m = document.getElementById(id); if(m) m.style.display='none'; }
   });
+  const menu = document.getElementById(menuId);
+  if (!menu) return;
+  // Si le filtre est vide, on ferme le menu
+  if (!filter || filter.trim() === '') {
+    menu.innerHTML = '';
+    menu.style.display = 'none';
+    return;
+  }
+  // Vérifier s'il y a des résultats (favoris OU base nationale) avant d'afficher
+  const f = filter.trim().toUpperCase();
+  const fLow = filter.trim().toLowerCase();
+  const matchesFav = AERODROMES.filter(a =>
+    (a.icao || '').toUpperCase().startsWith(f) ||
+    (a.name || '').toUpperCase().includes(f)
+  );
+  const matchesNat = (typeof FR_AERODROMES !== 'undefined') ? FR_AERODROMES.filter(a =>
+    (a.i || '').toUpperCase().startsWith(f) ||
+    (a.n || '').toLowerCase().includes(fLow) ||
+    (a.c || '').toLowerCase().includes(fLow)
+  ) : [];
+  // Si aucun résultat ni en favoris ni en base nationale, fermer le menu silencieusement
+  if (matchesFav.length === 0 && matchesNat.length === 0) {
+    menu.innerHTML = '';
+    menu.style.display = 'none';
+    return;
+  }
+  // Repeupler avec filtre et afficher
+  menu.innerHTML = '';
+  buildAeroMenuContent(menu, menuId, filter);
+  menu.style.display = 'block';
 }
 
 // ===== GESTIONNAIRE D'AÉRODROMES =====
@@ -2730,19 +2942,37 @@ function showAeroDropdown(inp) {
 }
 
 // Setup autocomplete sur tous les champs ICAO au chargement
+// DÉSACTIVÉ : ce système d'autocomplete utilisait FR_AERODROMES (250 aérodromes)
+// et entrait en conflit avec le menu favoris (AERODROMES). Le menu favoris est
+// désormais le seul système d'autocomplétion, enrichi des aérodromes FR_AERODROMES
+// en complément (voir buildAeroMenuContent).
+// Le tooltip au survol (showAeroTooltip) reste actif.
 document.addEventListener('DOMContentLoaded', function() {
   ['vol-dep','vol-dest','aero-txt','att-aero-txt','c-dep-icao','c-arr-icao','fp-dep-icao','fp-arr-icao','c-dega','fp-wpt1','fp-wpt2','fp-wpt3'].forEach(id => {
-    setupAeroAutocomplete(id);
+    const inp = document.getElementById(id);
+    if (inp) inp.addEventListener('mouseenter', function() { showAeroTooltip(this); });
   });
 });
 
 // Fermer les menus au clic dehors
 document.addEventListener('click', e => {
-  ['aero-menu','att-aero-menu','c-dep-menu','c-arr-menu','fp-dep-menu','fp-arr-menu'].forEach(id => {
+  // Mapping menu → input correspondant (pour ne pas fermer le menu si clic sur l'input)
+  const menuToInput = {
+    'aero-menu':'aero-txt','att-aero-menu':'att-aero-txt',
+    'c-dep-menu':'c-dep-icao','c-arr-menu':'c-arr-icao',
+    'fp-dep-menu':'fp-dep-icao','fp-arr-menu':'fp-arr-icao',
+    'vol-dep-menu':'vol-dep','vol-dest-menu':'vol-dest',
+    'fp-wpt1-menu':'fp-wpt1','fp-wpt2-menu':'fp-wpt2','fp-wpt3-menu':'fp-wpt3'
+  };
+  ['aero-menu','att-aero-menu','c-dep-menu','c-arr-menu','fp-dep-menu','fp-arr-menu','vol-dep-menu','vol-dest-menu','fp-wpt1-menu','fp-wpt2-menu','fp-wpt3-menu'].forEach(id => {
     const m = document.getElementById(id);
     if (m && m.style.display !== 'none') {
-      const btn = m.previousElementSibling;
-      if (!m.contains(e.target) && e.target !== btn) m.style.display='none';
+      const btn = m.previousElementSibling; // le bouton ▾ qui précède le menu
+      const inp = document.getElementById(menuToInput[id]); // l'input ICAO correspondant
+      // Ne pas fermer si clic sur le menu, sur le bouton ▾, ou sur l'input ICAO
+      if (!m.contains(e.target) && e.target !== btn && e.target !== inp) {
+        m.style.display='none';
+      }
     }
   });
 });
@@ -2873,7 +3103,7 @@ function updateFPRoute() {
 function getCarbuDep() {
   const sel = document.getElementById('c-dep-select');
   if(sel && sel.value && sel.value !== '_autre') return sel.value;
-  return (document.getElementById('c-dep-icao')?.value || '').toUpperCase() || 'LFPN';
+  return (document.getElementById('c-dep-icao')?.value || '').toUpperCase();
 }
 function getCarbuArr() {
   const sel = document.getElementById('c-arr-select');
@@ -3197,11 +3427,7 @@ function syncMassesFromCentrage(){
       if(lbl) lbl.textContent = v + ' kg';
       if(typeof compute === 'function') compute();
     }
-    const ind = document.getElementById('mass-auto-ind');
-    if(ind){
-      ind.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#16213e" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> auto';
-      ind.style.color = '#16213e';
-    }
+    if(typeof setMassMode === 'function') setMassMode('dec','auto');
   }
   // Bornes du slider atterrissage (550..750)
   const slAtt = document.getElementById('att-mass');
@@ -3213,11 +3439,7 @@ function syncMassesFromCentrage(){
       if(lbl) lbl.textContent = v + ' kg';
       if(typeof computeAtt === 'function') computeAtt();
     }
-    const ind = document.getElementById('att-mass-auto-ind');
-    if(ind){
-      ind.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#16213e" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> auto';
-      ind.style.color = '#16213e';
-    }
+    if(typeof setMassMode === 'function') setMassMode('att','auto');
   }
 }
 
@@ -3289,6 +3511,12 @@ window.addEventListener('DOMContentLoaded', () => {
   var arrI=document.getElementById('c-arr-icao'),volArr=document.getElementById('vol-dest');
   if(arrI&&volArr&&arrI.value)volArr.value=arrI.value;
 
+  // 7c. Lookup automatique des élévations d'aérodrome au chargement
+  // pour que AERO_ELEV_DEC / AERO_ELEV_ATT soient à jour dès le départ
+  // et que la ZP soit correctement calculée même sans modification manuelle
+  if (volDep && volDep.value && typeof lookupAeroElev === 'function') lookupAeroElev(volDep.value, 'dep');
+  if (volArr && volArr.value && typeof lookupAeroElev === 'function') lookupAeroElev(volArr.value, 'arr');
+
   // 8. Brancher auto-save sur tous les inputs (change = fin d'edition, input = sliders)
   document.querySelectorAll('input, select').forEach(el => {
     el.addEventListener('change', autoSave);
@@ -3344,6 +3572,27 @@ function resetVol() {
   AERO_ELEV_DEC = null;
   AERO_ELEV_ATT = null;
 
+  // ── Plan de vol : vider tous les champs (CDB, date, waypoints, anciens fp-dep/fp-arr) ─
+  ['fp-cdb','fp-date','fp-wpt1','fp-wpt2','fp-wpt3','fp-dep','fp-arr','nom-voyage'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.value = '';
+  });
+  // Vider aussi le récapitulatif route affiché
+  const fpRoute = document.getElementById('fp-route-display');
+  if (fpRoute) fpRoute.textContent = '—';
+  // Vider le nom du voyage si présent
+  const fpVoyage = document.getElementById('fp-voyage');
+  if (fpVoyage) fpVoyage.value = '';
+  // Vider CDB global aussi
+  const cdbGlobal = document.getElementById('vol-cdb');
+  if (cdbGlobal) cdbGlobal.value = '';
+  // Effacer le plan de vol persisté en localStorage
+  try { localStorage.removeItem(LS_KEY_FP); } catch(e) {}
+  // Recalculer / sauvegarder l'état vide
+  if (typeof updateFPRoute === 'function') updateFPRoute();
+  if (typeof saveFP === 'function') saveFP();
+
   // ── Masse & Centrage ──────────────────────────────────
   setSlider('sl-p1', 75);  // pilote 75 kg
   setSlider('sl-p2', 75);  // passager 75 kg
@@ -3374,14 +3623,17 @@ function resetVol() {
   if (typeof computeAtt === 'function') computeAtt();
 
   // ── Indicateurs masse re-passent en mode "auto" après reset ──
-  ['mass-auto-ind','att-mass-auto-ind'].forEach(id=>{
-    const el = document.getElementById(id);
-    if(el){
-      el.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#16213e" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> auto';
-      el.style.color = '#16213e';
-    }
-  });
+  if (typeof setMassMode === 'function') {
+    setMassMode('dec', 'auto');
+    setMassMode('att', 'auto');
+  }
   if (typeof syncMassesFromCentrage === 'function') syncMassesFromCentrage();
+
+  // ── Indicateurs altitude pression : masquer (pas d'aérodrome → pas d'auto) ─
+  ['alt-auto-ind','att-alt-auto-ind','alt-resync-btn','att-alt-resync-btn'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.style.display = 'none';
+  });
 
   // ── Montée ────────────────────────────────────────────
   setSlider('mon-temp', 20); setSlider('mon-alt', 550);
@@ -3739,12 +3991,12 @@ function setPisteAtt(p){
 function computeAtt(){
   if(!document.getElementById("att-temp")) return; // onglet pas encore rendu
   const t  = +document.getElementById("att-temp").value;
-  const a  = +document.getElementById("att-alt").value;
+  const a  = getAltValue("att-alt"); // ZP exacte si poussée par applyQNH, sinon valeur du slider
   const m  = +document.getElementById("att-mass").value;
   const w  = +document.getElementById("att-wind").value;
 
   document.getElementById("att-tempVal").textContent = t+"°C";
-  document.getElementById("att-altVal").textContent  = a+" ft";
+  document.getElementById("att-altVal").textContent  = Math.round(a)+" ft";
   document.getElementById("att-massVal").textContent = m+" kg";
   document.getElementById("att-windVal").textContent = w+" kt";
 
@@ -4632,11 +4884,11 @@ function mF_mon(m){ return 1 + 0.00294*(750-m); } // calibre: 750kg=ref, 700kg=1
 function computeMontee(){
   if(!document.getElementById('mon-temp')) return;
   const t  = +document.getElementById('mon-temp').value;
-  const a  = +document.getElementById('mon-alt').value;
+  const a  = getAltValue('mon-alt'); // ZP exacte si poussée par applyQNH, sinon valeur du slider
   const m  = +document.getElementById('mon-mass').value;
 
   document.getElementById('mon-tempVal').textContent = t+'°C';
-  document.getElementById('mon-altVal').textContent  = a.toLocaleString('fr-FR')+' ft';
+  document.getElementById('mon-altVal').textContent  = Math.round(a).toLocaleString('fr-FR')+' ft';
   document.getElementById('mon-massVal').textContent = m+' kg';
 
   const ai = document.getElementById('mon-immat');
@@ -4759,9 +5011,9 @@ function autoFromCurve(curve, alt_dens, cw) {
 function computeAutonomie() {
   if(!document.getElementById('aut-temp')) return;
   const t   = +document.getElementById('aut-temp').value;
-  const alt = +document.getElementById('aut-alt').value;
+  const alt = getAltValue('aut-alt'); // ZP exacte si poussée par applyQNH, sinon valeur du slider
   document.getElementById('aut-tempVal').textContent = t+'°C';
-  document.getElementById('aut-altVal').textContent  = alt.toLocaleString('fr-FR')+' ft';
+  document.getElementById('aut-altVal').textContent  = Math.round(alt).toLocaleString('fr-FR')+' ft';
   const ai = document.getElementById('aut-immat');
   if(ai) ai.value = avionActuel;
 
@@ -5003,8 +5255,8 @@ function buildPrepaPage(immat, date, cdb, dest) {
   // QNH et ZP pour Départ et Arrivée
   const pQnhDep = document.getElementById('qnh-dep-input')?.value || '1013';
   const pQnhArr = document.getElementById('qnh-arr-input')?.value || '1013';
-  const pZpDep  = (() => { const q=parseInt(pQnhDep); const e=AERO_ELEV_DEC; return (q>=950&&q<=1050&&e!=null)?Math.round(snapTo50((1013-q)*28+e)):null; })();
-  const pZpArr  = (() => { const q=parseInt(pQnhArr); const e=AERO_ELEV_ATT; return (q>=950&&q<=1050&&e!=null)?Math.round(snapTo50((1013-q)*28+e)):null; })();
+  const pZpDep  = (() => { const q=parseInt(pQnhDep); const e=AERO_ELEV_DEC; return (q>=950&&q<=1050&&e!=null)?Math.round((1013-q)*28+e):null; })();
+  const pZpArr  = (() => { const q=parseInt(pQnhArr); const e=AERO_ELEV_ATT; return (q>=950&&q<=1050&&e!=null)?Math.round((1013-q)*28+e):null; })();
   const pZpDepStr = pZpDep!=null ? pZpDep.toLocaleString('fr-FR')+' ft' : '—';
   const pZpArrStr = pZpArr!=null ? pZpArr.toLocaleString('fr-FR')+' ft' : '—';
   const cConso = document.getElementById('c-conso')?.value || document.getElementById('conso')?.value || '—';
@@ -5291,8 +5543,8 @@ function printPreparation() {
       // QNH et ZP pour Départ et Arrivée
       const cQnhDep = document.getElementById('qnh-dep-input')?.value || '1013';
       const cQnhArr = document.getElementById('qnh-arr-input')?.value || '1013';
-      const cZpDep  = (() => { const q=parseInt(cQnhDep); const e=AERO_ELEV_DEC; return (q>=950&&q<=1050&&e!=null)?Math.round(snapTo50((1013-q)*28+e)):null; })();
-      const cZpArr  = (() => { const q=parseInt(cQnhArr); const e=AERO_ELEV_ATT; return (q>=950&&q<=1050&&e!=null)?Math.round(snapTo50((1013-q)*28+e)):null; })();
+      const cZpDep  = (() => { const q=parseInt(cQnhDep); const e=AERO_ELEV_DEC; return (q>=950&&q<=1050&&e!=null)?Math.round((1013-q)*28+e):null; })();
+      const cZpArr  = (() => { const q=parseInt(cQnhArr); const e=AERO_ELEV_ATT; return (q>=950&&q<=1050&&e!=null)?Math.round((1013-q)*28+e):null; })();
       const cZpDepStr = cZpDep!=null ? cZpDep.toLocaleString('fr-FR')+' ft' : '—';
       const cZpArrStr = cZpArr!=null ? cZpArr.toLocaleString('fr-FR')+' ft' : '—';
       tabBanner = `<div style="display:grid;grid-template-columns:1fr 1.4fr 1fr 1fr 1fr 1fr;gap:4px;margin-bottom:4px;font-size:8px;">
@@ -5407,7 +5659,7 @@ function printPreparation() {
       const perfISA   = document.getElementById('detISA')?.textContent || '—';
       const perfPisteNec = document.getElementById('piste-nec-dec')?.textContent || '—';
       const perfQNH = document.getElementById('qnh-dep-input')?.value || '1013';
-      const perfZP  = (() => { const q=parseInt(perfQNH); const e=AERO_ELEV_DEC??0; return (q>=950&&q<=1050&&e)?Math.round(snapTo50((1013-q)*28+e)):null; })();
+      const perfZP  = (() => { const q=parseInt(perfQNH); const e=AERO_ELEV_DEC; return (q>=950&&q<=1050&&e!=null)?Math.round((1013-q)*28+e):null; })();
       tabBanner = `<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr 1fr;gap:4px;margin-bottom:4px;font-size:8px;">
         <div style="background:#f0f4ff;border:1px solid #bee3f8;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
           <div style="font-size:6px;font-weight:700;color:#3182ce;text-transform:uppercase;margin-bottom:1px;">Conditions</div>
@@ -5471,7 +5723,7 @@ function printPreparation() {
       const attPisteNec = document.getElementById('att-piste-nec')?.textContent || '—';
       const attMarge = MARGE_ATT || 30;
       const attQNH = document.getElementById('qnh-arr-input')?.value || '1013';
-      const attZP  = (() => { const q=parseInt(attQNH); const e=AERO_ELEV_ATT??0; return (q>=950&&q<=1050&&e)?Math.round(snapTo50((1013-q)*28+e)):null; })();
+      const attZP  = (() => { const q=parseInt(attQNH); const e=AERO_ELEV_ATT; return (q>=950&&q<=1050&&e!=null)?Math.round((1013-q)*28+e):null; })();
       tabBanner = `<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr 1fr;gap:4px;margin-bottom:4px;font-size:8px;">
         <div style="background:#f0f4ff;border:1px solid #bee3f8;border-radius:4px;padding:3px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
           <div style="font-size:6px;font-weight:700;color:#3182ce;text-transform:uppercase;margin-bottom:1px;">Conditions</div>
@@ -6018,9 +6270,13 @@ let qnhArrTouched = false;
 function snapTo50(val) { return Math.round(val / 50) * 50; }
 
 // Calculer la ZP à partir du QNH et d'une élévation
+// Retourne la valeur EXACTE (entière, sans arrondi au 50 ft)
+// elev = 0 est valide (aérodromes côtiers au niveau de la mer)
+// Seul un QNH invalide ou une élévation null/undefined retourne null
 function calcZP(qnh, elev) {
-  if (!qnh || isNaN(qnh) || !elev) return null;
-  return snapTo50(Math.round((1013 - qnh) * 28 + elev));
+  if (!qnh || isNaN(qnh) || qnh < 950 || qnh > 1050) return null;
+  if (elev == null || isNaN(elev)) return null;
+  return Math.round((1013 - qnh) * 28 + elev);
 }
 
 // Appliquer une valeur d'altitude pression à un slider + recalcul
@@ -6030,7 +6286,79 @@ function setAltSlider(sliderId, valId, value, min, max) {
   if (!sl) return;
   const clamped = Math.max(min, Math.min(max, value));
   sl.value = clamped;
+  // Stocker la valeur EXACTE comme propriété sur le slider, pour que compute()/computeAtt() etc.
+  // utilisent cette valeur précise (au ft près) plutôt que la valeur arrondie au step:50 du slider
+  sl._exactZP = clamped;
   if (lbl) lbl.textContent = clamped.toLocaleString('fr-FR') + ' ft';
+}
+
+// Helper : lit la valeur effective d'un slider d'altitude
+// Si le slider a une ZP exacte définie (poussée par applyQNH), on l'utilise pour les calculs
+// Sinon on lit la valeur du slider (arrondie au step:50 si l'utilisateur l'a manipulé manuellement)
+function getAltValue(sliderId) {
+  const sl = document.getElementById(sliderId);
+  if (!sl) return 0;
+  // Si l'utilisateur a manipulé le slider manuellement, sl.value diffère de _exactZP
+  // Dans ce cas on respecte la valeur courante du slider (l'utilisateur a pris la main)
+  const sliderVal = +sl.value;
+  if (sl._exactZP != null && Math.abs(sliderVal - Math.round(sl._exactZP / 50) * 50) < 0.5) {
+    // Le slider est à la valeur arrondie correspondant à _exactZP → on utilise la valeur exacte
+    return sl._exactZP;
+  }
+  // Sinon l'utilisateur a manipulé le slider, on utilise la valeur courante
+  return sliderVal;
+}
+
+// Met à jour l'indicateur auto/manuel à côté de l'Altitude pression (Décollage / Atterrissage)
+// which : 'dec' ou 'att'
+// mode  : 'auto' ou 'manuel'
+function updateAltAutoInd(which, mode) {
+  const indId = which === 'dec' ? 'alt-auto-ind' : 'att-alt-auto-ind';
+  const btnId = which === 'dec' ? 'alt-resync-btn' : 'att-alt-resync-btn';
+  const ind = document.getElementById(indId);
+  const btn = document.getElementById(btnId);
+  if (!ind) return;
+  if (mode === 'auto') {
+    ind.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#16213e" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> auto';
+    ind.style.color = '#16213e';
+    ind.style.display = 'inline-flex';
+    if (btn) btn.style.display = 'none'; // pas besoin de resync en mode auto
+  } else {
+    ind.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#e94560" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> manuel';
+    ind.style.color = '#e94560';
+    ind.style.display = 'inline-flex';
+    if (btn) btn.style.display = 'inline-flex'; // bouton resync visible en mode manuel
+  }
+}
+
+// Resynchronise le slider d'altitude pression sur la ZP calculée depuis le QNH + élévation
+// which : 'dec' ou 'att'
+function resyncAlt(which) {
+  // applyQNH() repousse les ZP exactes sur tous les sliders (alt, att-alt, mon-alt, aut-alt)
+  if (typeof applyQNH === 'function') applyQNH();
+  // Mettre à jour les indicateurs
+  updateAltAutoInd('dec', 'auto');
+  updateAltAutoInd('att', 'auto');
+}
+
+// Met à jour l'indicateur auto/manuel à côté du label "Masse" (Décollage / Atterrissage)
+// which : 'dec' ou 'att'
+// mode  : 'auto' ou 'manuel'
+function setMassMode(which, mode) {
+  const indId = which === 'dec' ? 'mass-auto-ind' : 'att-mass-auto-ind';
+  const btnId = which === 'dec' ? 'mass-resync-btn' : 'att-mass-resync-btn';
+  const ind = document.getElementById(indId);
+  const btn = document.getElementById(btnId);
+  if (!ind) return;
+  if (mode === 'auto') {
+    ind.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#16213e" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> auto';
+    ind.style.color = '#16213e';
+    if (btn) btn.style.display = 'none'; // pas besoin de resync en mode auto
+  } else {
+    ind.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#e94560" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> manuel';
+    ind.style.color = '#e94560';
+    if (btn) btn.style.display = 'inline-flex'; // bouton resync visible en mode manuel
+  }
 }
 
 // Mettre à jour les indicateurs ZP (entre parenthèses) sur tous les onglets
@@ -6114,9 +6442,9 @@ function applyQNH() {
   const zpAtt = validArr ? calcZP(qnhArr, elevAtt) : null;
 
   // Décollage slider (max 8000) — utilise QNH Dép.
-  if (zpDec !== null) { setAltSlider('alt', 'altVal', zpDec, 0, 8000); compute(); }
+  if (zpDec !== null) { setAltSlider('alt', 'altVal', zpDec, 0, 8000); updateAltAutoInd('dec','auto'); compute(); }
   // Atterrissage slider (max 8000) — utilise QNH Arr.
-  if (zpAtt !== null) { setAltSlider('att-alt', 'att-altVal', zpAtt, 0, 8000); computeAtt(); }
+  if (zpAtt !== null) { setAltSlider('att-alt', 'att-altVal', zpAtt, 0, 8000); updateAltAutoInd('att','auto'); computeAtt(); }
   // Montée (max 14000) — utilise QNH Dép.
   if (zpDec !== null) { setAltSlider('mon-alt', 'mon-altVal', zpDec, 0, 14000); computeMontee(); }
   // Autonomie (max 14000) — utilise QNH Dép.
@@ -6145,6 +6473,24 @@ function snapAltToAero(menuId, aero) {
   }
 }
 
+// Lookup automatique de l'élévation d'aérodrome à partir d'un ICAO saisi
+// Met à jour AERO_ELEV_DEC ou AERO_ELEV_ATT puis recalcule les ZP
+// side : 'dep' ou 'arr'
+function lookupAeroElev(icao, side) {
+  if (!icao || typeof icao !== 'string') return;
+  const code = icao.trim().toUpperCase();
+  if (code.length !== 4) return; // Ne lookup que sur ICAO complet (4 caractères)
+  if (typeof AERODROMES === 'undefined') return;
+  const aero = AERODROMES.find(x => x.icao === code);
+  if (!aero || aero.elev == null) return;
+  if (side === 'dep') {
+    AERO_ELEV_DEC = aero.elev;
+  } else if (side === 'arr') {
+    AERO_ELEV_ATT = aero.elev;
+  }
+  applyQNH(); // recalcule les ZP avec la nouvelle élévation
+}
+
 function setMargeDec(pct) {
   MARGE_DEC = pct;
   [15,30,50].forEach(v => {
@@ -6160,12 +6506,12 @@ function setMargeDec(pct) {
 function compute(){
   if(!document.getElementById("temp")) return;
   const t=+document.getElementById("temp").value;
-  const a=+document.getElementById("alt").value;
+  const a=getAltValue("alt"); // ZP exacte si poussée par applyQNH, sinon valeur du slider
   const m=+document.getElementById("mass").value;
   const w=+document.getElementById("wind").value;
 
   document.getElementById("tempVal").textContent=t+"°C";
-  document.getElementById("altVal").textContent=a.toLocaleString("fr-FR")+" ft";
+  document.getElementById("altVal").textContent=Math.round(a).toLocaleString("fr-FR")+" ft";
   document.getElementById("massVal").textContent=m+" kg";
   document.getElementById("windVal").textContent=w+" kt";
 
