@@ -771,7 +771,7 @@ canvas{display:block;max-width:100%;}
 
 <!-- ===== ÉCRAN DE LOGIN ===== -->
 <div id="login-screen">
-  <div id="login-box">
+  <div id="login-box" data-form="login">
     <div class="login-logo">
       <div class="tag">AQUILA</div>
       <h2>AT01 — Préparation de vol</h2>
@@ -803,6 +803,109 @@ canvas{display:block;max-width:100%;}
     <button id="login-btn" onclick="doLogin()"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:7px"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4 19-7z"/></svg>Accéder à l'application</button>
     <div id="login-error">Identifiants incorrects — accès refusé</div>
     <div id="login-session-info">Session conservée sur cet appareil</div>
+    <!-- Lien Créer un compte -->
+    <div style="text-align:center;margin-top:14px;font-size:12px;color:#a0aec0;">
+      Pas encore de compte ?
+      <a href="#" onclick="event.preventDefault();showSignup()" style="color:#e94560;text-decoration:none;font-weight:700;margin-left:4px;">Créer un compte</a>
+    </div>
+  </div>
+
+  <!-- Formulaire de création de compte -->
+  <div class="login-card" id="signup-card" style="display:none;">
+    <div class="login-logo">
+      <div class="tag">AQUILA</div>
+      <h2>Créer un compte</h2>
+      <div class="sub">Inscription pilote — Compte utilisateur</div>
+    </div>
+    <div class="login-field">
+      <label>Prénom & Nom</label>
+      <input type="text" id="signup-name" placeholder="Jean Dupont"
+        onkeydown="if(event.key==='Enter')document.getElementById('signup-club').focus()">
+    </div>
+    <div class="login-field">
+      <label>Aéroclub</label>
+      <input type="text" id="signup-club" placeholder="Aéroclub de Vincennes"
+        onkeydown="if(event.key==='Enter')document.getElementById('signup-email').focus()">
+    </div>
+    <div class="login-field">
+      <label>Adresse e-mail</label>
+      <input type="email" id="signup-email" placeholder="votre@email.com"
+        onkeydown="if(event.key==='Enter')document.getElementById('signup-pwd').focus()">
+    </div>
+    <div class="login-field">
+      <label>Mot de passe (min. 6 caractères)</label>
+      <div style="position:relative;">
+        <input type="password" id="signup-pwd" placeholder="••••••••"
+          style="padding-right:42px;"
+          onkeydown="if(event.key==='Enter')document.getElementById('signup-pwd2').focus()">
+        <button type="button" onclick="toggleSignupPwd('signup-pwd','signup-pwd-eye-show','signup-pwd-eye-hide')"
+          aria-label="Afficher le mot de passe"
+          style="position:absolute;right:6px;top:50%;transform:translateY(-50%);background:transparent;border:none;cursor:pointer;padding:6px;display:flex;align-items:center;justify-content:center;color:#a0aec0;border-radius:4px;transition:color .15s;"
+          onmouseenter="this.style.color='#fff'" onmouseleave="this.style.color='#a0aec0'">
+          <svg id="signup-pwd-eye-show" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+          <svg id="signup-pwd-eye-hide" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" y1="2" x2="22" y2="22"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="login-field">
+      <label>Confirmer le mot de passe</label>
+      <input type="password" id="signup-pwd2" placeholder="••••••••"
+        onkeydown="if(event.key==='Enter')document.getElementById('signup-captcha').focus()">
+    </div>
+    <!-- Captcha mathématique anti-spam -->
+    <div class="login-field">
+      <label>Vérification anti-spam — <span id="signup-captcha-q" style="color:#fff;font-weight:800;">…</span></label>
+      <input type="number" id="signup-captcha" placeholder="Réponse"
+        onkeydown="if(event.key==='Enter')doSignup()">
+    </div>
+    <button id="signup-btn" onclick="doSignup()"
+      style="width:100%;padding:12px;background:linear-gradient(135deg,#e94560,#c53030);border:none;border-radius:8px;color:white;font-size:14px;font-weight:800;letter-spacing:.5px;cursor:pointer;">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:7px"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+      Créer mon compte
+    </button>
+    <div id="signup-error" style="display:none;color:#fc8181;font-size:12px;margin-top:10px;text-align:center;font-weight:600;"></div>
+    <div style="text-align:center;margin-top:14px;font-size:12px;color:#a0aec0;">
+      Déjà un compte ?
+      <a href="#" onclick="event.preventDefault();showLogin()" style="color:#e94560;text-decoration:none;font-weight:700;margin-left:4px;">Se connecter</a>
+    </div>
+  </div>
+
+  <!-- Écran "En attente de validation" (compte créé, pas encore activé) -->
+  <div class="login-card" id="pending-card" style="display:none;">
+    <div class="login-logo">
+      <div class="tag" style="background:#d69e2e;">EN ATTENTE</div>
+      <h2>Inscription à valider</h2>
+      <div class="sub" id="pending-subtitle">Bonjour <span id="pending-name">…</span></div>
+    </div>
+    <div style="background:rgba(214,158,46,0.12);border:1px solid rgba(214,158,46,0.4);border-radius:8px;padding:14px;margin-bottom:16px;font-size:12px;color:#fbd38d;line-height:1.6;">
+      <strong style="color:#fff;display:block;margin-bottom:6px;">Étape 1 — Demander la validation</strong>
+      Cliquez sur le bouton ci-dessous pour envoyer une demande de validation à l'administrateur. Vous recevrez en retour un <strong>code à 6 chiffres</strong>.
+    </div>
+    <button onclick="sendValidationEmail()"
+      style="width:100%;padding:11px;background:linear-gradient(135deg,#3182ce,#2c5282);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:800;letter-spacing:.3px;cursor:pointer;margin-bottom:18px;display:flex;align-items:center;justify-content:center;gap:8px;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      Envoyer ma demande par e-mail
+    </button>
+    <div style="background:rgba(72,187,120,0.10);border:1px solid rgba(72,187,120,0.4);border-radius:8px;padding:14px;margin-bottom:14px;font-size:12px;color:#9ae6b4;line-height:1.6;">
+      <strong style="color:#fff;display:block;margin-bottom:6px;">Étape 2 — Saisir le code reçu</strong>
+      Une fois le code reçu de l'administrateur, saisissez-le ci-dessous pour activer votre compte.
+    </div>
+    <div class="login-field">
+      <label>Code d'activation (6 chiffres)</label>
+      <input type="text" id="pending-code" placeholder="123456" maxlength="6" inputmode="numeric"
+        style="text-align:center;font-size:20px;font-weight:800;letter-spacing:6px;"
+        oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+        onkeydown="if(event.key==='Enter')activatePending()">
+    </div>
+    <button onclick="activatePending()"
+      style="width:100%;padding:12px;background:linear-gradient(135deg,#48bb78,#276749);border:none;border-radius:8px;color:#fff;font-size:14px;font-weight:800;letter-spacing:.5px;cursor:pointer;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:7px;"><polyline points="20 6 9 17 4 12"/></svg>
+      Activer mon compte
+    </button>
+    <div id="pending-error" style="display:none;color:#fc8181;font-size:12px;margin-top:10px;text-align:center;font-weight:600;"></div>
+    <div style="text-align:center;margin-top:18px;font-size:11px;color:#718096;">
+      <a href="#" onclick="event.preventDefault();cancelPending()" style="color:#a0aec0;text-decoration:none;">← Retour à la connexion</a>
+    </div>
   </div>
 </div>
 
@@ -7188,6 +7291,13 @@ function openAdmin() {
   document.getElementById('admin-panel').style.display = 'none';
   document.getElementById('admin-pwd').value = '';
   document.getElementById('admin-pwd-err').style.display = 'none';
+  // Réinitialiser le champ en mode masqué (œil ouvert visible)
+  const inp = document.getElementById('admin-pwd');
+  const iconShow = document.getElementById('admin-pwd-eye-show');
+  const iconHide = document.getElementById('admin-pwd-eye-hide');
+  if (inp) inp.type = 'password';
+  if (iconShow) iconShow.style.display = '';
+  if (iconHide) iconHide.style.display = 'none';
 }
 
 function closeAdmin() {
@@ -7200,10 +7310,121 @@ function checkAdminPwd() {
     document.getElementById('admin-auth').style.display = 'none';
     document.getElementById('admin-panel').style.display = 'block';
     adminLoadPanel();
+    _applyAdminRestrictions();
   } else {
     document.getElementById('admin-pwd-err').style.display = 'block';
     document.getElementById('admin-pwd').value = '';
   }
+}
+
+// Applique les restrictions sur la modale Admin :
+// - Si l'utilisateur connecté n'est pas l'admin (CURRENT_USER.email !== ADMIN_EMAIL),
+//   les sections "Données avions" et "Calibration nomogrammes" sont grisées et désactivées.
+// - La section "Données pilote — Validités" reste accessible (données personnelles à chaque utilisateur).
+function _applyAdminRestrictions() {
+  const isAdmin = !!(CURRENT_USER && CURRENT_USER.isAdmin);
+  const restrictedSections = ['admin-section-avions', 'admin-section-calib', 'admin-section-users'];
+  restrictedSections.forEach(secId => {
+    const sec = document.getElementById(secId);
+    if (!sec) return;
+    if (isAdmin) {
+      // Admin : tout débloqué
+      sec.style.opacity = '';
+      sec.style.pointerEvents = '';
+      sec.style.position = '';
+      // Retirer overlay éventuel
+      const ov = sec.querySelector('.admin-lock-overlay');
+      if (ov) ov.remove();
+      // Réactiver les inputs
+      sec.querySelectorAll('input, button, select, textarea').forEach(el => { el.disabled = false; });
+    } else {
+      // Non-admin : section grisée et verrouillée
+      sec.style.opacity = '0.55';
+      sec.style.position = 'relative';
+      sec.style.pointerEvents = 'none';
+      // Désactiver tous les inputs (sécurité supplémentaire)
+      sec.querySelectorAll('input, button, select, textarea').forEach(el => { el.disabled = true; });
+      // Ajouter un overlay avec icône cadenas si pas déjà présent
+      if (!sec.querySelector('.admin-lock-overlay')) {
+        const ov = document.createElement('div');
+        ov.className = 'admin-lock-overlay';
+        ov.style.cssText = 'position:absolute;top:6px;right:8px;display:flex;align-items:center;gap:6px;background:#fff;border:1px solid #cbd5e0;border-radius:6px;padding:4px 10px;font-size:10px;font-weight:700;color:#718096;text-transform:uppercase;letter-spacing:.4px;pointer-events:auto;';
+        ov.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Réservé administrateur';
+        sec.appendChild(ov);
+      }
+    }
+  });
+}
+
+// ===== GESTION DES UTILISATEURS (panneau admin) =====
+function _escHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function adminLoadUsers() {
+  const container = document.getElementById('admin-users-list');
+  const counter   = document.getElementById('admin-users-count');
+  if (!container) return;
+  const users = _getUsers();
+  // Filtrer pour ne pas afficher l'admin lui-même (pas de gestion sur soi)
+  const visible = users.filter(u => u.email !== ADMIN_EMAIL);
+  if (counter) {
+    const nbActive  = visible.filter(u => u.status === 'active').length;
+    const nbPending = visible.filter(u => u.status === 'pending').length;
+    counter.textContent = `${visible.length} utilisateur${visible.length > 1 ? 's' : ''} · ${nbActive} actif${nbActive > 1 ? 's' : ''} · ${nbPending} en attente`;
+  }
+  if (visible.length === 0) {
+    container.innerHTML = '<div style="text-align:center;padding:18px;color:#a0aec0;font-style:italic;font-size:12px;">Aucun utilisateur enregistré pour le moment.</div>';
+    return;
+  }
+  // Trier : pending en premier, puis par date de création décroissante
+  visible.sort((a, b) => {
+    if (a.status === 'pending' && b.status !== 'pending') return -1;
+    if (b.status === 'pending' && a.status !== 'pending') return 1;
+    return (b.createdAt || 0) - (a.createdAt || 0);
+  });
+  container.innerHTML = visible.map(u => {
+    const isPending = u.status === 'pending';
+    const statusBadge = isPending
+      ? '<span style="background:#fef3c7;color:#92400e;border:1px solid #fbbf24;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;">En attente</span>'
+      : '<span style="background:#d1fae5;color:#065f46;border:1px solid #6ee7b7;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;">Actif</span>';
+    const dateStr = u.createdAt ? new Date(u.createdAt).toLocaleDateString('fr-FR') : '—';
+    return `
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:8px;padding:10px;background:#f7f8fa;border:1px solid #e2e8f0;border-radius:7px;">
+        <div style="flex:1;min-width:160px;">
+          <div style="font-weight:700;color:#1a1a2e;font-size:13px;">${_escHtml(u.name)} ${statusBadge}</div>
+          <div style="font-size:11px;color:#718096;margin-top:2px;">${_escHtml(u.email)}</div>
+          ${u.club ? `<div style="font-size:10px;color:#a0aec0;margin-top:1px;">Club : ${_escHtml(u.club)} · Inscrit le ${dateStr}</div>` : `<div style="font-size:10px;color:#a0aec0;margin-top:1px;">Inscrit le ${dateStr}</div>`}
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          ${isPending ? `<button onclick="adminCalcCode('${_escHtml(u.email)}')" style="padding:5px 11px;background:#3182ce;color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:11px;font-weight:700;">🔑 Calculer le code</button>` : ''}
+          <button onclick="adminDeleteUser('${_escHtml(u.email)}')" style="padding:5px 11px;background:#fff;color:#e53e3e;border:1px solid #e53e3e;border-radius:5px;cursor:pointer;font-size:11px;font-weight:600;">Supprimer</button>
+        </div>
+        <div id="admin-code-${_escHtml(u.email).replace(/[^a-zA-Z0-9]/g,'_')}" style="flex:0 0 100%;"></div>
+      </div>`;
+  }).join('');
+}
+
+async function adminCalcCode(email) {
+  const code = await _computeActivationCode(email);
+  const slotId = 'admin-code-' + email.replace(/[^a-zA-Z0-9]/g, '_');
+  const slot = document.getElementById(slotId);
+  if (slot) {
+    slot.innerHTML = `
+      <div style="margin-top:8px;padding:10px 12px;background:#ebf8ff;border:1px solid #90cdf4;border-radius:6px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <div style="font-size:11px;color:#2c5282;font-weight:600;">Code d'activation pour <strong>${_escHtml(email)}</strong> :</div>
+        <div style="font-family:monospace;font-size:18px;font-weight:800;color:#1a1a2e;letter-spacing:5px;background:#fff;padding:4px 12px;border-radius:5px;border:1px solid #cbd5e0;">${code}</div>
+        <button onclick="navigator.clipboard.writeText('${code}').then(()=>{this.textContent='✓ Copié !';setTimeout(()=>this.textContent='Copier le code',1500)})" style="padding:5px 11px;background:#3182ce;color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:11px;font-weight:700;">Copier le code</button>
+      </div>`;
+  }
+}
+
+function adminDeleteUser(email) {
+  if (email === ADMIN_EMAIL) { alert('Impossible de supprimer le compte administrateur.'); return; }
+  if (!confirm(`Supprimer définitivement le compte « ${email} » ?\n\nL'utilisateur ne pourra plus se connecter et devra recréer un compte s'il revient.`)) return;
+  const users = _getUsers().filter(u => u.email !== email);
+  _saveUsers(users);
+  adminLoadUsers();
 }
 
 function adminLoadPanel() {
@@ -7226,6 +7447,9 @@ function adminLoadPanel() {
         </div>
       </div>`;
   });
+
+  // Remplir aussi la liste des utilisateurs (réservée admin via _applyAdminRestrictions)
+  adminLoadUsers();
 
   // Remplir les donnees pilote
   const pilote = lsLoad(LS_KEY_PILOTE, {});
@@ -7334,9 +7558,19 @@ document.addEventListener('DOMContentLoaded', function() {
           <div style="font-size:14px;color:#1a1a2e;font-weight:700;margin-bottom:8px;">Accès protégé</div>
           <div style="font-size:12px;color:#718096;margin-bottom:14px;">Mot de passe requis pour modifier les données avion</div>
           <div style="display:flex;gap:8px;justify-content:center;">
-            <input type="password" id="admin-pwd" placeholder="Mot de passe"
-              style="padding:8px 12px;border:1px solid #cbd5e0;border-radius:6px;font-size:13px;width:180px;"
-              onkeydown="if(event.key==='Enter') checkAdminPwd()">
+            <div style="position:relative;width:180px;">
+              <input type="password" id="admin-pwd" placeholder="Mot de passe"
+                style="padding:8px 38px 8px 12px;border:1px solid #cbd5e0;border-radius:6px;font-size:13px;width:100%;box-sizing:border-box;"
+                onkeydown="if(event.key==='Enter') checkAdminPwd()">
+              <button type="button" id="admin-pwd-toggle" onclick="toggleAdminPwd()"
+                aria-label="Afficher le mot de passe"
+                style="position:absolute;right:4px;top:50%;transform:translateY(-50%);background:transparent;border:none;cursor:pointer;padding:6px;display:flex;align-items:center;justify-content:center;color:#718096;border-radius:4px;transition:color .15s;"
+                onmouseenter="this.style.color='#1a1a2e'"
+                onmouseleave="this.style.color='#718096'">
+                <svg id="admin-pwd-eye-show" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg id="admin-pwd-eye-hide" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" y1="2" x2="22" y2="22"/></svg>
+              </button>
+            </div>
             <button onclick="checkAdminPwd()"
               style="padding:8px 16px;background:#e94560;color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:700;">Entrer</button>
           </div>
@@ -7353,7 +7587,7 @@ document.addEventListener('DOMContentLoaded', function() {
       <!-- Panneau admin -->
       <div id="admin-panel" style="display:none;">
 
-        <div style="margin-bottom:18px;">
+        <div id="admin-section-avions" style="margin-bottom:18px;">
           <div style="font-size:11px;font-weight:700;color:#e94560;text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px;border-bottom:1px solid #fee2e2;padding-bottom:6px;">Données avions — Masse vide &amp; Bras CG</div>
           <div id="admin-avions-list"></div>
           <div style="font-size:10px;color:#718096;margin-top:6px;background:#f7f8fa;padding:6px 10px;border-radius:6px;">Valeurs issues de la fiche de pesée officielle. Ne modifier qu'après pesée agréée.</div>
@@ -7390,7 +7624,7 @@ document.addEventListener('DOMContentLoaded', function() {
           </div>
         </div>
 
-        <div style="margin-bottom:18px;">
+        <div id="admin-section-calib" style="margin-bottom:18px;">
           <div style="font-size:11px;font-weight:700;color:#e94560;text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px;border-bottom:1px solid #fee2e2;padding-bottom:6px;">Calibration nomogrammes</div>
           <div style="background:#fffbeb;border:1px solid #d69e2e;border-radius:6px;padding:10px 12px;font-size:11px;color:#744210;line-height:1.7;">
             <strong>Décollage</strong> — Image source : <code>${CAL_DECO.IMG_W}px</code>
@@ -7405,6 +7639,18 @@ document.addEventListener('DOMContentLoaded', function() {
             · V: ${CAL_ATT.V_X_0KT}–${CAL_ATT.V_X_20KT}px
             · Y: ${CAL_ATT.R_Y_0M}–${CAL_ATT.R_Y_1000M}px<br>
             <em>Pour recalibrer si l'image source change : éditer les constantes <code>CAL_DECO</code> et <code>CAL_ATT</code> dans le source JS.</em>
+          </div>
+        </div>
+
+        <!-- ═══ Section Gestion utilisateurs (admin uniquement) ═══ -->
+        <div id="admin-section-users" style="margin-bottom:18px;">
+          <div style="font-size:11px;font-weight:700;color:#e94560;text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px;border-bottom:1px solid #fee2e2;padding-bottom:6px;display:flex;justify-content:space-between;align-items:center;">
+            <span>Gestion des utilisateurs</span>
+            <span id="admin-users-count" style="font-size:10px;color:#718096;font-weight:600;letter-spacing:.3px;text-transform:none;"></span>
+          </div>
+          <div id="admin-users-list" style="font-size:12px;"></div>
+          <div style="font-size:10px;color:#718096;margin-top:8px;background:#f7f8fa;padding:6px 10px;border-radius:6px;line-height:1.5;">
+            Les comptes en attente sont créés à l'inscription. Cliquez sur <strong>Calculer le code</strong> pour obtenir le code à 6 chiffres à transmettre par e-mail au pilote.
           </div>
         </div>
 
@@ -7604,12 +7850,12 @@ function clearHist() {
   renderHistList();
 }
 
-// ===== AUTHENTIFICATION =====
-const AUTH_EMAIL    = 'alexandre.kilinc@gmail.com';
-const AUTH_PWD      = 'Racalefly';
-const AUTH_NAME     = 'Alexandre KILINC';
-const AUTH_INITIALS = 'AK';
+// ===== AUTHENTIFICATION MULTI-UTILISATEURS =====
+// Email admin : seul ce compte a accès aux sections sensibles
+// (Données avions, Calibration nomogrammes)
+const ADMIN_EMAIL = 'alexandre.kilinc@gmail.com';
 const LS_AUTH    = 'aquila_auth_v1';
+const LS_USERS   = 'aquila_users_v1';
 
 // Bascule l'affichage du mot de passe (champ visible / masqué) sur l'écran de connexion
 function toggleLoginPwd() {
@@ -7631,13 +7877,289 @@ function toggleLoginPwd() {
   }
 }
 
-function doLogin() {
+// Bascule l'affichage du mot de passe sur la modale Admin
+function toggleAdminPwd() {
+  const inp = document.getElementById('admin-pwd');
+  const btn = document.getElementById('admin-pwd-toggle');
+  const iconShow = document.getElementById('admin-pwd-eye-show');
+  const iconHide = document.getElementById('admin-pwd-eye-hide');
+  if (!inp || !iconShow || !iconHide) return;
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    iconShow.style.display = 'none';
+    iconHide.style.display = '';
+    if (btn) btn.setAttribute('aria-label', 'Masquer le mot de passe');
+  } else {
+    inp.type = 'password';
+    iconShow.style.display = '';
+    iconHide.style.display = 'none';
+    if (btn) btn.setAttribute('aria-label', 'Afficher le mot de passe');
+  }
+}
+
+// Bascule visibilité d'un mot de passe sur le formulaire signup (générique)
+function toggleSignupPwd(inputId, iconShowId, iconHideId) {
+  const inp = document.getElementById(inputId);
+  const iconShow = document.getElementById(iconShowId);
+  const iconHide = document.getElementById(iconHideId);
+  if (!inp || !iconShow || !iconHide) return;
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    iconShow.style.display = 'none';
+    iconHide.style.display = '';
+  } else {
+    inp.type = 'password';
+    iconShow.style.display = '';
+    iconHide.style.display = 'none';
+  }
+}
+
+// Hashage SHA-256 du mot de passe (évite stockage en clair, mais sécurité limitée vu que tout est côté client)
+async function _hashPwd(pwd) {
+  try {
+    const enc = new TextEncoder();
+    const buf = await crypto.subtle.digest('SHA-256', enc.encode(pwd));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+  } catch(e) {
+    return 'plain:' + pwd;
+  }
+}
+
+// Liste des utilisateurs stockée localement
+function _getUsers() {
+  try { return JSON.parse(localStorage.getItem(LS_USERS) || '[]'); }
+  catch(e) { return []; }
+}
+function _saveUsers(users) {
+  try { localStorage.setItem(LS_USERS, JSON.stringify(users)); } catch(e){}
+}
+
+// Garantit qu'un compte admin existe (création silencieuse au 1er chargement
+// avec le mot de passe historique 'Racalefly' pour assurer la migration douce)
+async function _ensureAdminAccount() {
+  const users = _getUsers();
+  if (users.find(u => u.email === ADMIN_EMAIL)) return;
+  const pwdHash = await _hashPwd('Racalefly');
+  users.push({
+    email: ADMIN_EMAIL,
+    name: 'Alexandre KILINC',
+    initials: 'AK',
+    pwdHash: pwdHash,
+    createdAt: Date.now()
+  });
+  _saveUsers(users);
+}
+
+// Calcule les initiales à partir d'un nom complet
+function _computeInitials(name) {
+  const parts = (name || '').trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return '??';
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+// Variables de session (renseignées au login)
+let CURRENT_USER = null; // { email, name, initials, isAdmin }
+
+// Bascule affichage formulaires login / signup
+function showSignup() {
+  document.getElementById('login-box').style.display = 'none';
+  document.getElementById('signup-card').style.display = 'block';
+  document.getElementById('signup-error').style.display = 'none';
+  // Générer une nouvelle question captcha à chaque ouverture
+  _generateCaptcha();
+  // Reset captcha input
+  const cap = document.getElementById('signup-captcha');
+  if (cap) cap.value = '';
+}
+function showLogin() {
+  document.getElementById('signup-card').style.display = 'none';
+  document.getElementById('login-box').style.display = 'block';
+  document.getElementById('login-error').style.display = 'none';
+}
+
+// ===== CAPTCHA MATH ANTI-SPAM =====
+let _captchaAnswer = 0;
+function _generateCaptcha() {
+  const a = Math.floor(Math.random() * 9) + 1;  // 1-9
+  const b = Math.floor(Math.random() * 9) + 1;  // 1-9
+  _captchaAnswer = a + b;
+  const q = document.getElementById('signup-captcha-q');
+  if (q) q.textContent = `Combien font ${a} + ${b} ?`;
+}
+
+// ===== CODE D'ACTIVATION =====
+// Secret partagé connu de l'admin uniquement (côté code, légèrement obfusqué)
+// Pour changer le secret : modifier cette ligne (et les utilisateurs déjà actifs ne sont pas impactés)
+const _ACTIVATION_SECRET = atob('YWtfY2x1Yl9zZWNyZXRfMjAyNl9hcXVpbGE='); // = "ak_club_secret_2026_aquila"
+
+// Calcule un code 6 chiffres déterministe à partir d'un email + secret (HMAC-like)
+async function _computeActivationCode(email) {
+  const enc = new TextEncoder();
+  const data = enc.encode(_ACTIVATION_SECRET + '|' + email.toLowerCase().trim());
+  const hashBuf = await crypto.subtle.digest('SHA-256', data);
+  const bytes = new Uint8Array(hashBuf);
+  // Construire un nombre à partir des 4 premiers octets, modulo 1000000 → code à 6 chiffres
+  const num = (bytes[0] * 16777216 + bytes[1] * 65536 + bytes[2] * 256 + bytes[3]) >>> 0;
+  return String(num % 1000000).padStart(6, '0');
+}
+
+async function doSignup() {
+  const name  = (document.getElementById('signup-name').value || '').trim();
+  const club  = (document.getElementById('signup-club').value || '').trim();
+  const email = (document.getElementById('signup-email').value || '').trim().toLowerCase();
+  const pwd   = document.getElementById('signup-pwd').value || '';
+  const pwd2  = document.getElementById('signup-pwd2').value || '';
+  const captcha = parseInt(document.getElementById('signup-captcha').value || '', 10);
+  const errEl = document.getElementById('signup-error');
+  const showErr = (msg) => { errEl.textContent = msg; errEl.style.display = 'block'; };
+
+  if (name.length < 2)  return showErr('Veuillez saisir votre prénom et nom.');
+  if (club.length < 2)  return showErr('Veuillez indiquer votre aéroclub.');
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showErr('Adresse e-mail invalide.');
+  if (pwd.length < 6)   return showErr('Le mot de passe doit contenir au moins 6 caractères.');
+  if (pwd !== pwd2)     return showErr('Les deux mots de passe ne correspondent pas.');
+  if (captcha !== _captchaAnswer) {
+    _generateCaptcha();
+    document.getElementById('signup-captcha').value = '';
+    return showErr('Réponse anti-spam incorrecte. Une nouvelle question vient d\'être générée.');
+  }
+
+  await _ensureAdminAccount();
+  const users = _getUsers();
+  if (users.find(u => u.email === email)) return showErr('Un compte existe déjà avec cet e-mail.');
+
+  const pwdHash = await _hashPwd(pwd);
+  // Le compte admin est "active" d'office, les autres en "pending"
+  const isAdminEmail = (email === ADMIN_EMAIL);
+  users.push({
+    email: email,
+    name: name,
+    club: club,
+    initials: _computeInitials(name),
+    pwdHash: pwdHash,
+    status: isAdminEmail ? 'active' : 'pending',
+    createdAt: Date.now()
+  });
+  _saveUsers(users);
+
+  if (isAdminEmail) {
+    // Admin : connexion immédiate
+    CURRENT_USER = { email, name, initials: _computeInitials(name), isAdmin: true, status: 'active' };
+    try { localStorage.setItem(LS_AUTH, JSON.stringify({ email, ts: Date.now() })); } catch(e){}
+    showApp();
+  } else {
+    // Utilisateur normal : passer à l'écran "En attente"
+    _pendingUser = { email, name, club };
+    showPending();
+  }
+}
+
+// ===== ÉCRAN "EN ATTENTE DE VALIDATION" =====
+let _pendingUser = null; // { email, name, club } pour passage des info de signup → pending
+
+function showPending() {
+  document.getElementById('login-box').style.display = 'none';
+  document.getElementById('signup-card').style.display = 'none';
+  document.getElementById('pending-card').style.display = 'block';
+  document.getElementById('pending-error').style.display = 'none';
+  document.getElementById('pending-code').value = '';
+  // Affichage du nom
+  const nameEl = document.getElementById('pending-name');
+  if (nameEl && _pendingUser) nameEl.textContent = _pendingUser.name;
+}
+
+function cancelPending() {
+  document.getElementById('pending-card').style.display = 'none';
+  document.getElementById('login-box').style.display = 'block';
+}
+
+// Ouvre le client mail avec demande pré-remplie vers l'admin
+function sendValidationEmail() {
+  if (!_pendingUser) return;
+  const adminMail = 'alexandre.kilinc@gmail.com';
+  const subject = encodeURIComponent('AQUILA-Club — Demande de validation de compte');
+  const lines = [
+    'Bonjour Alexandre,',
+    '',
+    'Je viens de créer un compte sur AQUILA-Club et je sollicite la validation de mon inscription.',
+    '',
+    '── Informations du demandeur ──',
+    'Nom : ' + _pendingUser.name,
+    'Aéroclub : ' + _pendingUser.club,
+    'E-mail : ' + _pendingUser.email,
+    'Date de demande : ' + new Date().toLocaleString('fr-FR'),
+    '',
+    'Merci de me transmettre en retour le code d\'activation à 6 chiffres.',
+    '',
+    'Bien cordialement,',
+    _pendingUser.name
+  ];
+  const body = encodeURIComponent(lines.join('\n'));
+  window.location.href = `mailto:${adminMail}?subject=${subject}&body=${body}`;
+}
+
+// Active le compte si le code 6 chiffres saisi est correct
+async function activatePending() {
+  if (!_pendingUser) return;
+  const code = (document.getElementById('pending-code').value || '').trim();
+  const errEl = document.getElementById('pending-error');
+  const showErr = (msg) => { errEl.textContent = msg; errEl.style.display = 'block'; };
+
+  if (!/^\d{6}$/.test(code)) return showErr('Le code doit contenir exactement 6 chiffres.');
+
+  const expected = await _computeActivationCode(_pendingUser.email);
+  if (code !== expected) {
+    return showErr('Code d\'activation incorrect. Vérifiez avec l\'administrateur.');
+  }
+
+  // Code OK → activer le compte dans le store
+  const users = _getUsers();
+  const u = users.find(x => x.email === _pendingUser.email);
+  if (!u) return showErr('Compte introuvable. Veuillez recommencer l\'inscription.');
+  u.status = 'active';
+  u.activatedAt = Date.now();
+  _saveUsers(users);
+
+  // Connexion immédiate
+  CURRENT_USER = {
+    email: u.email,
+    name: u.name,
+    initials: u.initials || _computeInitials(u.name),
+    isAdmin: (u.email === ADMIN_EMAIL),
+    status: 'active'
+  };
+  try { localStorage.setItem(LS_AUTH, JSON.stringify({ email: u.email, ts: Date.now() })); } catch(e){}
+  _pendingUser = null;
+  document.getElementById('pending-card').style.display = 'none';
+  showApp();
+}
+
+async function doLogin() {
   const email = (document.getElementById('login-email').value || '').trim().toLowerCase();
   const pwd   = document.getElementById('login-pwd').value || '';
   const errEl = document.getElementById('login-error');
 
-  if (email === AUTH_EMAIL && pwd === AUTH_PWD) {
-    try { localStorage.setItem(LS_AUTH, JSON.stringify({ ok: true, ts: Date.now() })); } catch(e){}
+  await _ensureAdminAccount();
+  const users = _getUsers();
+  const user = users.find(u => u.email === email);
+  const pwdHash = await _hashPwd(pwd);
+
+  if (user && user.pwdHash === pwdHash) {
+    // Si compte en attente de validation : rediriger vers l'écran "En attente"
+    if (user.status === 'pending') {
+      _pendingUser = { email: user.email, name: user.name, club: user.club || '' };
+      showPending();
+      return;
+    }
+    CURRENT_USER = {
+      email: user.email,
+      name: user.name,
+      initials: user.initials || _computeInitials(user.name),
+      isAdmin: (user.email === ADMIN_EMAIL),
+      status: user.status || 'active'
+    };
+    try { localStorage.setItem(LS_AUTH, JSON.stringify({ email: user.email, ts: Date.now() })); } catch(e){}
     showApp();
   } else {
     errEl.style.display = 'block';
@@ -7650,25 +8172,61 @@ function doLogin() {
 function showApp() {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app-wrapper').style.display  = 'block';
-  // Afficher nom + initiales dans le header
   const ni = document.getElementById('user-initials');
   const nf = document.getElementById('user-fullname');
-  if (ni) ni.textContent = AUTH_INITIALS;
-  if (nf) nf.textContent = AUTH_NAME;
+  if (ni && CURRENT_USER) ni.textContent = CURRENT_USER.initials;
+  if (nf && CURRENT_USER) nf.textContent = CURRENT_USER.name;
+  // Appliquer les restrictions admin sur la modale (si déjà ouverte ou pour la prochaine ouverture)
+  if (typeof _applyAdminRestrictions === 'function') _applyAdminRestrictions();
 }
 
 function doLogout() {
   try { localStorage.removeItem(LS_AUTH); } catch(e){}
+  CURRENT_USER = null;
   location.reload();
 }
 
 // Vérifier session existante au chargement
-(function() {
+(async function() {
+  await _ensureAdminAccount();
+  // Générer le captcha math pour le formulaire signup
+  _generateCaptcha();
   try {
     const s = JSON.parse(localStorage.getItem(LS_AUTH) || 'null');
-    if (s && s.ok) { showApp(); return; }
+    if (s && s.email) {
+      const users = _getUsers();
+      const user = users.find(u => u.email === s.email);
+      if (user) {
+        // Si le compte est pending, rediriger vers l'écran d'attente
+        if (user.status === 'pending') {
+          _pendingUser = { email: user.email, name: user.name, club: user.club || '' };
+          document.getElementById('login-screen').style.display = 'flex';
+          showPending();
+          return;
+        }
+        CURRENT_USER = {
+          email: user.email,
+          name: user.name,
+          initials: user.initials || _computeInitials(user.name),
+          isAdmin: (user.email === ADMIN_EMAIL),
+          status: user.status || 'active'
+        };
+        showApp();
+        return;
+      }
+    }
+    // Compatibilité avec ancien format de session : { ok: true, ts: ... }
+    if (s && s.ok) {
+      const users = _getUsers();
+      const admin = users.find(u => u.email === ADMIN_EMAIL);
+      if (admin) {
+        CURRENT_USER = { email: admin.email, name: admin.name, initials: admin.initials, isAdmin: true, status: 'active' };
+        try { localStorage.setItem(LS_AUTH, JSON.stringify({ email: admin.email, ts: Date.now() })); } catch(e){}
+        showApp();
+        return;
+      }
+    }
   } catch(e){}
-  // Pré-remplir l'email si connu
   const emailInput = document.getElementById('login-email');
   if (emailInput) emailInput.value = '';
   document.getElementById('login-screen').style.display = 'flex';
