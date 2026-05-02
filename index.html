@@ -3482,7 +3482,9 @@ function drawCentrage(momDep,mDep,momArr,mArr){
 // ===== SYNC MASSES depuis Masse&Centrage vers Décollage/Atterrissage =====
 // Carburant : UL Aero Super Plus / AVGAS — densité 0,72 kg/L (DENS_ESSENCE)
 // Masse décollage = masse au départ (Centrage), arrondie à l'unité
-// Masse atterrissage = masse décollage − conso vol (temps sans vent + roulage)
+// Masse atterrissage = masse décollage − conso vol
+//   où conso vol = (roulage + nav base + correction météo + retard × nb étapes) × conso L/h
+//   (même formule que navTotal dans updateCarbu, + roulage = temps moteur total)
 function syncMassesFromCentrage(){
   if(!document.getElementById('sl-p1')) return;
   const av    = AVIONS[avionActuel]; if(!av) return;
@@ -3494,14 +3496,19 @@ function syncMassesFromCentrage(){
   const kgDep = essDep * DENS_ESSENCE;
   const mDep  = Math.round(av.masse_vide + p1 + p2 + bag + kgDep); // arrondi à l'unité
 
-  // Conso de vol = (temps sans vent + roulage) × conso L/h
-  const navBase = parseInt(document.getElementById('c-nav-base')?.value || 60); // min
-  const roulage = parseInt(document.getElementById('c-roulage')?.value || 10);  // min
-  const conso   = parseFloat(document.getElementById('c-conso')?.value
-                  || document.getElementById('conso')?.value || 20); // L/h
-  const litres  = (navBase + roulage) / 60 * conso;   // litres de carburant brûlé
-  const kgConso = litres * DENS_ESSENCE;              // → kg
-  const mAtt    = Math.round(mDep - kgConso);         // arrondi à l'unité
+  // Conso de vol = (roulage + nav base + correction météo + retard × nb étapes) × conso L/h
+  // Même formule que navTotal dans updateCarbu(), + roulage pour temps moteur total
+  const navBase   = parseInt(document.getElementById('c-nav-base')?.value   || 60); // min
+  const navMeteo  = parseInt(document.getElementById('c-nav-meteo')?.value  || 0);  // min (peut être négatif)
+  const navRetard = parseInt(document.getElementById('c-nav-retard')?.value || 10); // min/étape
+  const nbEtapes  = parseInt(document.getElementById('c-etapes')?.value     || 1);  // étapes
+  const roulage   = parseInt(document.getElementById('c-roulage')?.value    || 10); // min
+  const conso     = parseFloat(document.getElementById('c-conso')?.value
+                    || document.getElementById('conso')?.value || 20); // L/h
+  const minVol    = roulage + navBase + navMeteo + (navRetard * nbEtapes);
+  const litres    = (minVol / 60) * conso;            // litres de carburant brûlé
+  const kgConso   = litres * DENS_ESSENCE;            // → kg
+  const mAtt      = Math.round(mDep - kgConso);       // arrondi à l'unité
 
   // Bornes du slider décollage (550..750)
   const slMass = document.getElementById('mass');
