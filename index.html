@@ -92,7 +92,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e;mi
 /* ===== ONGLETS ===== */
 #tabs{
   background:#fff;border-bottom:2px solid #e2e8f0;
-  padding:0 8px;display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch;
+  padding:0 8px;display:flex;align-items:center;overflow-x:auto;-webkit-overflow-scrolling:touch;
   box-shadow:0 1px 3px rgba(0,0,0,.08);scrollbar-width:none;
 }
 #tabs::-webkit-scrollbar{display:none;}
@@ -105,29 +105,54 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e;mi
 .tab-btn:hover{color:#1a1a2e;}
 .tab-btn.active{color:#e94560;border-bottom-color:#e94560;}
 
+/* ===== Bloc Date/CDB intégrés à la barre d'onglets ===== */
+.tab-info-wrap{
+  display:flex;align-items:center;gap:5px;flex:0 0 auto;
+  margin-right:8px;
+}
+.tab-info-wrap:first-child{ margin-left:4px; }
+.tab-info-lbl{
+  font-size:10px;color:#718096;font-weight:700;
+  text-transform:uppercase;letter-spacing:0.3px;white-space:nowrap;
+}
+.tab-info-input{
+  background:#f7f8fa;border:1px solid #cbd5e0;color:#1a1a2e;
+  padding:6px 8px;border-radius:6px;font-size:12px;
+  min-height:32px;outline:none;transition:border-color .15s,background .15s;
+  box-sizing:border-box;font-weight:600;
+}
+.tab-info-input:focus{ border-color:#e94560;background:#fff; }
+.tab-info-date{ width:130px; }
+.tab-info-cdb{ width:150px; }
+.tab-info-sep{
+  width:1px;height:24px;background:#e2e8f0;
+  flex:0 0 auto;margin:0 8px;
+}
+
 /* Champ nom du voyage — responsive */
 .nom-voyage-wrap{ width:220px; }
-/* iPad mini portrait (~744px) et tablettes : champ passe en pleine largeur sous les onglets */
+/* iPad mini portrait (~744px) et tablettes */
 @media (min-width:481px) and (max-width:860px){
-  #tabs{ flex-wrap:wrap; row-gap:0; padding-bottom:6px; }
+  #tabs{ padding-bottom:0; }
   .nom-voyage-wrap{
-    width:100% !important;
-    margin:4px 0 6px 0 !important;
-    order:99;
-    flex:1 1 100% !important;
+    width:180px !important;
+    margin:0 6px !important;
   }
   .nom-voyage-wrap input{
     width:100% !important;
-    font-size:13px !important;
-    padding:8px 12px !important;
-    min-height:36px !important;
+    font-size:12px !important;
+    padding:7px 10px !important;
+    min-height:32px !important;
   }
 }
 /* Petits écrans hors tablette */
 @media (max-width: 480px){
-  .nom-voyage-wrap{ width:100% !important; margin:4px 0 6px 0 !important; flex:1 1 100% !important; order:99; }
-  #tabs{ flex-wrap:wrap; row-gap:0; padding-bottom:6px; }
-  .nom-voyage-wrap input{ width:100% !important; font-size:12px !important; padding:7px 10px !important; }
+  .nom-voyage-wrap{ width:140px !important; margin:0 4px !important; }
+  .nom-voyage-wrap input{ width:100% !important; font-size:11px !important; padding:6px 8px !important; min-height:30px !important; }
+  .tab-info-lbl{ font-size:9px; }
+  .tab-info-date{ width:115px; }
+  .tab-info-cdb{ width:120px; }
+  .tab-info-sep{ display:none; }
 }
 
 /* ===== CONTENU ===== */
@@ -813,7 +838,7 @@ canvas{display:block;max-width:100%;}
 <div id="header">
   <div class="logo-tag">AQUILA</div>
   <div>
-    <h1>AQUILA AT01 — Préparation de vol</h1>
+    <h1>Préparation de vol</h1>
   </div>
   <div id="header-right">
     <!-- Cartouche avertissement (à gauche du bouton START) -->
@@ -860,7 +885,7 @@ canvas{display:block;max-width:100%;}
 <!-- SÉLECTEUR AVION (bleu marine) -->
 <input type="text" id="immat" value="F-GXCF" readonly style="display:none;">
 <div id="avion-bar">
-  <label>Avion :</label>
+  <label>Aquila AT01 :</label>
   <button class="avion-btn" data-immat="F-GXCF" onclick="setAvion(this)">F-GXCF</button>
   <button class="avion-btn" data-immat="F-GXMV" onclick="setAvion(this)">F-GXMV</button>
   <button class="avion-btn" data-immat="F-HAAT" onclick="setAvion(this)">F-HAAT</button>
@@ -874,24 +899,27 @@ canvas{display:block;max-width:100%;}
     <span style="font-size:11px;color:#a0aec0;">L/h</span>
   </div>
   <div id="avion-bar-right">
-    <div style="display:flex;align-items:center;gap:4px;">
+    <div style="display:none;">
       <label style="font-size:10px;color:#a0aec0;white-space:nowrap;">Date du vol</label>
       <input type="date" id="vol-date"
         style="background:#1e2d4a;border:1px solid #2d3748;color:#fff;padding:4px 6px;
                border-radius:5px;font-size:12px;min-height:32px;"
         oninput="var v=this.value;
+          var vm=document.getElementById('vol-date-main');if(vm&&vm.value!==v)vm.value=v;
           var dv=document.getElementById('dateVol');if(dv&&dv.value!==v)dv.value=v;
           var ad=document.getElementById('att-date');if(ad&&ad.value!==v)ad.value=v;
           var cd=document.getElementById('c-date-vol');if(cd&&cd.value!==v)cd.value=v;
           var fp=document.getElementById('fp-date');if(fp&&fp.value!==v)fp.value=v;
           if(typeof saveFP==='function')saveFP();">
     </div>
-    <div style="display:flex;align-items:center;gap:4px;">
+    <div style="display:none;">
       <label style="font-size:10px;color:#a0aec0;white-space:nowrap;">CDB</label>
       <input type="text" id="vol-cdb" value="Alexandre KILINC"
         style="background:#1e2d4a;border:1px solid #2d3748;color:#fff;padding:4px 6px;
                border-radius:5px;font-size:12px;width:130px;min-height:32px;"
-        oninput="var fp=document.getElementById('fp-cdb');if(fp)fp.value=this.value;">
+        oninput="var v=this.value;
+          var vm=document.getElementById('vol-cdb-main');if(vm&&vm.value!==v)vm.value=v;
+          var fp=document.getElementById('fp-cdb');if(fp)fp.value=v;">
     </div>
     <fieldset class="aero-group">
       <legend>Aérodrome départ</legend>
@@ -987,15 +1015,30 @@ canvas{display:block;max-width:100%;}
 
 <!-- ONGLETS (fond blanc) -->
 <div id="tabs">
-  <button class="tab-btn active" onclick="showTab('carbu',this)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><path d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 4 0v-6.998a2 2 0 0 0-.59-1.42L18 5"/><path d="M14 21V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v16"/><path d="M2 21h13"/><path d="M3 9h11"/></svg> Carburant</button>
-  <button class="tab-btn" onclick="showTab('centrage',this)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><path d="M12 3v18"/><path d="m19 8 3 8a5 5 0 0 1-6 0z"/><path d="M3 7h1a17 17 0 0 0 8-2 17 17 0 0 0 8 2h1"/><path d="m5 8 3 8a5 5 0 0 1-6 0z"/><path d="M7 21h10"/></svg> Masse &amp; Centrage</button>
-  <button class="tab-btn" onclick="showTab('perf',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><path d="M2 22h20"/><path d="M6.36 17.4 4 17l-2-4 1.1-.55a2 2 0 0 1 1.8 0l.17.1a2 2 0 0 0 1.8 0L8 12 5 6l.9-.45a2 2 0 0 1 2.09.2l4.02 3a2 2 0 0 0 2.1.2l4.19-2.06a2.41 2.41 0 0 1 1.73-.17L21 7a1.4 1.4 0 0 1 .87 1.99l-.38.76c-.23.46-.6.84-1.07 1.08L7.58 17.2a2 2 0 0 1-1.22.18Z"/></svg> Décollage</button>
-  <button class="tab-btn" onclick="showTab('atterro',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><path d="M2 22h20"/><path d="M3.77 10.77 2 9l2-4.5 1.1.55c.55.28.9.84.9 1.45s.35 1.17.9 1.45L8 8.5l3-6 1.05.53a2 2 0 0 1 1.09 1.52l.72 5.4a2 2 0 0 0 1.09 1.52l4.4 2.2c.42.22.78.55 1.01.96l.6 1.03c.49.88-.06 1.98-1.06 2.1l-1.18.15c-.47.06-.95-.02-1.37-.24L4.29 11.15a2 2 0 0 1-.52-.38Z"/></svg> Atterrissage</button>
-  <button class="tab-btn" onclick="showTab('montee',this)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> Montée</button>
-  <button class="tab-btn" onclick="showTab('autonomie',this)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Autonomie</button>
-  <button class="tab-btn" onclick="showTab('prepa',this)" id="tab-btn-prepa" style="position:relative;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M9 14l2 2 4-4"/></svg> Prépa vol <span id="prepa-badge" style="display:none;position:absolute;top:6px;right:4px;width:8px;height:8px;background:#e94560;border-radius:50%;"></span></button>
-  <!-- Champ nom du voyage -->
-  <div class="nom-voyage-wrap" style="display:flex;align-items:center;margin-left:8px;margin-right:8px;flex:0 0 auto;width:220px;">
+  <!-- Date du vol intégrée à la barre d'onglets -->
+  <div class="tab-info-wrap">
+    <span class="tab-info-lbl">Date</span>
+    <input type="date" id="vol-date-main" class="tab-info-input tab-info-date"
+      oninput="var v=this.value;
+        var vd=document.getElementById('vol-date');if(vd&&vd.value!==v){vd.value=v;}
+        var dv=document.getElementById('dateVol');if(dv&&dv.value!==v)dv.value=v;
+        var ad=document.getElementById('att-date');if(ad&&ad.value!==v)ad.value=v;
+        var cd=document.getElementById('c-date-vol');if(cd&&cd.value!==v)cd.value=v;
+        var fp=document.getElementById('fp-date');if(fp&&fp.value!==v)fp.value=v;
+        if(typeof saveFP==='function')saveFP();">
+  </div>
+  <!-- CDB intégré à la barre d'onglets -->
+  <div class="tab-info-wrap">
+    <span class="tab-info-lbl">CDB</span>
+    <input type="text" id="vol-cdb-main" class="tab-info-input tab-info-cdb" placeholder="Nom Prénom"
+      oninput="var v=this.value;
+        var vc=document.getElementById('vol-cdb');if(vc&&vc.value!==v)vc.value=v;
+        var fp=document.getElementById('fp-cdb');if(fp)fp.value=v;">
+  </div>
+  <!-- Séparateur vertical -->
+  <div class="tab-info-sep"></div>
+  <!-- Champ nom du voyage (déplacé) -->
+  <div class="nom-voyage-wrap" style="display:flex;align-items:center;margin-right:6px;flex:0 0 auto;width:220px;">
     <input type="text" id="nom-voyage" placeholder="Navigations vers ..." maxlength="60"
       oninput="saveNomVoyage()"
       style="width:100%;background:#edf2f7;border:1px solid #cbd5e0;border-radius:6px;
@@ -1004,6 +1047,13 @@ canvas{display:block;max-width:100%;}
       onfocus="this.style.background='#fff';this.style.borderColor='#e94560';"
       onblur="this.style.background='#edf2f7';this.style.borderColor='#cbd5e0';">
   </div>
+  <button class="tab-btn active" onclick="showTab('carbu',this)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><path d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 4 0v-6.998a2 2 0 0 0-.59-1.42L18 5"/><path d="M14 21V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v16"/><path d="M2 21h13"/><path d="M3 9h11"/></svg> Carburant</button>
+  <button class="tab-btn" onclick="showTab('centrage',this)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><path d="M12 3v18"/><path d="m19 8 3 8a5 5 0 0 1-6 0z"/><path d="M3 7h1a17 17 0 0 0 8-2 17 17 0 0 0 8 2h1"/><path d="m5 8 3 8a5 5 0 0 1-6 0z"/><path d="M7 21h10"/></svg> Masse &amp; Centrage</button>
+  <button class="tab-btn" onclick="showTab('perf',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><path d="M2 22h20"/><path d="M6.36 17.4 4 17l-2-4 1.1-.55a2 2 0 0 1 1.8 0l.17.1a2 2 0 0 0 1.8 0L8 12 5 6l.9-.45a2 2 0 0 1 2.09.2l4.02 3a2 2 0 0 0 2.1.2l4.19-2.06a2.41 2.41 0 0 1 1.73-.17L21 7a1.4 1.4 0 0 1 .87 1.99l-.38.76c-.23.46-.6.84-1.07 1.08L7.58 17.2a2 2 0 0 1-1.22.18Z"/></svg> Décollage</button>
+  <button class="tab-btn" onclick="showTab('atterro',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><path d="M2 22h20"/><path d="M3.77 10.77 2 9l2-4.5 1.1.55c.55.28.9.84.9 1.45s.35 1.17.9 1.45L8 8.5l3-6 1.05.53a2 2 0 0 1 1.09 1.52l.72 5.4a2 2 0 0 0 1.09 1.52l4.4 2.2c.42.22.78.55 1.01.96l.6 1.03c.49.88-.06 1.98-1.06 2.1l-1.18.15c-.47.06-.95-.02-1.37-.24L4.29 11.15a2 2 0 0 1-.52-.38Z"/></svg> Atterrissage</button>
+  <button class="tab-btn" onclick="showTab('montee',this)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> Montée</button>
+  <button class="tab-btn" onclick="showTab('autonomie',this)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Autonomie</button>
+  <button class="tab-btn" onclick="showTab('prepa',this)" id="tab-btn-prepa" style="position:relative;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M9 14l2 2 4-4"/></svg> Prépa vol <span id="prepa-badge" style="display:none;position:absolute;top:6px;right:4px;width:8px;height:8px;background:#e94560;border-radius:50%;"></span></button>
 </div>
 
 <!-- ===== ONGLET DÉCOLLAGE ===== -->
@@ -3499,6 +3549,12 @@ window.addEventListener('DOMContentLoaded', () => {
   // 2. Date du jour
   const dateInput = document.getElementById('vol-date');
   if (dateInput) dateInput.value = new Date().toISOString().slice(0,10);
+  // 2b. Synchroniser les champs Date/CDB intégrés à la barre d'onglets
+  const _vdMain = document.getElementById('vol-date-main');
+  if (_vdMain && dateInput) _vdMain.value = dateInput.value;
+  const _vcSrc = document.getElementById('vol-cdb');
+  const _vcMain = document.getElementById('vol-cdb-main');
+  if (_vcMain && _vcSrc) _vcMain.value = _vcSrc.value;
 
   // 3. Activer le premier avion par defaut
   const firstBtn = document.querySelector('.avion-btn[data-immat="F-GXCF"]');
@@ -3522,6 +3578,15 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // 5. Restaurer donnees pilote (dates validite)
   restorePilote();
+
+  // 5a. Synchroniser les champs Date/CDB intégrés à la barre d'onglets
+  //     après que vol-date et vol-cdb aient été restaurés
+  const _vd2 = document.getElementById('vol-date');
+  const _vdMain2 = document.getElementById('vol-date-main');
+  if (_vd2 && _vdMain2) _vdMain2.value = _vd2.value;
+  const _vc2 = document.getElementById('vol-cdb');
+  const _vcMain2 = document.getElementById('vol-cdb-main');
+  if (_vc2 && _vcMain2) _vcMain2.value = _vc2.value;
 
   // 5b. Restaurer plan de vol
   restoreFP();
@@ -3632,6 +3697,8 @@ function resetVol() {
   } catch(e) {}
   const cdbGlobal = document.getElementById('vol-cdb');
   if (cdbGlobal) cdbGlobal.value = _cdbDefault;
+  const cdbMainEl = document.getElementById('vol-cdb-main');
+  if (cdbMainEl) cdbMainEl.value = _cdbDefault;
   const fpCdbEl = document.getElementById('fp-cdb');
   if (fpCdbEl) fpCdbEl.value = _cdbDefault;
   // Effacer le plan de vol persisté en localStorage
