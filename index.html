@@ -150,9 +150,24 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e;mi
   .nom-voyage-wrap{ width:140px !important; margin:0 4px !important; }
   .nom-voyage-wrap input{ width:100% !important; font-size:11px !important; padding:6px 8px !important; min-height:30px !important; }
   .tab-info-lbl{ font-size:9px; }
-  .tab-info-date{ width:115px; }
+  .tab-info-date{ width:128px; }
   .tab-info-cdb{ width:120px; }
   .tab-info-sep{ display:none; }
+  /* Champ date dans la barre d'onglets : iOS/Android affichent un contenu
+     natif (jj/mm/aaaa + icône calendrier) qui déborde si le padding est
+     trop large ou la font-size pas adaptée. On force des valeurs compactes. */
+  .tab-info-input.tab-info-date{
+    padding:4px 4px !important;
+    font-size:11px !important;
+    -webkit-appearance:none;
+    appearance:none;
+    text-align:center;
+    -webkit-min-logical-width:0;
+    line-height:normal;
+  }
+  /* Réduire aussi la marge entre les wrappers pour gagner de la place */
+  .tab-info-wrap{ margin-right:4px; gap:3px; }
+  .tab-info-wrap:first-child{ margin-left:2px; }
 }
 
 /* ===== CONTENU ===== */
@@ -2078,21 +2093,50 @@ canvas{display:block;max-width:100%;}
 .sec-all-btn.all-done { background:#c6f6d5; border-color:#9ae6b4; color:#276749; }
 
 /* Plan de vol responsive */
-#prepa-flightplan-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
-@media(max-width:700px){ #prepa-flightplan-grid { grid-template-columns:1fr 1fr; } }
-@media(max-width:480px){ 
-  #prepa-flightplan-grid { grid-template-columns:1fr; gap:8px; }
-  #prepa-flightplan-grid input { 
-    width:100% !important; 
-    min-width:0 !important; 
+/* Ligne 1 : CDB / Date / Avion / Nom de la navigation */
+#prepa-flightplan-grid { display:grid; grid-template-columns:1.3fr 1fr 0.9fr 1.4fr; gap:10px; }
+/* Ligne 2 : Départ / WPT1 / WPT2 / WPT3 / Arrivée */
+#prepa-flightplan-route { display:grid; grid-template-columns:1fr 1fr 1fr 1fr 1fr; gap:8px; margin-top:10px; }
+@media(max-width:700px){
+  #prepa-flightplan-grid { grid-template-columns:1fr 1fr; }
+  /* Ligne 2 reste sur 5 colonnes mais plus compacte */
+}
+@media(max-width:480px){
+  #prepa-flightplan-grid { grid-template-columns:1fr 1fr; gap:8px; }
+  #prepa-flightplan-route { grid-template-columns:1fr 1fr 1fr; gap:6px; }
+  #prepa-flightplan-grid input,
+  #prepa-flightplan-route input {
+    width:100% !important;
+    min-width:0 !important;
     max-width:100% !important;
     box-sizing:border-box !important;
     font-size:16px !important; /* évite zoom iOS */
   }
+  /* Champ date : sur mobile, l'input native iOS/Android contient texte + icône
+     calendrier qui débordent facilement. On réduit le padding latéral et la
+     font-size pour que la date jj/mm/aaaa tienne dans la cellule de la grille. */
   #prepa-flightplan-grid input[type="date"] {
     -webkit-appearance:none;
     appearance:none;
+    padding:7px 4px !important;
+    font-size:13px !important;
+    font-weight:600 !important;
+    text-align:center;
+    /* iOS Safari : retire les marges internes par défaut autour du contenu date */
+    -webkit-min-logical-width:0;
+    line-height:normal;
   }
+  /* Le champ Avion (readonly) peut aussi resserrer son padding pour rester
+     aligné avec la cellule date à côté */
+  #prepa-flightplan-grid #fp-avion {
+    padding:7px 4px !important;
+    letter-spacing:0.5px !important;
+  }
+}
+@media(max-width:380px){
+  /* Très petits écrans : forcer le champ date sur sa propre ligne pour
+     éviter le débordement systématique sur iPhone SE / écrans étroits */
+  #prepa-flightplan-grid { grid-template-columns:1fr; gap:6px; }
 }
 
 /* Zones de validation responsive */
@@ -2113,6 +2157,8 @@ canvas{display:block;max-width:100%;}
   <!-- ═══ BANDEAU PLAN DE VOL ═══ -->
   <div id="prepa-flightplan" style="background:linear-gradient(135deg,#0d2354,#1a3a6e);border-radius:12px;padding:14px 16px;margin-bottom:12px;color:#fff;">
     <div style="font-size:11px;font-weight:700;color:#90cdf4;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">Plan de vol</div>
+
+    <!-- ── Ligne 1 : CDB / Date / Avion / Nom de la navigation ── -->
     <div id="prepa-flightplan-grid">
 
       <!-- CDB -->
@@ -2120,7 +2166,9 @@ canvas{display:block;max-width:100%;}
         <label style="font-size:10px;color:#90cdf4;display:block;margin-bottom:3px;">Commandant de bord</label>
         <input type="text" id="fp-cdb" placeholder="Nom Prénom"
           style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid #2c5282;background:#0d2354;color:#fff;font-size:14px;font-weight:600;box-sizing:border-box;min-height:36px;"
-          oninput="saveFP();var v=document.getElementById('vol-cdb');if(v)v.value=this.value;">
+          oninput="saveFP();
+            var v=document.getElementById('vol-cdb');if(v)v.value=this.value;
+            var vm=document.getElementById('vol-cdb-main');if(vm && vm!==this)vm.value=this.value;">
       </div>
 
       <!-- Date de vol -->
@@ -2130,6 +2178,7 @@ canvas{display:block;max-width:100%;}
           style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid #2c5282;background:#0d2354;color:#fff;font-size:14px;font-weight:600;box-sizing:border-box;min-height:36px;-webkit-appearance:none;appearance:none;"
           onchange="saveFP();var val=this.value;
             var v=document.getElementById('vol-date');if(v&&v.value!==val)v.value=val;
+            var vm=document.getElementById('vol-date-main');if(vm && vm.value!==val)vm.value=val;
             var dv=document.getElementById('dateVol');if(dv&&dv.value!==val)dv.value=val;
             var ad=document.getElementById('att-date');if(ad&&ad.value!==val)ad.value=val;
             var cd=document.getElementById('c-date-vol');if(cd&&cd.value!==val)cd.value=val;">
@@ -2139,15 +2188,33 @@ canvas{display:block;max-width:100%;}
       <div>
         <label style="font-size:10px;color:#90cdf4;display:block;margin-bottom:3px;">Avion</label>
         <input type="text" id="fp-avion" placeholder="F-GXCF" readonly
-          style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid #2c5282;background:#0d2354;color:#e94560;font-size:14px;font-weight:700;box-sizing:border-box;letter-spacing:1px;min-height:36px;">
+          style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid #2c5282;background:#0d2354;color:#e94560;font-size:14px;font-weight:700;box-sizing:border-box;letter-spacing:1px;min-height:36px;text-align:center;">
       </div>
+
+      <!-- Nom de la navigation -->
+      <div>
+        <label style="font-size:10px;color:#90cdf4;display:block;margin-bottom:3px;">Nom de la navigation</label>
+        <input type="text" id="fp-nom-voyage" placeholder="Navigations vers ..." maxlength="60"
+          style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid #2c5282;background:#0d2354;color:#fff;font-size:14px;font-weight:600;box-sizing:border-box;min-height:36px;"
+          oninput="saveFP();
+            var nv=document.getElementById('nom-voyage');
+            if(nv && nv.value !== this.value){
+              nv.value = this.value;
+              if(typeof saveNomVoyage === 'function') saveNomVoyage();
+            }">
+      </div>
+
+    </div>
+
+    <!-- ── Ligne 2 : Départ / WPT1 / WPT2 / WPT3 / Arrivée ── -->
+    <div id="prepa-flightplan-route">
 
       <!-- Départ -->
       <div>
         <label style="font-size:10px;color:#90cdf4;display:block;margin-bottom:3px;">Départ (ICAO)</label>
-        <div style="display:flex;gap:6px;align-items:center;position:relative;">
+        <div style="display:flex;gap:4px;align-items:center;position:relative;">
           <input type="text" id="fp-dep-icao" value="LFPN" maxlength="4" placeholder="ICAO"
-            style="flex:1;min-width:0;background:#0d2354;border:1px solid #2c5282;border-radius:6px;padding:7px 10px;font-size:16px;font-weight:800;text-transform:uppercase;text-align:center;min-height:36px;color:#fff;box-sizing:border-box;"
+            style="flex:1;min-width:0;background:#0d2354;border:1px solid #2c5282;border-radius:6px;padding:7px 6px;font-size:15px;font-weight:800;text-transform:uppercase;text-align:center;min-height:36px;color:#fff;box-sizing:border-box;letter-spacing:1px;"
             oninput="this.value=this.value.toUpperCase();saveFP();
               _icaoSyncing=true;
               try {
@@ -2158,17 +2225,50 @@ canvas{display:block;max-width:100%;}
               if(typeof showAeroMenuFiltered==='function')showAeroMenuFiltered('fp-dep-menu',this.value);
               if(typeof updateFPRoute==='function')updateFPRoute();">
           <button onclick="toggleAeroMenu('fp-dep-menu')" type="button"
-            style="min-width:36px;min-height:36px;background:rgba(255,255,255,.1);border:1px solid #2c5282;border-radius:6px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;">▾</button>
-          <div id="fp-dep-menu" style="display:none;position:absolute;top:42px;left:0;right:0;z-index:999;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);min-width:220px;max-height:610px;overflow-y:auto;"></div>
+            style="min-width:28px;min-height:36px;background:rgba(255,255,255,.1);border:1px solid #2c5282;border-radius:6px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;">▾</button>
+          <div id="fp-dep-menu" style="display:none;position:absolute;top:62px;left:0;right:0;z-index:999;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);min-width:220px;max-height:610px;overflow-y:auto;"></div>
         </div>
+      </div>
+
+      <!-- WPT 1 -->
+      <div style="position:relative;">
+        <label style="font-size:10px;color:#90cdf4;display:block;margin-bottom:3px;">WPT 1</label>
+        <input type="text" id="fp-wpt1" placeholder="WPT 1" maxlength="4"
+          style="width:100%;padding:7px 6px;border-radius:6px;border:1px solid #2c5282;background:#0d2354;color:#fff;font-size:15px;font-weight:700;letter-spacing:1px;text-transform:uppercase;text-align:center;box-sizing:border-box;min-height:36px;"
+          oninput="this.value=this.value.toUpperCase();saveFP();
+            if(typeof showAeroMenuFiltered==='function')showAeroMenuFiltered('fp-wpt1-menu',this.value);
+            if(typeof updateFPRoute==='function')updateFPRoute();">
+        <div id="fp-wpt1-menu" style="display:none;position:absolute;top:62px;left:0;right:0;z-index:999;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);min-width:220px;max-height:610px;overflow-y:auto;"></div>
+      </div>
+
+      <!-- WPT 2 -->
+      <div style="position:relative;">
+        <label style="font-size:10px;color:#90cdf4;display:block;margin-bottom:3px;">WPT 2</label>
+        <input type="text" id="fp-wpt2" placeholder="WPT 2" maxlength="4"
+          style="width:100%;padding:7px 6px;border-radius:6px;border:1px solid #2c5282;background:#0d2354;color:#fff;font-size:15px;font-weight:700;letter-spacing:1px;text-transform:uppercase;text-align:center;box-sizing:border-box;min-height:36px;"
+          oninput="this.value=this.value.toUpperCase();saveFP();
+            if(typeof showAeroMenuFiltered==='function')showAeroMenuFiltered('fp-wpt2-menu',this.value);
+            if(typeof updateFPRoute==='function')updateFPRoute();">
+        <div id="fp-wpt2-menu" style="display:none;position:absolute;top:62px;left:0;right:0;z-index:999;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);min-width:220px;max-height:610px;overflow-y:auto;"></div>
+      </div>
+
+      <!-- WPT 3 -->
+      <div style="position:relative;">
+        <label style="font-size:10px;color:#90cdf4;display:block;margin-bottom:3px;">WPT 3</label>
+        <input type="text" id="fp-wpt3" placeholder="WPT 3" maxlength="4"
+          style="width:100%;padding:7px 6px;border-radius:6px;border:1px solid #2c5282;background:#0d2354;color:#fff;font-size:15px;font-weight:700;letter-spacing:1px;text-transform:uppercase;text-align:center;box-sizing:border-box;min-height:36px;"
+          oninput="this.value=this.value.toUpperCase();saveFP();
+            if(typeof showAeroMenuFiltered==='function')showAeroMenuFiltered('fp-wpt3-menu',this.value);
+            if(typeof updateFPRoute==='function')updateFPRoute();">
+        <div id="fp-wpt3-menu" style="display:none;position:absolute;top:62px;left:0;right:0;z-index:999;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);min-width:220px;max-height:610px;overflow-y:auto;"></div>
       </div>
 
       <!-- Arrivée -->
       <div>
         <label style="font-size:10px;color:#90cdf4;display:block;margin-bottom:3px;">Arrivée (ICAO)</label>
-        <div style="display:flex;gap:6px;align-items:center;position:relative;">
+        <div style="display:flex;gap:4px;align-items:center;position:relative;">
           <input type="text" id="fp-arr-icao" value="" maxlength="4" placeholder="ICAO"
-            style="flex:1;min-width:0;background:#0d2354;border:1px solid #2c5282;border-radius:6px;padding:7px 10px;font-size:16px;font-weight:800;text-transform:uppercase;text-align:center;min-height:36px;color:#fff;box-sizing:border-box;"
+            style="flex:1;min-width:0;background:#0d2354;border:1px solid #2c5282;border-radius:6px;padding:7px 6px;font-size:15px;font-weight:800;text-transform:uppercase;text-align:center;min-height:36px;color:#fff;box-sizing:border-box;letter-spacing:1px;"
             oninput="this.value=this.value.toUpperCase();saveFP();
               var v=this.value.trim();
               _icaoSyncing=true;
@@ -2180,42 +2280,11 @@ canvas{display:block;max-width:100%;}
               if(typeof showAeroMenuFiltered==='function')showAeroMenuFiltered('fp-arr-menu',v);
               if(typeof updateFPRoute==='function')updateFPRoute();">
           <button onclick="toggleAeroMenu('fp-arr-menu')" type="button"
-            style="min-width:36px;min-height:36px;background:rgba(255,255,255,.1);border:1px solid #2c5282;border-radius:6px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;">▾</button>
-          <div id="fp-arr-menu" style="display:none;position:absolute;top:42px;left:0;right:0;z-index:999;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);min-width:220px;max-height:610px;overflow-y:auto;"></div>
+            style="min-width:28px;min-height:36px;background:rgba(255,255,255,.1);border:1px solid #2c5282;border-radius:6px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;">▾</button>
+          <div id="fp-arr-menu" style="display:none;position:absolute;top:62px;left:0;right:0;z-index:999;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);min-width:220px;max-height:610px;overflow-y:auto;"></div>
         </div>
       </div>
 
-    </div>
-
-    <!-- Étapes facultatives -->
-    <div style="margin-top:10px;">
-      <label style="font-size:10px;color:#90cdf4;display:block;margin-bottom:4px;">Étapes facultatives (ICAO)</label>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <div style="flex:1;min-width:70px;position:relative;">
-          <input type="text" id="fp-wpt1" placeholder="WPT 1" maxlength="4"
-            style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid #2c5282;background:#0d2354;color:#fff;font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;box-sizing:border-box;min-height:36px;"
-            oninput="this.value=this.value.toUpperCase();saveFP();
-              if(typeof showAeroMenuFiltered==='function')showAeroMenuFiltered('fp-wpt1-menu',this.value);
-              if(typeof updateFPRoute==='function')updateFPRoute();">
-          <div id="fp-wpt1-menu" style="display:none;position:absolute;top:42px;left:0;right:0;z-index:999;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);min-width:220px;max-height:610px;overflow-y:auto;"></div>
-        </div>
-        <div style="flex:1;min-width:70px;position:relative;">
-          <input type="text" id="fp-wpt2" placeholder="WPT 2" maxlength="4"
-            style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid #2c5282;background:#0d2354;color:#fff;font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;box-sizing:border-box;min-height:36px;"
-            oninput="this.value=this.value.toUpperCase();saveFP();
-              if(typeof showAeroMenuFiltered==='function')showAeroMenuFiltered('fp-wpt2-menu',this.value);
-              if(typeof updateFPRoute==='function')updateFPRoute();">
-          <div id="fp-wpt2-menu" style="display:none;position:absolute;top:42px;left:0;right:0;z-index:999;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);min-width:220px;max-height:610px;overflow-y:auto;"></div>
-        </div>
-        <div style="flex:1;min-width:70px;position:relative;">
-          <input type="text" id="fp-wpt3" placeholder="WPT 3" maxlength="4"
-            style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid #2c5282;background:#0d2354;color:#fff;font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;box-sizing:border-box;min-height:36px;"
-            oninput="this.value=this.value.toUpperCase();saveFP();
-              if(typeof showAeroMenuFiltered==='function')showAeroMenuFiltered('fp-wpt3-menu',this.value);
-              if(typeof updateFPRoute==='function')updateFPRoute();">
-          <div id="fp-wpt3-menu" style="display:none;position:absolute;top:42px;left:0;right:0;z-index:999;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);min-width:220px;max-height:610px;overflow-y:auto;"></div>
-        </div>
-      </div>
     </div>
 
     <!-- Route résumée -->
@@ -3691,7 +3760,7 @@ function resetVol() {
 
   // ── Plan de vol : vider tous les champs sauf CDB (date, waypoints, anciens fp-dep/fp-arr) ─
   // Le CDB est traité ci-dessous : on conserve la valeur par défaut stockée en admin
-  ['fp-date','fp-wpt1','fp-wpt2','fp-wpt3','fp-dep','fp-arr','nom-voyage'].forEach(id => {
+  ['fp-date','fp-wpt1','fp-wpt2','fp-wpt3','fp-dep','fp-arr','nom-voyage','fp-nom-voyage'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     el.value = '';
@@ -3702,6 +3771,9 @@ function resetVol() {
   // Vider le nom du voyage si présent
   const fpVoyage = document.getElementById('fp-voyage');
   if (fpVoyage) fpVoyage.value = '';
+  // Effacer le nom de navigation persisté en localStorage
+  // (sinon restoreNomVoyage le remettrait au prochain chargement)
+  try { localStorage.removeItem(LS_KEY_NOM_VOYAGE); } catch(e) {}
   // ── CDB : si un nom CDB a été défini en admin (LS_KEY_PILOTE.cdb), on le conserve
   // au lieu de vider, car c'est une donnée personnelle stable (même logique que le poids pilote)
   let _cdbDefault = '';
@@ -7589,6 +7661,9 @@ function saveNomVoyage() {
   try {
     const v = document.getElementById('nom-voyage')?.value || '';
     localStorage.setItem(LS_KEY_NOM_VOYAGE, v);
+    // Propagation vers le bandeau Plan de vol (champ jumeau)
+    const fp = document.getElementById('fp-nom-voyage');
+    if (fp && fp.value !== v) fp.value = v;
   } catch(e) {}
 }
 function restoreNomVoyage() {
@@ -7596,6 +7671,8 @@ function restoreNomVoyage() {
     const v = localStorage.getItem(LS_KEY_NOM_VOYAGE) || '';
     const el = document.getElementById('nom-voyage');
     if (el) el.value = v;
+    const fp = document.getElementById('fp-nom-voyage');
+    if (fp) fp.value = v;
   } catch(e) {}
 }
 
