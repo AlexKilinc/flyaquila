@@ -2579,7 +2579,7 @@ canvas{display:block;max-width:100%;}
 <script>
 // ===== LISTE AÉRODROMES (persistante) =====
 const AERO_DEFAULTS = [
-  { icao:'LFPN', name:'Toussus-le-Noble', elev:538 },
+  { icao:'LFPN', name:'Toussus-le-Noble', elev:538, aliases:'Paris Saclay Versailles' },
   { icao:'LFOX', name:'Étampes',          elev:494 },
   { icao:'LFPM', name:'Melun',            elev:304 },
   { icao:'LFOR', name:'Chartres',         elev:509 },
@@ -2593,13 +2593,17 @@ const AERO_DEFAULTS = [
   { icao:'LFRG', name:'Deauville',        elev:479 },
 ];
 let AERODROMES = JSON.parse(localStorage.getItem('aquila_aerodromes') || 'null') || JSON.parse(JSON.stringify(AERO_DEFAULTS));
-// Migration : injecter elev si absent (données localStorage antérieures à v18)
+// Migration : injecter elev/aliases si absents (données localStorage antérieures)
 AERODROMES = AERODROMES.map(a => {
-  if (a.elev == null) {
-    const def = AERO_DEFAULTS.find(d => d.icao === a.icao);
-    if (def && def.elev != null) return Object.assign({}, a, { elev: def.elev });
+  const def = AERO_DEFAULTS.find(d => d.icao === a.icao);
+  let out = a;
+  if (out.elev == null && def && def.elev != null) {
+    out = Object.assign({}, out, { elev: def.elev });
   }
-  return a;
+  if (out.aliases == null && def && def.aliases != null) {
+    out = Object.assign({}, out, { aliases: def.aliases });
+  }
+  return out;
 });
 function saveAerodromes() { localStorage.setItem('aquila_aerodromes', JSON.stringify(AERODROMES)); }
 
@@ -2646,7 +2650,8 @@ function buildAeroMenuContent(menu, menuId, filter) {
     if (f.length > 0) {
       list = AERODROMES.filter(a =>
         (a.icao || '').toUpperCase().startsWith(f) ||
-        (a.name || '').toUpperCase().includes(f)
+        (a.name || '').toUpperCase().includes(f) ||
+        (a.aliases || '').toUpperCase().includes(f)
       );
     }
   }
@@ -2786,7 +2791,8 @@ function showAeroMenuFiltered(menuId, filter) {
   const fLow = filter.trim().toLowerCase();
   const matchesFav = AERODROMES.filter(a =>
     (a.icao || '').toUpperCase().startsWith(f) ||
-    (a.name || '').toUpperCase().includes(f)
+    (a.name || '').toUpperCase().includes(f) ||
+    (a.aliases || '').toUpperCase().includes(f)
   );
   const matchesNat = (typeof FR_AERODROMES !== 'undefined') ? FR_AERODROMES.filter(a =>
     (a.i || '').toUpperCase().startsWith(f) ||
