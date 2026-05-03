@@ -147,27 +147,95 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e;mi
 }
 /* Petits écrans hors tablette */
 @media (max-width: 480px){
-  .nom-voyage-wrap{ width:140px !important; margin:0 4px !important; }
-  .nom-voyage-wrap input{ width:100% !important; font-size:11px !important; padding:6px 8px !important; min-height:30px !important; }
-  .tab-info-lbl{ font-size:9px; }
-  .tab-info-date{ width:128px; }
-  .tab-info-cdb{ width:120px; }
-  .tab-info-sep{ display:none; }
-  /* Champ date dans la barre d'onglets : iOS/Android affichent un contenu
-     natif (jj/mm/aaaa + icône calendrier) qui déborde si le padding est
-     trop large ou la font-size pas adaptée. On force des valeurs compactes. */
+  /* Barre d'onglets : retour à la ligne autorisé pour faire tenir
+     Nav. + Date + CDB + tous les onglets sans scroll horizontal.
+     ATTENTION : ce media query ne s'applique qu'à l'iPhone (≤480px).
+     Sur iPad mini portrait (~744px), c'est le media query 481-860px
+     qui s'applique : tout reste sur une seule ligne. */
+  #tabs{
+    flex-wrap:wrap;
+    overflow-x:visible;
+    padding:8px 8px 0 8px;
+    row-gap:8px;
+    column-gap:6px;
+    align-items:center;
+  }
+  /* === Rangée 1 : Navigations vers (pleine largeur, en premier) === */
+  .nom-voyage-wrap{
+    order:1;
+    width:100% !important;
+    flex:0 0 100% !important;
+    min-width:0 !important;
+    margin:0 !important;
+  }
+  .nom-voyage-wrap input{
+    width:100% !important;
+    font-size:13px !important;
+    padding:7px 10px !important;
+    min-height:34px !important;
+  }
+  /* === Rangée 2 : Date + CDB côte à côte (chacun 50% - gap) === */
+  .tab-info-wrap{
+    margin:0;
+    gap:5px;
+    box-sizing:border-box;
+  }
+  .tab-info-wrap:first-child{ margin-left:0; }
+  /* Wrap Date (1ʳᵉ tab-info-wrap dans le DOM) */
+  .tab-info-wrap:nth-of-type(1){
+    order:2;
+    flex:0 0 calc(50% - 3px);
+    width:calc(50% - 3px);
+    max-width:calc(50% - 3px);
+  }
+  /* Wrap CDB (2ᵉ tab-info-wrap dans le DOM) */
+  .tab-info-wrap:nth-of-type(2){
+    order:3;
+    flex:0 0 calc(50% - 3px);
+    width:calc(50% - 3px);
+    max-width:calc(50% - 3px);
+  }
+  .tab-info-lbl{
+    font-size:9px;
+    color:#718096;
+    flex:0 0 auto;
+  }
+  /* Date : prend toute la place dans son wrap, lisible */
   .tab-info-input.tab-info-date{
-    padding:4px 4px !important;
-    font-size:11px !important;
+    flex:1 1 auto;
+    width:auto;
+    min-width:0;
+    padding:7px 4px !important;
+    font-size:12px !important;
+    font-weight:700 !important;
     -webkit-appearance:none;
     appearance:none;
     text-align:center;
     -webkit-min-logical-width:0;
     line-height:normal;
+    min-height:34px;
   }
-  /* Réduire aussi la marge entre les wrappers pour gagner de la place */
-  .tab-info-wrap{ margin-right:4px; gap:3px; }
-  .tab-info-wrap:first-child{ margin-left:2px; }
+  /* CDB : prend toute la place dans son wrap */
+  .tab-info-cdb{
+    flex:1 1 auto;
+    width:auto;
+    min-width:0;
+    font-size:12px !important;
+    padding:7px 8px !important;
+    min-height:34px;
+  }
+  /* Séparateur masqué (pas de place sur mobile) */
+  .tab-info-sep{ display:none; order:99; }
+  /* === Rangées 3-4 : onglets répartis uniformément === */
+  .tab-btn{
+    order:10;
+    flex:1 1 auto;
+    padding:8px 4px;
+    font-size:11px;
+    min-height:36px;
+    text-align:center;
+    white-space:nowrap;
+  }
 }
 
 /* ===== CONTENU ===== */
