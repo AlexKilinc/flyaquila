@@ -129,14 +129,34 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e;mi
   flex:0 0 auto;margin:0 8px;
 }
 
-/* Champ nom du voyage — responsive */
-.nom-voyage-wrap{ width:220px; }
-/* iPad mini portrait (~744px) et tablettes */
+/* ===== Ordre visuel sur TOUS les écrans : Nav → Date → CDB → onglets ===== */
+/* Le DOM reste dans l'ordre Date|CDB|sep|Nav|onglets, mais le rendu visuel
+   est forcé via flex order. Aucun handler/JS n'est touché. */
+#tabs > .nom-voyage-wrap{ order:1; }
+#tabs > .tab-info-wrap:nth-of-type(1){ order:2; }   /* Date */
+#tabs > .tab-info-wrap:nth-of-type(2){ order:3; }   /* CDB */
+#tabs > .tab-info-sep{ order:4; }
+#tabs > .tab-btn{ order:10; }
+
+/* Champ nom du voyage — base desktop */
+.nom-voyage-wrap{ width:220px; margin-left:0; margin-right:6px; }
+
+/* === iPad mini portrait & iPad (481-860px) ===
+   UNE seule ligne avec scroll horizontal possible. */
 @media (min-width:481px) and (max-width:860px){
-  #tabs{ padding-bottom:0; }
+  #tabs{
+    flex-wrap:nowrap;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    scroll-behavior:smooth;
+    padding:0 8px;
+    scrollbar-width:none;
+  }
+  #tabs::-webkit-scrollbar{ display:none; }
   .nom-voyage-wrap{
     width:180px !important;
     margin:0 6px !important;
+    flex-shrink:0;
   }
   .nom-voyage-wrap input{
     width:100% !important;
@@ -144,14 +164,16 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e;mi
     padding:7px 10px !important;
     min-height:32px !important;
   }
+  .tab-info-wrap{ flex-shrink:0; }
+  .tab-btn{ flex-shrink:0; }
 }
-/* Petits écrans hors tablette */
+
+/* === iPhone (≤480px) ===
+   Disposition sur 3-4 rangées, AUCUN scroll horizontal :
+   - Rangée 1 : [Navigations vers...] pleine largeur
+   - Rangée 2 : [Date] + [CDB] côte à côte (50/50)
+   - Rangées 3-4 : les 7 onglets répartis uniformément */
 @media (max-width: 480px){
-  /* Barre d'onglets : retour à la ligne autorisé pour faire tenir
-     Nav. + Date + CDB + tous les onglets sans scroll horizontal.
-     ATTENTION : ce media query ne s'applique qu'à l'iPhone (≤480px).
-     Sur iPad mini portrait (~744px), c'est le media query 481-860px
-     qui s'applique : tout reste sur une seule ligne. */
   #tabs{
     flex-wrap:wrap;
     overflow-x:visible;
@@ -160,9 +182,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e;mi
     column-gap:6px;
     align-items:center;
   }
-  /* === Rangée 1 : Navigations vers (pleine largeur, en premier) === */
   .nom-voyage-wrap{
-    order:1;
     width:100% !important;
     flex:0 0 100% !important;
     min-width:0 !important;
@@ -174,23 +194,14 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e;mi
     padding:7px 10px !important;
     min-height:34px !important;
   }
-  /* === Rangée 2 : Date + CDB côte à côte (chacun 50% - gap) === */
   .tab-info-wrap{
     margin:0;
     gap:5px;
     box-sizing:border-box;
+    position:relative;
   }
-  .tab-info-wrap:first-child{ margin-left:0; }
-  /* Wrap Date (1ʳᵉ tab-info-wrap dans le DOM) */
-  .tab-info-wrap:nth-of-type(1){
-    order:2;
-    flex:0 0 calc(50% - 3px);
-    width:calc(50% - 3px);
-    max-width:calc(50% - 3px);
-  }
-  /* Wrap CDB (2ᵉ tab-info-wrap dans le DOM) */
-  .tab-info-wrap:nth-of-type(2){
-    order:3;
+  #tabs > .tab-info-wrap:nth-of-type(1),
+  #tabs > .tab-info-wrap:nth-of-type(2){
     flex:0 0 calc(50% - 3px);
     width:calc(50% - 3px);
     max-width:calc(50% - 3px);
@@ -200,7 +211,6 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e;mi
     color:#718096;
     flex:0 0 auto;
   }
-  /* Date : prend toute la place dans son wrap, lisible */
   .tab-info-input.tab-info-date{
     flex:1 1 auto;
     width:auto;
@@ -214,8 +224,9 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e;mi
     -webkit-min-logical-width:0;
     line-height:normal;
     min-height:34px;
+    background-color:#f7f8fa;
+    color:#1a1a2e;
   }
-  /* CDB : prend toute la place dans son wrap */
   .tab-info-cdb{
     flex:1 1 auto;
     width:auto;
@@ -224,11 +235,8 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e;mi
     padding:7px 8px !important;
     min-height:34px;
   }
-  /* Séparateur masqué (pas de place sur mobile) */
-  .tab-info-sep{ display:none; order:99; }
-  /* === Rangées 3-4 : onglets répartis uniformément === */
+  .tab-info-sep{ display:none; }
   .tab-btn{
-    order:10;
     flex:1 1 auto;
     padding:8px 4px;
     font-size:11px;
@@ -1121,7 +1129,7 @@ canvas{display:block;max-width:100%;}
   <!-- Séparateur vertical -->
   <div class="tab-info-sep"></div>
   <!-- Champ nom du voyage (déplacé) -->
-  <div class="nom-voyage-wrap" style="display:flex;align-items:center;margin-right:6px;flex:0 0 auto;width:220px;">
+  <div class="nom-voyage-wrap" style="display:flex;align-items:center;margin-right:6px;flex:0 0 auto;">
     <input type="text" id="nom-voyage" placeholder="Navigations vers ..." maxlength="60"
       oninput="saveNomVoyage()"
       style="width:100%;background:#edf2f7;border:1px solid #cbd5e0;border-radius:6px;
@@ -3495,6 +3503,22 @@ function showTab(id,btn){
   document.querySelectorAll('.tab-btn').forEach(el=>el.classList.remove('active'));
   document.getElementById('tab-'+id).classList.add('active');
   btn.classList.add('active');
+  // Auto-scroll horizontal sur tablette (barre scrollable) :
+  // amener le PREMIER onglet (Carburant) sur le bord gauche du viewport visible,
+  // ce qui cache Nav/Date/CDB à gauche et révèle les 7 onglets sur une ligne.
+  setTimeout(function(){
+    try {
+      const tabsBar = document.getElementById('tabs');
+      if (!tabsBar) return;
+      const overflow = tabsBar.scrollWidth - tabsBar.clientWidth;
+      if (overflow <= 0) return; // rien à scroller (cas desktop)
+      const firstTab = tabsBar.querySelector('.tab-btn');
+      if (!firstTab) return;
+      // offsetLeft donne la position visuelle même avec flex order
+      const target = Math.max(0, Math.min(firstTab.offsetLeft, overflow));
+      tabsBar.scrollTo({ left: target, behavior: 'smooth' });
+    } catch(e) {}
+  }, 0);
   if(id==='perf')     setTimeout(compute,50);
   if(id==='centrage') setTimeout(updateCentrage,50);
   if(id==='atterro') setTimeout(computeAtt,50);
