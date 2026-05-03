@@ -777,6 +777,26 @@ canvas{display:block;max-width:100%;}
   /* iPad : masquer nom complet, garder initiales */
   #user-fullname{display:none;}
   #user-badge{padding:4px 6px;gap:0;}
+  /* iPad : forcer PDF + Enregistrer compactés (pas trop larges) */
+  #avion-bar-right > button:nth-last-child(2),
+  #avion-bar-right > button:last-child{
+    flex-shrink:0;
+    padding:6px 10px !important;
+    font-size:12px !important;
+  }
+}
+
+/* === iPad mini portrait & tablettes étroites en portrait ===
+   Icône seule pour le bouton Enregistrer afin de garder PDF + Enregistrer
+   côte à côte sur la même ligne (sinon Enregistrer passe seul à la ligne). */
+@media (min-width:481px) and (max-width:820px) and (orientation:portrait){
+  #avion-bar-right > button:last-child > span{
+    display:none;
+  }
+  #avion-bar-right > button:last-child{
+    padding:6px 9px !important;
+    min-width:38px;
+  }
 }
 
 /* @media print removed */
@@ -3498,7 +3518,7 @@ function autoSave() {
 }
 
 // ===== NAVIGATION =====
-function showTab(id,btn){
+function showTab(id,btn,skipScroll){
   document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(el=>el.classList.remove('active'));
   document.getElementById('tab-'+id).classList.add('active');
@@ -3506,19 +3526,22 @@ function showTab(id,btn){
   // Auto-scroll horizontal sur tablette (barre scrollable) :
   // amener le PREMIER onglet (Carburant) sur le bord gauche du viewport visible,
   // ce qui cache Nav/Date/CDB à gauche et révèle les 7 onglets sur une ligne.
-  setTimeout(function(){
-    try {
-      const tabsBar = document.getElementById('tabs');
-      if (!tabsBar) return;
-      const overflow = tabsBar.scrollWidth - tabsBar.clientWidth;
-      if (overflow <= 0) return; // rien à scroller (cas desktop)
-      const firstTab = tabsBar.querySelector('.tab-btn');
-      if (!firstTab) return;
-      // offsetLeft donne la position visuelle même avec flex order
-      const target = Math.max(0, Math.min(firstTab.offsetLeft, overflow));
-      tabsBar.scrollTo({ left: target, behavior: 'smooth' });
-    } catch(e) {}
-  }, 0);
+  // Sauf si skipScroll=true (au chargement initial et au reset Start).
+  if (!skipScroll) {
+    setTimeout(function(){
+      try {
+        const tabsBar = document.getElementById('tabs');
+        if (!tabsBar) return;
+        const overflow = tabsBar.scrollWidth - tabsBar.clientWidth;
+        if (overflow <= 0) return; // rien à scroller (cas desktop)
+        const firstTab = tabsBar.querySelector('.tab-btn');
+        if (!firstTab) return;
+        // offsetLeft donne la position visuelle même avec flex order
+        const target = Math.max(0, Math.min(firstTab.offsetLeft, overflow));
+        tabsBar.scrollTo({ left: target, behavior: 'smooth' });
+      } catch(e) {}
+    }, 0);
+  }
   if(id==='perf')     setTimeout(compute,50);
   if(id==='centrage') setTimeout(updateCentrage,50);
   if(id==='atterro') setTimeout(computeAtt,50);
@@ -3526,6 +3549,20 @@ function showTab(id,btn){
   if(id==='autonomie') setTimeout(computeAutonomie,50);
   if(id==='prepa')    setTimeout(syncFPFromSources,50);
   lsSave('aquila_last_tab', id);
+}
+
+// Scroller la barre d'onglets tout à gauche (Nav. vers... visible).
+// Utilisé au chargement initial et au reset Start pour ne pas masquer Nav/Date/CDB.
+function scrollTabsToStart(){
+  setTimeout(function(){
+    try {
+      const tabsBar = document.getElementById('tabs');
+      if (!tabsBar) return;
+      const overflow = tabsBar.scrollWidth - tabsBar.clientWidth;
+      if (overflow <= 0) return;
+      tabsBar.scrollTo({ left: 0, behavior: 'auto' });
+    } catch(e) {}
+  }, 0);
 }
 
 function setAvion(btn){
@@ -3773,7 +3810,8 @@ window.addEventListener('DOMContentLoaded', () => {
   const lastTab = lsLoad('aquila_last_tab', 'carbu');
   const lastTabBtn = document.querySelector(`.tab-btn[onclick*="'${lastTab}'"]`);
   if (lastTab && lastTabBtn) {
-    showTab(lastTab, lastTabBtn);
+    showTab(lastTab, lastTabBtn, true);  // skipScroll=true : ne pas masquer Nav/Date/CDB
+    scrollTabsToStart();
   }
 
   // 7. Calculs initiaux
@@ -3965,7 +4003,8 @@ function resetVol() {
 
   // ── Naviguer vers onglet Carburant ────────────────────
   const tabBtn = document.querySelector(".tab-btn[onclick*='carbu']");
-  showTab('carbu', tabBtn);
+  showTab('carbu', tabBtn, true);  // skipScroll=true : ne pas masquer Nav/Date/CDB
+  scrollTabsToStart();
 }
 
 
