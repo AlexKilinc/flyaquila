@@ -169,24 +169,31 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e;mi
 }
 
 /* === iPhone (≤480px) ===
-   Disposition sur 3-4 rangées, AUCUN scroll horizontal :
-   - Rangée 1 : [Navigations vers...] pleine largeur
-   - Rangée 2 : [Date] + [CDB] côte à côte (50/50)
-   - Rangées 3-4 : les 7 onglets répartis uniformément */
+   Reproduction fidèle de la mise en forme version Club via CSS Grid 12 colonnes :
+   - Rangée 1 : Navigations vers... (span 12 = pleine largeur)
+   - Rangée 2 : Date (span 6) + CDB (span 6)
+   - Rangée 3 : Carburant (4) + Masse & Centrage (4) + Décollage (4)
+   - Rangée 4 : Atterrissage (3) + Montée (3) + Autonomie (3) + Prépa vol (3) */
 @media (max-width: 480px){
   #tabs{
-    flex-wrap:wrap;
+    display:grid;
+    grid-template-columns:repeat(12, 1fr);
+    gap:8px 6px;
+    padding:10px 8px 4px 8px;
+    margin-top:8px;        /* espace après le bandeau bleu */
     overflow-x:visible;
-    padding:8px 8px 0 8px;
-    row-gap:8px;
-    column-gap:6px;
     align-items:center;
   }
+  /* Annule les règles order: globales (inutiles en grid) */
+  #tabs > * { order:unset; }
+
+  /* === Rangée 1 : Navigations vers (span 12 colonnes) === */
   .nom-voyage-wrap{
+    grid-column:1 / span 12;
+    grid-row:1;
     width:100% !important;
-    flex:0 0 100% !important;
-    min-width:0 !important;
     margin:0 !important;
+    flex:unset !important;
   }
   .nom-voyage-wrap input{
     width:100% !important;
@@ -194,55 +201,81 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e;mi
     padding:7px 10px !important;
     min-height:34px !important;
   }
+
+  /* === Rangée 2 : Date (col 1-6) + CDB (col 7-12) === */
   .tab-info-wrap{
-    margin:0;
-    gap:5px;
+    display:flex !important;
+    flex-direction:row !important;
+    align-items:center;
+    gap:6px;
+    margin:0 !important;
+    width:100%;
     box-sizing:border-box;
-    position:relative;
+    grid-row:2;
   }
-  #tabs > .tab-info-wrap:nth-of-type(1),
-  #tabs > .tab-info-wrap:nth-of-type(2){
-    flex:0 0 calc(50% - 3px);
-    width:calc(50% - 3px);
-    max-width:calc(50% - 3px);
-  }
+  #tabs > .tab-info-wrap:nth-of-type(1){ grid-column:1 / span 6; }
+  #tabs > .tab-info-wrap:nth-of-type(2){ grid-column:7 / span 6; }
+  /* Label horizontal à gauche */
   .tab-info-lbl{
-    font-size:9px;
-    color:#718096;
+    font-size:9px !important;
+    color:#718096 !important;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:0.3px;
     flex:0 0 auto;
+    white-space:nowrap;
   }
+  /* Input prend le reste */
   .tab-info-input.tab-info-date{
     flex:1 1 auto;
-    width:auto;
+    width:auto !important;
     min-width:0;
-    padding:7px 4px !important;
-    font-size:12px !important;
-    font-weight:700 !important;
+    padding:6px 4px !important;
+    font-size:13px !important;
+    font-weight:600 !important;
     -webkit-appearance:none;
     appearance:none;
     text-align:center;
     -webkit-min-logical-width:0;
     line-height:normal;
-    min-height:34px;
+    min-height:32px;
     background-color:#f7f8fa;
     color:#1a1a2e;
+    border:1px solid #cbd5e0;
+    border-radius:6px;
   }
   .tab-info-cdb{
     flex:1 1 auto;
-    width:auto;
+    width:auto !important;
     min-width:0;
     font-size:12px !important;
-    padding:7px 8px !important;
-    min-height:34px;
+    padding:6px 8px !important;
+    min-height:32px;
   }
-  .tab-info-sep{ display:none; }
+  .tab-info-sep{ display:none !important; }
+
+  /* === Rangée 3 : 3 onglets (span 4 chacun = total 12) === */
+  /* Onglets 1, 2, 3 : Carburant, Masse & Centrage, Décollage */
+  #tabs > .tab-btn:nth-of-type(1){ grid-column:1 / span 4;  grid-row:3; }
+  #tabs > .tab-btn:nth-of-type(2){ grid-column:5 / span 4;  grid-row:3; }
+  #tabs > .tab-btn:nth-of-type(3){ grid-column:9 / span 4;  grid-row:3; }
+
+  /* === Rangée 4 : 4 onglets (span 3 chacun = total 12) === */
+  /* Onglets 4, 5, 6, 7 : Atterrissage, Montée, Autonomie, Prépa vol */
+  #tabs > .tab-btn:nth-of-type(4){ grid-column:1 / span 3;  grid-row:4; }
+  #tabs > .tab-btn:nth-of-type(5){ grid-column:4 / span 3;  grid-row:4; }
+  #tabs > .tab-btn:nth-of-type(6){ grid-column:7 / span 3;  grid-row:4; }
+  #tabs > .tab-btn:nth-of-type(7){ grid-column:10 / span 3; grid-row:4; }
+
   .tab-btn{
-    flex:1 1 auto;
-    padding:8px 4px;
+    padding:8px 2px;
     font-size:11px;
     min-height:36px;
     text-align:center;
     white-space:nowrap;
+    margin-bottom:0;
+    width:100%;
+    box-sizing:border-box;
   }
 }
 
