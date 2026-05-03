@@ -54,16 +54,23 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e;mi
 #header{
   background:linear-gradient(135deg,#1a1a2e,#16213e);
   border-bottom:3px solid #e94560;
-  padding:8px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:8px 14px;display:flex;align-items:center;gap:10px;flex-wrap:nowrap;
 }
 .logo-tag{background:#e94560;color:white;font-weight:900;font-size:13px;
   padding:3px 9px;border-radius:5px;letter-spacing:1px;flex-shrink:0;}
+/* Variante 2 lignes : AQUILA / AT01 empilés */
+.logo-tag.logo-tag-2lines{
+  display:inline-flex;flex-direction:column;align-items:center;justify-content:center;
+  line-height:1.05;padding:3px 9px;letter-spacing:1px;
+}
+.logo-tag.logo-tag-2lines .logo-line1{font-size:12px;font-weight:900;}
+.logo-tag.logo-tag-2lines .logo-line2{font-size:11px;font-weight:800;letter-spacing:1.5px;}
 #header h1{font-size:15px;font-weight:700;color:#ffffff;}
 #header .sub{font-size:11px;color:#a0aec0;}
 #header-right{margin-left:auto;display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
 #header-warn{background:rgba(255,255,255,0.08);border:1px solid rgba(255,200,0,0.4);
-  border-radius:6px;padding:6px 11px;font-size:10px;color:#fbd38d;line-height:1.3;
-  min-height:36px;display:inline-flex;align-items:center;gap:4px;box-sizing:border-box;
+  border-radius:6px;padding:6px 18px;font-size:10px;color:#fbd38d;line-height:1.3;
+  min-height:36px;display:inline-flex;align-items:center;gap:6px;box-sizing:border-box;
   white-space:nowrap;flex-shrink:0;}
 .hdr-btn{
   padding:6px 11px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);
@@ -87,7 +94,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e;mi
 }
 .avion-btn:hover{border-color:#e94560;color:#fff;}
 .avion-btn.active{background:#e94560;border-color:#e94560;color:white;}
-#avion-bar-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+#avion-bar-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-start;min-width:760px;}
 
 /* ===== ONGLETS ===== */
 #tabs{
@@ -388,28 +395,24 @@ canvas{display:block;max-width:100%;}
 .badge.error{background:#fed7d7;color:#c53030;}
 
 /* ===== CARBURANT — Identification du vol ===== */
+/* Desktop : Aérodrome départ + flèche + Aérodrome arrivée sur 1 ligne */
 .carbu-aero-row {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   align-items: flex-end;
   margin-bottom: 12px;
+  flex-wrap: nowrap;
 }
-.carbu-aero-col { flex: 1; min-width: 0; }
+.carbu-aero-col { flex: 1 1 0; min-width: 0; }
 .carbu-aero-arrow {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 700;
   color: #16213e;
-  padding-bottom: 8px;
+  padding-bottom: 10px;
   flex-shrink: 0;
 }
-.carbu-date-conso-row {
-  display: flex;
-  gap: 12px;
-  align-items: flex-end;
-  margin-bottom: 12px;
-}
-.carbu-date-col { flex: 1; min-width: 0; }
-.carbu-conso-col { flex: 0 0 auto; min-width: 120px; }
+
+/* Mobile : tout empilé en colonne */
 @media (max-width: 480px) {
   .carbu-aero-row {
     flex-direction: column;
@@ -419,12 +422,6 @@ canvas{display:block;max-width:100%;}
   .carbu-aero-arrow {
     display: none;
   }
-  .carbu-date-conso-row {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
-  }
-  .carbu-conso-col { min-width: 100%; }
 }
 
 /* ===== COMING SOON ===== */
@@ -594,7 +591,7 @@ canvas{display:block;max-width:100%;}
 }
 
 @media(max-width:480px){
-  #header{padding:8px 10px;gap:7px;}
+  #header{padding:8px 10px;gap:7px;flex-wrap:wrap;}
   #header h1{font-size:13px;}
   #header .sub{font-size:10px;}
   #header-warn{font-size:0;padding:5px 7px;min-height:34px;}
@@ -641,6 +638,7 @@ canvas{display:block;max-width:100%;}
   /* Ligne 2 : Date + CDB + Dép + Arr + PDF */
   #avion-bar-right{
     width:100%;
+    min-width:0;
     display:grid;
     grid-template-columns: 1fr 1fr;
     gap:6px;
@@ -746,7 +744,7 @@ canvas{display:block;max-width:100%;}
   /* Score bar: empiler */
   .prepa-score{flex-direction:column;gap:8px;padding:10px 12px;}
   .prepa-score .score-go{margin-left:0;width:100%;text-align:center;}
-  #header-right{gap:5px;}
+  #header-right{gap:5px;min-width:0;}
   /* Mobile : masquer texte boutons, garder icônes */
   .hdr-btn{padding:5px 7px;font-size:0;min-height:34px;gap:0;}
   .hdr-btn svg{margin:0;}
@@ -758,7 +756,7 @@ canvas{display:block;max-width:100%;}
 
 /* ===== RESPONSIVE TABLETTE (481px–860px iPad mini/portrait) ===== */
 @media(min-width:481px) and (max-width:860px){
-  #header{padding:8px 14px;}
+  #header{padding:8px 14px;flex-wrap:wrap;}
   #header h1{font-size:15px;}
   #header-warn{font-size:9px;padding:5px 8px;}
   #header-warn .header-warn-sub{display:none;}
@@ -778,6 +776,7 @@ canvas{display:block;max-width:100%;}
     flex-wrap:wrap;
     gap:8px;
     width:auto;
+    min-width:0;
     margin-left:auto;
   }
   #avion-bar-right > div{
@@ -812,14 +811,11 @@ canvas{display:block;max-width:100%;}
   /* Carburant : aérodromes côte à côte */
   .carbu-aero-row{
     flex-direction:row !important;
+    flex-wrap:nowrap !important;
     gap:10px !important;
   }
   .carbu-aero-arrow{
     display:block !important;
-  }
-  .carbu-date-conso-row{
-    flex-direction:row !important;
-    gap:12px !important;
   }
   
   /* iPad : icône seule pour Historique/Admin/Exit */
@@ -1345,7 +1341,7 @@ body.app-mode-perso .signup-link-wrap { display: none !important; }
   <div id="header-right">
     <div id="header-warn">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-      <span><strong>CDB responsable de ses calculs</strong> <span class="header-warn-sub" style="color:#a0aec0;font-size:9px;">· Manuel de Vol</span></span>
+      <span><strong>Le CDB est responsable de ses calculs</strong> <span class="header-warn-sub" style="color:#a0aec0;font-size:9px;">· Manuel de Vol</span></span>
     </div>
     <!-- Bouton START -->
     <button id="btn-start" class="hdr-btn" title="Commencer la préparation de vol"
@@ -1394,14 +1390,9 @@ body.app-mode-perso .signup-link-wrap { display: none !important; }
   <button class="avion-btn" data-immat="F-GXMV" onclick="setAvion(this)">F-GXMV</button>
   <button class="avion-btn" data-immat="F-HAAT" onclick="setAvion(this)">F-HAAT</button>
   <button class="avion-btn" data-immat="F-HARM" onclick="setAvion(this)">F-HARM</button>
-  <div style="display:flex;align-items:center;gap:6px;background:#1e2d4a;border-radius:8px;padding:5px 10px;">
-    <label style="font-size:11px;color:#a0aec0;white-space:nowrap;">Conso</label>
-    <input type="number" id="conso" value="20" min="5" max="50" step="1"
-      style="width:50px;background:#0f1d33;border:1px solid #2d3748;color:#fff;
-             padding:4px 5px;border-radius:5px;font-size:14px;font-weight:700;text-align:center;"
-      oninput="syncConso('conso');updateCentrage()">
-    <span style="font-size:11px;color:#a0aec0;">L/h</span>
-  </div>
+  <!-- Champ conso caché : déplacé vers l'onglet Carburant (c-conso reste source visible) -->
+  <input type="number" id="conso" value="20" min="5" max="50" step="1" style="display:none;"
+    oninput="syncConso('conso');updateCentrage()">
   <div id="avion-bar-right">
     <!-- Champs cachés pour préserver toutes les synchronisations existantes -->
     <input type="date" id="vol-date" style="display:none;"
@@ -1419,7 +1410,7 @@ body.app-mode-perso .signup-link-wrap { display: none !important; }
         <label style="font-size:10px;color:#a0aec0;white-space:nowrap;">Dép.</label>
         <input type="text" id="vol-dep" value="LFPN" placeholder="ICAO" maxlength="4"
           style="background:#1e2d4a;border:1px solid #2d3748;color:#fff;padding:4px 6px;
-                 border-radius:5px;font-size:12px;width:60px;text-transform:uppercase;min-height:32px;font-weight:700;text-align:center;"
+                 border-radius:5px;font-size:13px;width:100px;text-transform:uppercase;min-height:32px;font-weight:700;text-align:center;letter-spacing:1px;"
           oninput="
             this.value=this.value.toUpperCase();
             var v=this.value.trim();
@@ -1457,7 +1448,7 @@ body.app-mode-perso .signup-link-wrap { display: none !important; }
         <label style="font-size:10px;color:#a0aec0;white-space:nowrap;">Arr.</label>
         <input type="text" id="vol-dest" placeholder="ICAO" maxlength="4"
           style="background:#1e2d4a;border:1px solid #2d3748;color:#fff;padding:4px 6px;
-                 border-radius:5px;font-size:12px;width:60px;text-transform:uppercase;min-height:32px;font-weight:700;text-align:center;"
+                 border-radius:5px;font-size:13px;width:100px;text-transform:uppercase;min-height:32px;font-weight:700;text-align:center;letter-spacing:1px;"
           oninput="
             this.value=this.value.toUpperCase();
             var v=this.value.trim();
@@ -1819,14 +1810,14 @@ body.app-mode-perso .signup-link-wrap { display: none !important; }
       <div class="card" style="border-left:4px solid #e94560;">
         <h3>Identification du vol</h3>
 
-        <!-- Départ + Arrivée côte à côte -->
+        <!-- Départ + Arrivée + Consommation sur 1 seule ligne (ordi) -->
         <div class="carbu-aero-row">
           <!-- Départ -->
           <div class="carbu-aero-col">
             <label style="font-size:11px;color:#16213e;display:block;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Aérodrome départ</label>
             <div style="display:flex;gap:6px;align-items:center;position:relative;">
               <input type="text" id="c-dep-icao" value="LFPN" maxlength="4" placeholder="ICAO"
-                style="flex:1;min-width:0;background:#fff;border:2px solid #16213e;border-radius:8px;padding:10px 12px;font-size:18px;font-weight:800;text-transform:uppercase;text-align:center;min-height:44px;color:#16213e;box-sizing:border-box;"
+                style="flex:1;min-width:0;background:#fff;border:2px solid #16213e;border-radius:8px;padding:10px 8px;font-size:15px;font-weight:800;text-transform:uppercase;text-align:center;min-height:44px;color:#16213e;box-sizing:border-box;"
                 oninput="this.value=this.value.toUpperCase();updateCarbu();
                   var _v2=this.value.trim();
                   _icaoSyncing=true;
@@ -1840,8 +1831,8 @@ body.app-mode-perso .signup-link-wrap { display: none !important; }
                   if(typeof showAeroMenuFiltered==='function')showAeroMenuFiltered('c-dep-menu',_v2);
                   if(typeof updateFPRoute==='function')updateFPRoute();">
               <button onclick="toggleAeroMenu('c-dep-menu')" type="button"
-                style="min-width:44px;min-height:44px;background:#fff;border:2px solid #16213e;border-radius:8px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#16213e;font-weight:700;">▾</button>
-              <div id="c-dep-menu" style="display:none;position:absolute;top:48px;left:0;right:0;z-index:999;background:#fff;border:2px solid #16213e;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.15);min-width:220px;max-height:610px;overflow-y:auto;"></div>
+                style="min-width:36px;min-height:44px;background:#fff;border:2px solid #16213e;border-radius:8px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#16213e;font-weight:700;padding:0 4px;">▾</button>
+              <div id="c-dep-menu" style="display:none;position:absolute;top:48px;left:0;z-index:999;background:#fff;border:2px solid #16213e;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.15);min-width:220px;max-height:610px;overflow-y:auto;"></div>
             </div>
           </div>
 
@@ -1853,7 +1844,7 @@ body.app-mode-perso .signup-link-wrap { display: none !important; }
             <label style="font-size:11px;color:#16213e;display:block;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Aérodrome arrivée</label>
             <div style="display:flex;gap:6px;align-items:center;position:relative;">
               <input type="text" id="c-arr-icao" value="LFPN" maxlength="4" placeholder="ICAO"
-                style="flex:1;min-width:0;background:#fff;border:2px solid #16213e;border-radius:8px;padding:10px 12px;font-size:18px;font-weight:800;text-transform:uppercase;text-align:center;min-height:44px;color:#16213e;box-sizing:border-box;"
+                style="flex:1;min-width:0;background:#fff;border:2px solid #16213e;border-radius:8px;padding:10px 8px;font-size:15px;font-weight:800;text-transform:uppercase;text-align:center;min-height:44px;color:#16213e;box-sizing:border-box;"
                 oninput="this.value=this.value.toUpperCase();updateCarbu();
                   var v=this.value.trim();
                   _icaoSyncing=true;
@@ -1868,41 +1859,27 @@ body.app-mode-perso .signup-link-wrap { display: none !important; }
                   if(typeof updateFPRoute==='function')updateFPRoute();
                   if(typeof saveFP==='function')saveFP();">
               <button onclick="toggleAeroMenu('c-arr-menu')" type="button"
-                style="min-width:44px;min-height:44px;background:#fff;border:2px solid #16213e;border-radius:8px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#16213e;font-weight:700;">▾</button>
-              <div id="c-arr-menu" style="display:none;position:absolute;top:48px;left:0;right:0;z-index:999;background:#fff;border:2px solid #16213e;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.15);min-width:220px;max-height:610px;overflow-y:auto;"></div>
+                style="min-width:36px;min-height:44px;background:#fff;border:2px solid #16213e;border-radius:8px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#16213e;font-weight:700;padding:0 4px;">▾</button>
+              <div id="c-arr-menu" style="display:none;position:absolute;top:48px;right:0;z-index:999;background:#fff;border:2px solid #16213e;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.15);min-width:220px;max-height:610px;overflow-y:auto;"></div>
             </div>
           </div>
         </div>
 
-        <!-- Date de vol + Conso sur 1 ligne -->
-        <div class="carbu-date-conso-row">
-          <div class="carbu-date-col">
-            <label style="font-size:11px;color:#1a1a2e;display:block;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Date de vol</label>
-            <input type="date" id="c-date-vol"
-              style="width:100%;background:#f7f8fa;border:1px solid #cbd5e0;color:#1a1a2e;padding:9px 10px;border-radius:8px;font-size:16px;font-weight:600;min-height:44px;box-sizing:border-box;-webkit-appearance:none;appearance:none;display:block;"
-              onchange="
-                var v=this.value;
-                var vd=document.getElementById('vol-date');if(vd&&vd.value!==v)vd.value=v;
-                var fp=document.getElementById('fp-date');if(fp&&fp.value!==v)fp.value=v;
-                var dv=document.getElementById('dateVol');if(dv&&dv.value!==v)dv.value=v;
-                var ad=document.getElementById('att-date');if(ad&&ad.value!==v)ad.value=v;
-                if(typeof saveFP==='function')saveFP();">
+        <!-- Avion + Consommation sur une même ligne -->
+        <div style="margin-bottom:10px;display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
+          <div style="flex:1;min-width:200px;">
+            <label style="font-size:11px;color:#1a1a2e;display:block;margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Avion</label>
+            <div id="c-avion-btns" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
           </div>
-          <div class="carbu-conso-col">
-            <label style="font-size:11px;color:#1a1a2e;display:block;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Consommation</label>
-            <div style="display:flex;align-items:center;gap:6px;background:#f7f8fa;border:1px solid #cbd5e0;border-radius:8px;padding:6px 10px;min-height:44px;box-sizing:border-box;">
+          <div class="carbu-conso-inline" style="flex:0 0 auto;">
+            <label style="font-size:11px;color:#1a1a2e;display:block;margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Consommation</label>
+            <div style="display:inline-flex;align-items:center;gap:5px;background:#f7f8fa;border:1px solid #cbd5e0;border-radius:6px;padding:4px 8px;">
               <input type="number" id="c-conso" value="20" min="5" max="50" step="1"
-                style="width:54px;background:#fff;border:1px solid #cbd5e0;border-radius:6px;padding:5px 6px;font-size:14px;font-weight:700;text-align:center;"
+                style="width:46px;background:#fff;border:1px solid #cbd5e0;border-radius:5px;padding:3px 4px;font-size:13px;font-weight:700;text-align:center;"
                 oninput="syncConso('c-conso');updateCarbu()">
-              <span class="conso-unit" style="font-size:12px;color:#718096;font-weight:600;">L/h</span>
+              <span class="conso-unit" style="font-size:11px;color:#718096;font-weight:600;">L/h</span>
             </div>
           </div>
-        </div>
-
-        <!-- Avion -->
-        <div style="margin-bottom:10px;">
-          <label style="font-size:11px;color:#1a1a2e;display:block;margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Avion</label>
-          <div id="c-avion-btns" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
         </div>
         <!-- champ readonly legacy pour compatibilité JS -->
         <input type="text" id="c-avion" readonly style="display:none;">
@@ -1955,12 +1932,17 @@ body.app-mode-perso .signup-link-wrap { display: none !important; }
       <!-- Plan de diversion -->
       <div style="background:#faf5ff;border-radius:8px;padding:10px 12px;margin-bottom:10px;border-left:3px solid #805ad5;">
         <div style="font-size:11px;font-weight:700;color:#805ad5;margin-bottom:8px;text-transform:uppercase;">(2) Plan de diversion</div>
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
-          <label style="font-size:11px;color:#718096;width:130px;">Terrain dégagement</label>
-          <input type="text" id="c-dega" placeholder="ICAO" maxlength="4"
-            style="width:75px;background:#fff;border:1px solid #d6bcfa;border-radius:5px;
-                   padding:4px 8px;font-size:14px;font-weight:700;text-transform:uppercase;text-align:center;color:#1a1a2e;"
-            oninput="this.value=this.value.toUpperCase();updateCarbu()">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;position:relative;">
+          <label style="font-size:11px;color:#718096;width:130px;flex-shrink:0;">Terrain dégagement</label>
+          <div style="display:flex;gap:6px;align-items:center;position:relative;width:170px;flex-shrink:0;">
+            <input type="text" id="c-dega" placeholder="ICAO" maxlength="4"
+              style="flex:1;min-width:0;background:#fff;border:1px solid #d6bcfa;border-radius:5px;padding:6px 8px;font-size:14px;font-weight:700;text-transform:uppercase;text-align:center;color:#1a1a2e;min-height:36px;box-sizing:border-box;"
+              oninput="this.value=this.value.toUpperCase();updateCarbu();
+                if(typeof showAeroMenuFiltered==='function')showAeroMenuFiltered('c-dega-menu',this.value);">
+            <button onclick="toggleAeroMenu('c-dega-menu')" type="button"
+              style="min-width:32px;min-height:36px;background:#fff;border:1px solid #d6bcfa;border-radius:5px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#805ad5;font-weight:700;padding:0 4px;">▾</button>
+            <div id="c-dega-menu" style="display:none;position:absolute;top:40px;left:0;z-index:999;background:#fff;border:1px solid #d6bcfa;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.15);min-width:220px;overflow-y:auto;"></div>
+          </div>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
           <label style="font-size:11px;color:#718096;width:130px;">Durée diversion</label>
@@ -2094,8 +2076,8 @@ body.app-mode-perso .signup-link-wrap { display: none !important; }
         <div style="margin-top:8px;padding:7px 10px;background:#f7f8fa;border-radius:8px;border-left:3px solid #2b6cb0;display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap;row-gap:4px;">
           <div style="font-size:10px;color:#2b6cb0;font-weight:700;text-transform:uppercase;letter-spacing:.3px;flex-shrink:0;height:38px;display:flex;align-items:flex-end;padding-bottom:8px;">Autonomie au départ</div>
           <div style="display:flex;align-items:flex-end;gap:4px;">
-            <input type="text" id="c-autonomie-manual" value="" placeholder="hh:mm"
-              style="width:72px;background:#fff;border:1px dashed #2b6cb0;border-radius:5px;padding:18px 5px 4px 5px;font-size:13px;font-weight:700;text-align:center;color:#1a1a2e;height:38px;box-sizing:border-box;line-height:1;" oninput="updateCarbu()">
+            <input type="text" id="c-autonomie-manual" value="" placeholder=":"
+              style="width:72px;background:#fff;border:1px dashed #2b6cb0;border-radius:5px;padding:0 5px;font-size:13px;font-weight:700;text-align:center;color:#1a1a2e;height:38px;box-sizing:border-box;line-height:38px;" oninput="updateCarbu()">
             <span style="font-size:10px;color:#a0aec0;height:38px;display:flex;align-items:flex-end;padding-bottom:8px;white-space:nowrap;">manuel</span>
           </div>
           <!-- Sous-bloc auto : reste solidaire au wrap -->
@@ -3134,6 +3116,54 @@ function toggleAeroMenu(menuId) {
   menu.innerHTML = '';
   buildAeroMenuContent(menu, menuId);
   menu.style.display = 'block';
+  positionAeroMenu(menu);
+}
+
+// Choisit dynamiquement l'ouverture vers le haut ou vers le bas selon la place disponible
+// dans le viewport, et fixe une max-height pour éviter de déborder.
+function positionAeroMenu(menu) {
+  if (!menu || menu.style.display === 'none') return;
+  // On prend l'INPUT/BOUTON associé au menu pour mesurer sa position dans le viewport.
+  // Le menu est généralement précédé immédiatement par un bouton ▾ ou un input.
+  // Plus fiable : utiliser le parent direct (qui contient input+bouton+menu).
+  const anchor = menu.parentElement;
+  if (!anchor) return;
+  const r = anchor.getBoundingClientRect();
+  const vpH = window.innerHeight;
+  const vpW = window.innerWidth;
+  const margin = 12;
+  const desired = 540; // pour afficher 12 favoris sans scroll
+  const spaceBelow = vpH - r.bottom - margin;
+  const spaceAbove = r.top - margin;
+
+  // Largeur souhaitée du menu : au moins celle de l'ancre, min 220px
+  const menuWidth = Math.max(220, r.width);
+
+  // Position horizontale : aligner le bord gauche du menu avec le bord gauche de l'ancre,
+  // mais garder dans le viewport (au moins 'margin' du bord droit)
+  let left = r.left;
+  if (left + menuWidth > vpW - margin) {
+    left = Math.max(margin, vpW - menuWidth - margin);
+  }
+  if (left < margin) left = margin;
+
+  // Choix vertical
+  menu.style.position = 'fixed';
+  menu.style.left = left + 'px';
+  menu.style.right = '';
+  menu.style.width = menuWidth + 'px';
+
+  if (spaceBelow >= 280 || spaceBelow >= spaceAbove) {
+    // Ouvrir vers le bas
+    menu.style.top = (r.bottom + 4) + 'px';
+    menu.style.bottom = '';
+    menu.style.maxHeight = Math.max(220, Math.min(desired, spaceBelow)) + 'px';
+  } else {
+    // Ouvrir vers le haut : bottom = vpH - top du champ + 4 (espace au-dessus du champ)
+    menu.style.top = '';
+    menu.style.bottom = (vpH - r.top + 4) + 'px';
+    menu.style.maxHeight = Math.max(220, Math.min(desired, spaceAbove)) + 'px';
+  }
 }
 
 function buildAeroMenuContent(menu, menuId, filter) {
@@ -3274,6 +3304,20 @@ let _aeroMenuPicking = false;
 // Empêche les cascades de dispatchEvent qui multiplieraient inutilement les appels showAeroMenuFiltered
 let _icaoSyncing = false;
 
+// Comme les menus utilisent position:fixed (placé via positionAeroMenu),
+// au scroll/resize on les referme pour éviter qu'ils se désynchronisent visuellement du champ.
+(function setupAeroMenuAutoClose(){
+  const menuIds = ['aero-menu','att-aero-menu','c-dep-menu','c-arr-menu','c-dega-menu',
+                   'fp-dep-menu','fp-arr-menu','vol-dep-menu','vol-dest-menu',
+                   'fp-wpt1-menu','fp-wpt2-menu','fp-wpt3-menu'];
+  function closeAll(){
+    menuIds.forEach(id => { const m = document.getElementById(id); if (m) m.style.display = 'none'; });
+  }
+  // Capture pour attraper les scrolls de containers internes aussi
+  window.addEventListener('scroll', closeAll, true);
+  window.addEventListener('resize', closeAll);
+})();
+
 // Affiche le menu déroulant en filtrant la liste selon le contenu de l'input
 // Appelé à chaque oninput sur les champs ICAO
 function showAeroMenuFiltered(menuId, filter) {
@@ -3317,6 +3361,7 @@ function showAeroMenuFiltered(menuId, filter) {
   menu.innerHTML = '';
   buildAeroMenuContent(menu, menuId, filter);
   menu.style.display = 'block';
+  positionAeroMenu(menu);
 }
 
 // ===== GESTIONNAIRE D'AÉRODROMES =====
@@ -7351,6 +7396,7 @@ body {
   gap: 14px !important;
   margin-bottom: 8px !important;
   align-items: flex-end !important;
+  flex-wrap: nowrap !important;
 }
 .tab-body .carbu-aero-col { flex: 1 !important; }
 .tab-body .carbu-aero-arrow {
@@ -7359,16 +7405,9 @@ body {
   color: #16213e !important;
 }
 
-/* Date + Conso */
-.tab-body .carbu-date-conso-row {
-  display: flex !important;
-  gap: 24px !important;
-  margin-bottom: 8px !important;
-  align-items: flex-end !important;
-}
-.tab-body .carbu-date-col { flex: 0 0 auto !important; }
-.tab-body .carbu-conso-col { flex: 0 0 auto !important; }
-.tab-body .carbu-conso-col > div {
+/* Conso inline (Avion + Consommation) */
+.tab-body .carbu-conso-inline { flex: 0 0 auto !important; }
+.tab-body .carbu-conso-inline > div {
   background: transparent !important;
   border: none !important;
   padding: 0 !important;
