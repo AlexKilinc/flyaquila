@@ -1934,14 +1934,14 @@ body.app-mode-perso .signup-link-wrap { display: none !important; }
         <div style="font-size:11px;font-weight:700;color:#805ad5;margin-bottom:8px;text-transform:uppercase;">(2) Plan de diversion</div>
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;position:relative;">
           <label style="font-size:11px;color:#718096;width:130px;flex-shrink:0;">Terrain dégagement</label>
-          <div style="display:flex;gap:6px;align-items:center;position:relative;width:170px;flex-shrink:0;">
+          <div style="display:flex;gap:6px;align-items:center;position:relative;flex-shrink:0;">
             <input type="text" id="c-dega" placeholder="ICAO" maxlength="4"
-              style="flex:1;min-width:0;background:#fff;border:1px solid #d6bcfa;border-radius:5px;padding:6px 8px;font-size:14px;font-weight:700;text-transform:uppercase;text-align:center;color:#1a1a2e;min-height:36px;box-sizing:border-box;"
+              style="width:130px;background:#fff;border:1px solid #d6bcfa;border-radius:5px;padding:6px 8px;font-size:14px;font-weight:700;text-transform:uppercase;text-align:center;color:#1a1a2e;min-height:36px;box-sizing:border-box;"
               oninput="this.value=this.value.toUpperCase();updateCarbu();
                 if(typeof showAeroMenuFiltered==='function')showAeroMenuFiltered('c-dega-menu',this.value);">
             <button onclick="toggleAeroMenu('c-dega-menu')" type="button"
               style="min-width:32px;min-height:36px;background:#fff;border:1px solid #d6bcfa;border-radius:5px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#805ad5;font-weight:700;padding:0 4px;">▾</button>
-            <div id="c-dega-menu" style="display:none;position:absolute;top:40px;left:0;z-index:999;background:#fff;border:1px solid #d6bcfa;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.15);min-width:220px;overflow-y:auto;"></div>
+            <div id="c-dega-menu" style="display:none;position:absolute;bottom:40px;left:0;z-index:999;background:#fff;border:1px solid #d6bcfa;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.15);min-width:220px;max-height:350px;overflow-y:auto;"></div>
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
@@ -3106,7 +3106,7 @@ function invalidateAeroMenus() {
 
 // Ouvre/ferme le menu déroulant aérodrome
 function toggleAeroMenu(menuId) {
-  ['aero-menu','att-aero-menu','c-dep-menu','c-arr-menu','fp-dep-menu','fp-arr-menu','vol-dep-menu','vol-dest-menu','fp-wpt1-menu','fp-wpt2-menu','fp-wpt3-menu'].forEach(id => {
+  ['aero-menu','att-aero-menu','c-dep-menu','c-arr-menu','c-dega-menu','fp-dep-menu','fp-arr-menu','vol-dep-menu','vol-dest-menu','fp-wpt1-menu','fp-wpt2-menu','fp-wpt3-menu'].forEach(id => {
     if (id !== menuId) { const m = document.getElementById(id); if(m) m.style.display='none'; }
   });
   const menu = document.getElementById(menuId);
@@ -3116,54 +3116,6 @@ function toggleAeroMenu(menuId) {
   menu.innerHTML = '';
   buildAeroMenuContent(menu, menuId);
   menu.style.display = 'block';
-  positionAeroMenu(menu);
-}
-
-// Choisit dynamiquement l'ouverture vers le haut ou vers le bas selon la place disponible
-// dans le viewport, et fixe une max-height pour éviter de déborder.
-function positionAeroMenu(menu) {
-  if (!menu || menu.style.display === 'none') return;
-  // On prend l'INPUT/BOUTON associé au menu pour mesurer sa position dans le viewport.
-  // Le menu est généralement précédé immédiatement par un bouton ▾ ou un input.
-  // Plus fiable : utiliser le parent direct (qui contient input+bouton+menu).
-  const anchor = menu.parentElement;
-  if (!anchor) return;
-  const r = anchor.getBoundingClientRect();
-  const vpH = window.innerHeight;
-  const vpW = window.innerWidth;
-  const margin = 12;
-  const desired = 540; // pour afficher 12 favoris sans scroll
-  const spaceBelow = vpH - r.bottom - margin;
-  const spaceAbove = r.top - margin;
-
-  // Largeur souhaitée du menu : au moins celle de l'ancre, min 220px
-  const menuWidth = Math.max(220, r.width);
-
-  // Position horizontale : aligner le bord gauche du menu avec le bord gauche de l'ancre,
-  // mais garder dans le viewport (au moins 'margin' du bord droit)
-  let left = r.left;
-  if (left + menuWidth > vpW - margin) {
-    left = Math.max(margin, vpW - menuWidth - margin);
-  }
-  if (left < margin) left = margin;
-
-  // Choix vertical
-  menu.style.position = 'fixed';
-  menu.style.left = left + 'px';
-  menu.style.right = '';
-  menu.style.width = menuWidth + 'px';
-
-  if (spaceBelow >= 280 || spaceBelow >= spaceAbove) {
-    // Ouvrir vers le bas
-    menu.style.top = (r.bottom + 4) + 'px';
-    menu.style.bottom = '';
-    menu.style.maxHeight = Math.max(220, Math.min(desired, spaceBelow)) + 'px';
-  } else {
-    // Ouvrir vers le haut : bottom = vpH - top du champ + 4 (espace au-dessus du champ)
-    menu.style.top = '';
-    menu.style.bottom = (vpH - r.top + 4) + 'px';
-    menu.style.maxHeight = Math.max(220, Math.min(desired, spaceAbove)) + 'px';
-  }
 }
 
 function buildAeroMenuContent(menu, menuId, filter) {
@@ -3240,7 +3192,7 @@ function buildAeroMenuContent(menu, menuId, filter) {
     row.onclick = () => {
       const inputId = {
         'aero-menu':'aero-txt','att-aero-menu':'att-aero-txt',
-        'c-dep-menu':'c-dep-icao','c-arr-menu':'c-arr-icao',
+        'c-dep-menu':'c-dep-icao','c-arr-menu':'c-arr-icao','c-dega-menu':'c-dega',
         'fp-dep-menu':'fp-dep-icao','fp-arr-menu':'fp-arr-icao',
         'vol-dep-menu':'vol-dep','vol-dest-menu':'vol-dest',
         'fp-wpt1-menu':'fp-wpt1','fp-wpt2-menu':'fp-wpt2','fp-wpt3-menu':'fp-wpt3'
@@ -3304,20 +3256,6 @@ let _aeroMenuPicking = false;
 // Empêche les cascades de dispatchEvent qui multiplieraient inutilement les appels showAeroMenuFiltered
 let _icaoSyncing = false;
 
-// Comme les menus utilisent position:fixed (placé via positionAeroMenu),
-// au scroll/resize on les referme pour éviter qu'ils se désynchronisent visuellement du champ.
-(function setupAeroMenuAutoClose(){
-  const menuIds = ['aero-menu','att-aero-menu','c-dep-menu','c-arr-menu','c-dega-menu',
-                   'fp-dep-menu','fp-arr-menu','vol-dep-menu','vol-dest-menu',
-                   'fp-wpt1-menu','fp-wpt2-menu','fp-wpt3-menu'];
-  function closeAll(){
-    menuIds.forEach(id => { const m = document.getElementById(id); if (m) m.style.display = 'none'; });
-  }
-  // Capture pour attraper les scrolls de containers internes aussi
-  window.addEventListener('scroll', closeAll, true);
-  window.addEventListener('resize', closeAll);
-})();
-
 // Affiche le menu déroulant en filtrant la liste selon le contenu de l'input
 // Appelé à chaque oninput sur les champs ICAO
 function showAeroMenuFiltered(menuId, filter) {
@@ -3327,7 +3265,7 @@ function showAeroMenuFiltered(menuId, filter) {
   // ne pas réouvrir un menu d'un autre champ — le menu cible sera ouvert en fin de cascade
   if (_icaoSyncing) return;
   // Fermer les autres menus
-  ['aero-menu','att-aero-menu','c-dep-menu','c-arr-menu','fp-dep-menu','fp-arr-menu','vol-dep-menu','vol-dest-menu','fp-wpt1-menu','fp-wpt2-menu','fp-wpt3-menu'].forEach(id => {
+  ['aero-menu','att-aero-menu','c-dep-menu','c-arr-menu','c-dega-menu','fp-dep-menu','fp-arr-menu','vol-dep-menu','vol-dest-menu','fp-wpt1-menu','fp-wpt2-menu','fp-wpt3-menu'].forEach(id => {
     if (id !== menuId) { const m = document.getElementById(id); if(m) m.style.display='none'; }
   });
   const menu = document.getElementById(menuId);
@@ -3361,7 +3299,6 @@ function showAeroMenuFiltered(menuId, filter) {
   menu.innerHTML = '';
   buildAeroMenuContent(menu, menuId, filter);
   menu.style.display = 'block';
-  positionAeroMenu(menu);
 }
 
 // ===== GESTIONNAIRE D'AÉRODROMES =====
