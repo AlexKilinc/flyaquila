@@ -8330,19 +8330,30 @@ function sendAdminPwd() {
 function openAdmin() {
   document.getElementById('admin-overlay').style.display = 'block';
 
-  // Bypass mot de passe : si admin connecté depuis moins de 5 minutes,
-  // ouvrir directement le panneau sans demander le mot de passe
-  const isAdmin = !!(CURRENT_USER && CURRENT_USER.isAdmin);
-  let recentLogin = false;
-  if (isAdmin) {
+  // Bypass mot de passe : pour TOUT utilisateur connecté, si l'une des deux conditions
+  // est vraie, ouvrir directement le panneau Admin sans demander le mot de passe :
+  //   1) Connexion à l'app il y a moins de 5 minutes (LS_AUTH.ts)
+  //   2) Saisie correcte du mot de passe Admin il y a moins de 5 minutes (LS_ADMIN_AUTH.ts)
+  let recentAccess = false;
+  if (CURRENT_USER && CURRENT_USER.email) {
+    const FIVE_MIN = 5 * 60 * 1000;
+    const now = Date.now();
     try {
-      const s = JSON.parse(localStorage.getItem(LS_AUTH) || 'null');
-      if (s && s.ts && (Date.now() - s.ts) < 5 * 60 * 1000) {
-        recentLogin = true;
+      const s1 = JSON.parse(localStorage.getItem(LS_AUTH) || 'null');
+      if (s1 && s1.email === CURRENT_USER.email && s1.ts && (now - s1.ts) < FIVE_MIN) {
+        recentAccess = true;
       }
     } catch(e) {}
+    if (!recentAccess) {
+      try {
+        const s2 = JSON.parse(localStorage.getItem(LS_ADMIN_AUTH) || 'null');
+        if (s2 && s2.email === CURRENT_USER.email && s2.ts && (now - s2.ts) < FIVE_MIN) {
+          recentAccess = true;
+        }
+      } catch(e) {}
+    }
   }
-  if (recentLogin) {
+  if (recentAccess) {
     document.getElementById('admin-auth').style.display = 'none';
     document.getElementById('admin-panel').style.display = 'block';
     adminLoadPanel();
@@ -8389,6 +8400,13 @@ async function checkAdminPwd() {
   } catch(e) { ok = false; }
 
   if (ok) {
+    // Stocker le timestamp de cette saisie correcte (bypass 5 min)
+    try {
+      localStorage.setItem(LS_ADMIN_AUTH, JSON.stringify({
+        email: CURRENT_USER && CURRENT_USER.email,
+        ts: Date.now()
+      }));
+    } catch(e) {}
     document.getElementById('admin-auth').style.display = 'none';
     document.getElementById('admin-panel').style.display = 'block';
     adminLoadPanel();
@@ -9112,6 +9130,7 @@ function clearHist() {
 const ADMIN_EMAIL = 'alexandre.kilinc@gmail.com';
 const LS_AUTH    = 'aquila_auth_v1';
 const LS_USERS   = 'aquila_users_v1';
+const LS_ADMIN_AUTH = 'aquila_admin_auth_v1'; // Timestamp de la dernière saisie correcte du mdp Admin (bypass 5 min)
 
 // ===== MODE PERSO / CLUB =====
 const APP_MODE_KEY = 'aquila_app_mode_v1';
@@ -9692,6 +9711,7 @@ function showApp() {
 
 function doLogout() {
   try { localStorage.removeItem(LS_AUTH); } catch(e){}
+  try { localStorage.removeItem(LS_ADMIN_AUTH); } catch(e){}
   CURRENT_USER = null;
   location.reload();
 }
