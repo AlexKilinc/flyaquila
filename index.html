@@ -8308,10 +8308,21 @@ function sendAdminPwd() {
   }
   const div = document.createElement('div');
   div.id = 'admin-pwd-hint';
-  div.style.cssText = 'margin-top:12px;padding:10px 14px;background:#ebf8ff;border:1px solid #bee3f8;border-radius:8px;font-size:12px;color:#2b6cb0;';
-  div.innerHTML = `Mot de passe&nbsp;: <strong style="font-size:14px;letter-spacing:1px;">${ADMIN_PWD}</strong>
-    <button onclick="navigator.clipboard.writeText('${ADMIN_PWD}').then(()=>{this.textContent='✓ Copié !';setTimeout(()=>this.textContent='Copier',1500)})"
-      style="margin-left:10px;padding:3px 10px;background:#3182ce;color:white;border:none;border-radius:5px;cursor:pointer;font-size:11px;">Copier</button>`;
+  div.style.cssText = 'margin-top:12px;padding:10px 14px;background:#ebf8ff;border:1px solid #bee3f8;border-radius:8px;font-size:12px;color:#2b6cb0;line-height:1.5;';
+  if (CURRENT_USER && CURRENT_USER.email === ADMIN_EMAIL) {
+    // Admin principal : afficher le mdp spécial
+    div.innerHTML = `Mot de passe&nbsp;: <strong style="font-size:14px;letter-spacing:1px;">${ADMIN_PWD}</strong>
+      <button onclick="navigator.clipboard.writeText('${ADMIN_PWD}').then(()=>{this.textContent='✓ Copié !';setTimeout(()=>this.textContent='Copier',1500)})"
+        style="margin-left:10px;padding:3px 10px;background:#3182ce;color:white;border:none;border-radius:5px;cursor:pointer;font-size:11px;">Copier</button>`;
+  } else if (CURRENT_USER && CURRENT_USER.email === TEST_USER_PERSO.email) {
+    // Compte test hardcodé : afficher en clair
+    div.innerHTML = `Mot de passe&nbsp;: <strong style="font-size:14px;letter-spacing:1px;">${TEST_USER_PERSO.password}</strong>
+      <button onclick="navigator.clipboard.writeText('${TEST_USER_PERSO.password}').then(()=>{this.textContent='✓ Copié !';setTimeout(()=>this.textContent='Copier',1500)})"
+        style="margin-left:10px;padding:3px 10px;background:#3182ce;color:white;border:none;border-radius:5px;cursor:pointer;font-size:11px;">Copier</button>`;
+  } else {
+    // Utilisateur normal : message d'aide (le mdp est hashé, on ne peut pas l'afficher)
+    div.innerHTML = `Le mot de passe d'accès Admin est le m&ecirc;me que celui que vous utilisez pour vous connecter &agrave; l'application.`;
+  }
   const btn = document.querySelector('[onclick="sendAdminPwd()"]');
   btn.parentNode.appendChild(div);
 }
@@ -8356,15 +8367,34 @@ function closeAdmin() {
   document.getElementById('admin-overlay').style.display = 'none';
 }
 
-function checkAdminPwd() {
+async function checkAdminPwd() {
   const pwd = document.getElementById('admin-pwd').value;
-  if (pwd === ADMIN_PWD) {
+  const errEl = document.getElementById('admin-pwd-err');
+  let ok = false;
+  try {
+    if (CURRENT_USER && CURRENT_USER.email === ADMIN_EMAIL) {
+      // Admin principal : mot de passe spécial ADMIN_PWD
+      ok = (pwd === ADMIN_PWD);
+    } else if (CURRENT_USER && CURRENT_USER.email === TEST_USER_PERSO.email) {
+      // Compte test hardcodé : mdp = mdp de connexion (testaquila)
+      ok = (pwd === TEST_USER_PERSO.password);
+    } else if (CURRENT_USER && CURRENT_USER.email) {
+      // Utilisateur normal en BDD : mdp Admin = mdp de connexion app
+      const users = _getUsers();
+      const u = users.find(x => x.email === CURRENT_USER.email);
+      if (u && u.pwdHash) {
+        ok = await _verifyPwd(pwd, u.pwdHash);
+      }
+    }
+  } catch(e) { ok = false; }
+
+  if (ok) {
     document.getElementById('admin-auth').style.display = 'none';
     document.getElementById('admin-panel').style.display = 'block';
     adminLoadPanel();
     _applyAdminRestrictions();
   } else {
-    document.getElementById('admin-pwd-err').style.display = 'block';
+    errEl.style.display = 'block';
     document.getElementById('admin-pwd').value = '';
   }
 }
@@ -8407,6 +8437,13 @@ function _applyAdminRestrictions() {
     if (!sec) return;
     sec.style.display = isAdmin ? '' : 'none';
   });
+  // Section "Mode application" (toggle Perso/Club) : visible UNIQUEMENT pour l'admin principal
+  // (alexandre.kilinc@gmail.com). Masquée pour tous les autres comptes, y compris test@aquila.fr.
+  const secMode = document.getElementById('admin-section-mode');
+  if (secMode) {
+    const isMainAdmin = !!(CURRENT_USER && CURRENT_USER.email === ADMIN_EMAIL);
+    secMode.style.display = isMainAdmin ? '' : 'none';
+  }
 }
 
 // ── Gestion des utilisateurs (panneau admin) ──
