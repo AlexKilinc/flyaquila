@@ -4053,7 +4053,9 @@ function showAeroTooltip(inputEl) {
     'vol-dep':'vol-dep-menu','vol-dest':'vol-dest-menu',
     'aero-txt':'aero-menu','att-aero-txt':'att-aero-menu',
     'c-dep-icao':'c-dep-menu','c-arr-icao':'c-arr-menu',
-    'fp-dep-icao':'fp-dep-menu','fp-arr-icao':'fp-arr-menu'
+    'fp-dep-icao':'fp-dep-menu','fp-arr-icao':'fp-arr-menu',
+    'c-dega':'c-dega-menu',
+    'fp-wpt1':'fp-wpt1-menu','fp-wpt2':'fp-wpt2-menu','fp-wpt3':'fp-wpt3-menu'
   };
   const menuId = inputToMenu[inputEl.id];
   if (menuId) {
@@ -4078,7 +4080,7 @@ function showAeroTooltip(inputEl) {
       '<span style="margin-left:auto;font-size:11px;color:#a0aec0;line-height:1;">' + _esc(elev) + ' ft</span>' +
     '</div>' +
     '<div style="font-size:12.5px;color:#e2e8f0;margin-bottom:8px;">' + _esc(a.n) + '</div>' +
-    '<div style="border-top:1px solid #2d3748;padding-top:7px;display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:11px;">' +
+    '<div style="border-top:1px solid #e94560;padding-top:7px;display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:11px;">' +
       '<span style="color:#a0aec0;">Radio</span><span style="color:#fff;">' + _esc(radio) + '</span>' +
       '<span style="color:#a0aec0;">Contrôle</span><span style="color:#fff;">' + _esc(ctrl) + '</span>' +
       '<span style="color:#a0aec0;">Pistes</span><span style="color:#fff;">' + _esc(nb) + '</span>' +
@@ -4149,7 +4151,7 @@ function showAeroDropdown(inp) {
 // Fermeture : blur + sortie (mouseleave)
 // Mise à jour : à la saisie (input) si pop-up déjà visible
 document.addEventListener('DOMContentLoaded', function() {
-  ['vol-dep','vol-dest','aero-txt','att-aero-txt','c-dep-icao','c-arr-icao','fp-dep-icao','fp-arr-icao'].forEach(id => {
+  ['vol-dep','vol-dest','aero-txt','att-aero-txt','c-dep-icao','c-arr-icao','fp-dep-icao','fp-arr-icao','c-dega','fp-wpt1','fp-wpt2','fp-wpt3'].forEach(id => {
     const inp = document.getElementById(id);
     if (!inp) return;
     inp.addEventListener('mouseenter', function() { showAeroTooltip(this); });
