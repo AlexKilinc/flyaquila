@@ -412,6 +412,37 @@ canvas{display:block;max-width:100%;}
   flex-shrink: 0;
 }
 
+/* Avion (4 immat) + Consommation : grille 2x2 sur mobile et tablette */
+/* Sur desktop large : 4 boutons sur une ligne (comportement par défaut flex-wrap) */
+@media (max-width: 860px) {
+  /* Garder Avion et Consommation côte à côte (pas de retour à la ligne) */
+  .carbu-avion-row {
+    flex-wrap: nowrap !important;
+    gap: 8px !important;
+  }
+  .carbu-avion-row > .carbu-avion-col {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+  }
+  .carbu-avion-row > .carbu-conso-inline {
+    flex: 0 0 auto !important;
+  }
+  /* Forcer 2 immat par ligne (grille 2 colonnes) */
+  #c-avion-btns {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px !important;
+    width: 100%;
+  }
+  #c-avion-btns .avion-btn {
+    width: 100%;
+    text-align: center;
+    padding: 6px 8px;
+    font-size: 12px;
+    box-sizing: border-box;
+  }
+}
+
 /* Mobile : tout empilé en colonne */
 @media (max-width: 480px) {
   .carbu-aero-row {
@@ -1866,8 +1897,8 @@ body.app-mode-perso .signup-link-wrap { display: none !important; }
         </div>
 
         <!-- Avion + Consommation sur une même ligne -->
-        <div style="margin-bottom:10px;display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
-          <div style="flex:1;min-width:200px;">
+        <div class="carbu-avion-row" style="margin-bottom:10px;display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
+          <div class="carbu-avion-col" style="flex:1;min-width:200px;">
             <label style="font-size:11px;color:#1a1a2e;display:block;margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Avion</label>
             <div id="c-avion-btns" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
           </div>
