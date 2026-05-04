@@ -4833,6 +4833,34 @@ function resetVol() {
     if (el) el.style.display = 'none';
   });
 
+  // ── Onglet Carburant : valeurs par défaut métier ─────
+  // Forfait roulage 10 min · Temps sans vent 60 min ·
+  // Correction météo 0 min · Intégration+retards 10 min/étape ·
+  // Nombre d'étapes 1 · Durée diversion 20 min · Marge sécurité 30 min
+  // (Terrain dégagement c-dega est déjà vidé plus haut avec les autres ICAO)
+  setVal('c-roulage',    10);
+  setVal('c-nav-base',   60);
+  setVal('c-nav-meteo',   0);
+  setVal('c-nav-retard', 10);
+  setVal('c-etapes',      1);
+  setVal('c-diver',      20);
+  setVal('c-marge',      30);
+
+  // ── Carburant réel à bord : remettre à zéro tous les champs ─
+  // (Aile G + Aile D + AVT + Total + Autonomie manuelle)
+  // C'est essentiel : ces valeurs sont propres à chaque vol et ne doivent
+  // jamais être conservées d'une préparation à la suivante.
+  ['c-bord-aileG','c-bord-aileD','c-bord-avt','c-bord','c-autonomie-manual'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.value = '';
+  });
+  // Mettre à jour les calculs dérivés (kg, autonomie auto, verdict)
+  if (typeof updateCarbu === 'function') updateCarbu();
+  // Vider l'affichage du Total kg si présent
+  const _crBordKg = document.getElementById('cr-bord-kg');
+  if (_crBordKg) _crBordKg.textContent = '—';
+
   // ── Naviguer vers onglet Carburant sans scroller la barre ─
   // (on veut que Nav/Date/CDB restent visibles à gauche)
   const tabBtn = document.querySelector(".tab-btn[onclick*='carbu']");
