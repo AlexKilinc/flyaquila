@@ -2516,6 +2516,62 @@ body.app-mode-perso .signup-link-wrap { display: none !important; }
           Conditions : Plein gaz · 2260 RPM · Volets 0° (croisière)
         </div>
       </div>
+
+      <div class="card" id="card-calib-montee" style="margin-top:10px;display:none;">
+        <h3 style="display:flex;align-items:center;justify-content:space-between;">
+          <span>🎨 Calibration nomogramme</span>
+          <span id="cal-mon-status" style="font-size:11px;color:#718096;font-weight:400;"></span>
+        </h3>
+        <div style="font-size:12px;color:#4a5568;line-height:1.5;margin-bottom:8px;">
+          Glissez les poignées colorées <b>○</b> pour aligner chaque courbe sur sa vraie position du nomogramme. L'aperçu se met à jour en temps réel.
+        </div>
+        <button id="btn-cal-visual" onclick="toggleCalVisual()" style="width:100%;padding:10px 12px;background:#7b1fa2;color:white;border:none;border-radius:6px;font-weight:600;cursor:pointer;font-size:14px;">
+          🎨 Lancer le calibrage visuel
+        </button>
+        <button id="btn-cal-mon" onclick="toggleCalMon()" style="display:none;">_</button>
+        <button id="btn-cal-curves" onclick="toggleCalCurves()" style="display:none;">_</button>
+        <button id="btn-cal-quick" onclick="toggleCalQuick()" style="display:none;">_</button>
+        <button id="btn-cal-reset" onclick="resetCalMon()" style="width:100%;padding:6px 12px;margin-top:6px;background:#fff;color:#e94560;border:1px solid #e94560;border-radius:6px;font-weight:600;cursor:pointer;font-size:12px;display:none;">
+          ↺ Réinitialiser la calibration
+        </button>
+        <div id="cal-mon-panel" style="display:none;">
+          <div id="cal-mon-instruction"></div>
+          <div id="cal-mon-points"></div>
+          <button onclick="calMonStepBack()">_</button>
+          <button onclick="calMonStepNext()" id="cal-mon-next">_</button>
+        </div>
+        <div id="cal-curves-panel" style="display:none;">
+          <div id="cal-curves-instruction"></div>
+          <div id="cal-curves-status"></div>
+          <button onclick="calCurvesStepBack()">_</button>
+          <button onclick="calCurvesSkip()">_</button>
+          <button onclick="calCurvesSave()">_</button>
+        </div>
+        <div id="cal-visual-panel" style="display:none;margin-top:10px;padding:10px;background:#f3e5f5;border-radius:6px;border:1px solid #ce93d8;font-size:12px;">
+          <div style="font-weight:600;color:#4a148c;margin-bottom:6px;">🎨 Calibrage visuel des courbes</div>
+          <div style="font-size:11px;color:#6a1b9a;margin-bottom:8px;line-height:1.4;">
+            Chaque courbe a <b>3 poignées rondes ○</b> à glisser <b>verticalement</b> :<br>
+            • <b>Gauche</b> (T=-30°C) · <b>Milieu</b> (T=+5°C, courbure) · <b>Droite</b> (T=+40°C ou T_max)<br>
+            Pour les courbes 12000 et 14000 ft, une <b style="color:#ff6f00;">poignée carrée orange ◼</b> permet de glisser <b>horizontalement</b> le point d'arrêt de la courbe (T_max).
+          </div>
+          <div style="font-size:11px;color:#6a1b9a;margin-bottom:8px;">
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+              <input type="checkbox" id="cal-visual-mode-shift" style="margin:0;">
+              Mode "translation globale" (glisser une poignée Y déplace toutes les courbes en parallèle sur ce côté)
+            </label>
+          </div>
+          <div id="cal-visual-status" style="font-size:11px;color:#4a148c;font-family:monospace;margin-bottom:8px;max-height:140px;overflow-y:auto;background:#fff;padding:6px;border-radius:4px;border:1px solid #e1bee7;"></div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button onclick="calVisualReset()" style="flex:1;min-width:100px;padding:5px 8px;background:#fff;color:#7b1fa2;border:1px solid #7b1fa2;border-radius:4px;cursor:pointer;font-size:11px;">↺ Réinit.</button>
+            <button onclick="calVisualExport()" style="flex:1;min-width:100px;padding:5px 8px;background:#fff;color:#1565c0;border:1px solid #1565c0;border-radius:4px;cursor:pointer;font-size:11px;">📋 Exporter code</button>
+            <button onclick="calVisualSave()" style="flex:1.5;min-width:120px;padding:5px 8px;background:#7b1fa2;color:white;border:none;border-radius:4px;cursor:pointer;font-size:11px;">✓ Valider et sauver</button>
+          </div>
+          <div id="cal-visual-export" style="display:none;margin-top:8px;padding:8px;background:#fff;border:1px solid #ddd;border-radius:4px;">
+            <div style="font-size:11px;color:#333;margin-bottom:4px;">Copiez ce bloc et envoyez-le moi pour mise à jour permanente du code :</div>
+            <textarea id="cal-visual-code" readonly style="width:100%;height:130px;font-family:monospace;font-size:10px;border:1px solid #ccc;padding:4px;background:#f8f8f8;"></textarea>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Canvas montée -->
@@ -6246,12 +6302,155 @@ const CM = {
   rpy_0:1073,   rpy_1500:308,
   x_connect:1066,
 };
+// Overrides depuis l'outil de calibration interactif (Ctrl+Shift+M sur l'onglet montee)
+try{
+  const cal = JSON.parse(localStorage.getItem('CAL_MONTEE_PARAMS')||'null');
+  if(cal && cal.CM){
+    Object.assign(CM, cal.CM);
+  }
+}catch(e){}
 const IMG_W_MON = 2000;
 
 function tpx_m(t,cw)  { return Math.round((CM.tpx_m30+(t+30)/70*(CM.tpx_p40-CM.tpx_m30))*cw/IMG_W_MON); }
 function mpx_m(m,cw)  { return Math.round((CM.mpx_750+(750-m)/200*(CM.mpx_550-CM.mpx_750))*cw/IMG_W_MON); }
+// Echelle Y pour le panel 2 (axe resultat): 0 ft/min = bottom, 1500 = top
 function rpy_m(v,cw)  { return Math.round((CM.rpy_0-v/1500*(CM.rpy_0-CM.rpy_1500))*cw/IMG_W_MON); }
 function xcn_m(cw)    { return Math.round(CM.x_connect*cw/IMG_W_MON); }
+
+// Position du point P1 sur la courbe d'altitude du panel 1.
+// Les courbes d'altitude du panel 1 ne sont PAS graduees en ft/min - ce sont des courbes
+// parametriques. La position Y depend de l'altitude ET de la temperature.
+// On utilise une table calibree: pour chaque altitude de reference, la position Y a T=-30 et T=+40.
+// CM.alt_curves = [{alt: 0, y_m30: ..., y_p40: ...}, {alt: 2000, ...}, ...]
+// Si non calibre, on fait une interpolation lineaire grossiere entre g1_y_in (bas) et g1_y_top (haut)
+// en supposant que MSL est en haut et 14000ft en bas (ce qui correspond au nomogramme Aquila).
+function panel1_y(t, alt, cw){
+  // Si table de calibration existe, utiliser interpolation bilineaire
+  if(CM.alt_curves && CM.alt_curves.length >= 2){
+    const curves = CM.alt_curves;
+    // Trouver les 2 courbes encadrant alt
+    let i = 0;
+    if(alt <= curves[0].alt) { i = 0; }
+    else if(alt >= curves[curves.length-1].alt) { i = curves.length-2; }
+    else {
+      for(let k=0; k<curves.length-1; k++){
+        if(alt >= curves[k].alt && alt <= curves[k+1].alt){ i = k; break; }
+      }
+    }
+    const c1 = curves[i], c2 = curves[i+1];
+    // Pour chaque courbe, interpoler Y selon T entre y_m30 (T=-30) et y_p40 (T=+40)
+    const tFrac = Math.max(0, Math.min(1, (t - (-30)) / 70));
+    const y1 = c1.y_m30 + tFrac * (c1.y_p40 - c1.y_m30);
+    const y2 = c2.y_m30 + tFrac * (c2.y_p40 - c2.y_m30);
+    // Interpoler entre les 2 courbes selon alt
+    const aFrac = (alt - c1.alt) / (c2.alt - c1.alt);
+    const y_img = y1 + aFrac * (y2 - y1);
+    return Math.round(y_img * cw / IMG_W_MON);
+  }
+  // Fallback: estimation grossiere - les courbes du nomogramme Aquila vont de MSL (haut)
+  // a 14000ft (bas) entre g1_y_top et g1_y_in. La pente -10degC -> +40degC va du haut vers le bas.
+  const altMax = 14000;
+  const altFrac = Math.max(0, Math.min(1, alt / altMax));
+  // a t=20degC, MSL est a y_top et 14000ft est a y_in
+  // a t=-30degC, les courbes sont decalees vers le haut (env 35% plus haut)
+  // a t=+40degC, les courbes sont decalees vers le bas (env 15% plus bas)
+  const yBot = CM.g1_y_in, yTop = CM.g1_y_top;
+  const yRange = yBot - yTop;
+  // Position de base (T=20degC)
+  const y_at_20 = yTop + altFrac * yRange;
+  // Decalage selon T (les courbes sont inclinees -- a froid ca monte, a chaud ca descend)
+  const tFrac = (t - 20) / 50;  // -1 a -30degC, +0.4 a +40degC
+  const y_img = y_at_20 + tFrac * yRange * 0.18;  // amplitude empirique
+  return Math.round(y_img * cw / IMG_W_MON);
+}
+// Conserver rpy_m1 comme alias pour compatibilite avec ancien code (ne devrait plus etre appele)
+function rpy_m1(v, cw){ return panel1_y(20, 0, cw); }
+
+// === Calibration des courbes d'altitude du panel 1 ===
+// Pour chaque altitude etiquetee, position Y (en pixels image) sur 3 points du panel 1:
+// - y_left  = position Y a x = tpx_m30 (T = -30°C)
+// - y_mid   = position Y a T = +5°C (point central, permet la courbure parabolique)
+// - y_right = position Y a x = tpx_p40 (T = +40°C, ou x_max si t_max < 40)
+//
+// Les vraies courbes du nomogramme Aquila sont incurvees vers le bas (paraboliques).
+// Avec 3 points, on fait une interpolation quadratique (Lagrange) qui reproduit fidelement
+// cette courbure.
+//
+// Pour les courbes hautes altitudes (12000, 14000 ft), la courbe se "termine" graphiquement
+// quand le taux atteint 0 ft/min. Le champ t_max indique la T° de cette terminaison.
+// Au-dela de t_max, le point P1 reste plaque a l'extremite droite reelle de la courbe.
+//
+// Valeurs par defaut: courbure parabolique legere (y_mid = (y_left+y_right)/2 + decalage).
+// L'utilisateur ajuste via l'outil de calibrage visuel.
+const ALT_CURVES_DEFAULT = [
+  { alt:0,     y_left:485, y_mid:585, y_right:689, t_max:40   },  // MSL
+  { alt:2000,  y_left:535, y_mid:635, y_right:739, t_max:40   },
+  { alt:4000,  y_left:587, y_mid:687, y_right:789, t_max:40   },
+  { alt:6000,  y_left:639, y_mid:739, y_right:841, t_max:40   },
+  { alt:8000,  y_left:691, y_mid:790, y_right:891, t_max:40   },
+  { alt:10000, y_left:743, y_mid:842, y_right:943, t_max:40   },
+  { alt:12000, y_left:795, y_mid:894, y_right:993, t_max:21.6 },  // tronquee a +21.6°C (taux=0 au-dela)
+  { alt:14000, y_left:849, y_mid:947, y_right:1045,t_max:-1.4 },  // tronquee a -1.4°C (taux=0 au-dela)
+];
+let ALT_CURVES = ALT_CURVES_DEFAULT.map(c => ({...c}));
+// Charger calibration custom si disponible (et ajouter y_mid si manquant pour retro-compat)
+try{
+  const cal = JSON.parse(localStorage.getItem('CAL_MONTEE_PARAMS')||'null');
+  if(cal && Array.isArray(cal.altCurves) && cal.altCurves.length>=2){
+    ALT_CURVES = cal.altCurves.map(c => {
+      const out = {...c};
+      // Retro-compat: si y_mid manquant (ancien format 2 points), generer mid lineaire
+      if(out.y_mid == null) out.y_mid = Math.round((out.y_left + out.y_right) / 2);
+      return out;
+    });
+  }
+}catch(e){}
+
+// T° associee au point milieu de la courbe (entre tpx_m30=-30°C et tpx_p40=+40°C)
+const T_MID = 5;  // T° au point d'inflexion approximatif des courbes Aquila
+
+// Position Y du point P1 sur le panel 1 pour T° et altitude donnees.
+// Interpolation quadratique de Lagrange entre les 3 points (y_left, y_mid, y_right)
+// de chaque courbe etiquetee, puis interpolation lineaire entre courbes adjacentes selon altitude.
+//
+// Cas particulier des courbes "tronquees" (12000/14000 ft a haute T°): si la T° depasse
+// t_max de la courbe interpolee, le point reste plaque a la position a t_max.
+function y_curve_alt(t, alt, cw){
+  const sc = cw / IMG_W_MON;
+  // Trouver les deux courbes adjacentes par altitude
+  const curves = ALT_CURVES.slice().sort((a,b) => a.alt - b.alt);
+  let c1 = curves[0], c2 = curves[curves.length-1];
+  if(alt <= c1.alt){ c2 = curves[1] || c1; }
+  else if(alt >= c2.alt){ c1 = curves[curves.length-2] || c2; }
+  else {
+    for(let i=0; i<curves.length-1; i++){
+      if(alt >= curves[i].alt && alt <= curves[i+1].alt){
+        c1 = curves[i]; c2 = curves[i+1]; break;
+      }
+    }
+  }
+  // T° max de la courbe a cette altitude (interpole depuis t_max des courbes adjacentes)
+  const tAlt = (c2.alt === c1.alt) ? 0 : (alt - c1.alt) / (c2.alt - c1.alt);
+  const tmax1 = (c1.t_max != null) ? c1.t_max : 40;
+  const tmax2 = (c2.t_max != null) ? c2.t_max : 40;
+  const tmax  = tmax1 + tAlt * (tmax2 - tmax1);
+  // Plafonner T° a t_max pour eviter de prolonger la courbe au-dela de son domaine reel
+  const tEff  = Math.min(t, tmax);
+  // Interpolation quadratique de Lagrange sur 3 points: T=-30 -> y_left, T=T_MID -> y_mid, T=+40 -> y_right
+  const yQuad = (c) => {
+    const yL = c.y_left, yM = (c.y_mid != null ? c.y_mid : (c.y_left+c.y_right)/2), yR = c.y_right;
+    const x = tEff, x1=-30, x2=T_MID, x3=40;
+    const L1 = ((x-x2)*(x-x3))/((x1-x2)*(x1-x3));
+    const L2 = ((x-x1)*(x-x3))/((x2-x1)*(x2-x3));
+    const L3 = ((x-x1)*(x-x2))/((x3-x1)*(x3-x2));
+    return yL*L1 + yM*L2 + yR*L3;
+  };
+  const y1 = yQuad(c1);
+  const y2 = yQuad(c2);
+  // Interpolation lineaire entre les deux courbes selon altitude
+  const y_img = y1 + tAlt * (y2 - y1);
+  return Math.round(y_img * sc);
+}
 
 // Courbes montee: altitude x temperature -> taux de base (masse ref 700kg)
 // Calibrees depuis exemple 2100ft/20degC/700kg -> 640 ft/min
@@ -6280,8 +6479,33 @@ function bR_mon(t,a){
 }
 
 // Facteur masse montee (interpole depuis donnees tableau)
-// 750kg -> ~0.97, 700kg -> 1.0 (reference), 600kg -> ~1.09
-function mF_mon(m){ return 1 + 0.00294*(750-m); } // calibre: 750kg=ref, 700kg=1.147 -> 640 ft/min
+// Le tableau AC_MON est calibre sur masse 750kg (max), pas 700kg comme le commentaire l'indiquait.
+// Reference: pour T=20degC, ZP=2100ft, masse=700kg -> 640 ft/min
+//   - bR_mon(20, 2100) ~= 558 (valeur a 750kg)
+//   - mF_mon(700) doit valoir 640/558 ~= 1.147
+// Donnees constructeur typiques: 750kg=ref(1.0), 700kg=1.15, 650kg=1.30, 600kg=1.45, 550kg=1.60
+function mF_mon(m){
+  // Interpolation lineaire: pente ~+0.030 par kg en-dessous de 750
+  return 1 + 0.00294*(750-m);
+}
+// Override via outil de calibration interactif (sauvegarde dans localStorage)
+try{
+  const cal = JSON.parse(localStorage.getItem('CAL_MONTEE_PARAMS')||'null');
+  if(cal && cal.mF_table && Array.isArray(cal.mF_table)){
+    // mF_table = [[masse, facteur], ...]
+    window.mF_mon = function(m){
+      const t = cal.mF_table;
+      if(m<=t[0][0]) return t[0][1];
+      if(m>=t[t.length-1][0]) return t[t.length-1][1];
+      for(let i=0;i<t.length-1;i++){
+        if(m>=t[i][0] && m<=t[i+1][0]){
+          const tt=(m-t[i][0])/(t[i+1][0]-t[i][0]);
+          return t[i][1]+tt*(t[i+1][1]-t[i][1]);
+        }
+      }
+    };
+  }
+}catch(e){}
 
 function computeMontee(){
   if(!document.getElementById('mon-temp')) return;
@@ -6310,6 +6534,11 @@ function computeMontee(){
 }
 
 function drawMontee(t, a, m, taux){
+  // Si l'outil de calibrage visuel est actif, il gere le rendu lui-meme
+  if(typeof CAL_VISUAL !== 'undefined' && CAL_VISUAL.active){
+    drawCalVisual();
+    return;
+  }
   const cv = document.getElementById('cv-montee');
   if(!CHART_MONTEE.complete||!CHART_MONTEE.naturalWidth) return;
   const scale = 0.6;
@@ -6324,8 +6553,10 @@ function drawMontee(t, a, m, taux){
   const fs = Math.max(12, Math.round(CW/80));
   ctx.lineWidth = lw;
 
-  const g1_bot = CM.g1_y_in, g1_top = CM.g1_y_top;
-  const g2_bot = CM.g2_y_in, g2_top = CM.g2_y_top;
+  // IMPORTANT: g1_*/g2_* sont en pixels image (2000px de large), il faut les scaler vers le canvas
+  const sc = CW / IMG_W_MON;
+  const g1_bot = Math.round(CM.g1_y_in  * sc), g1_top = Math.round(CM.g1_y_top * sc);
+  const g2_bot = Math.round(CM.g2_y_in  * sc), g2_top = Math.round(CM.g2_y_top * sc);
 
   // Ligne verticale Tdeg (panel 1)
   const x_t = tpx_m(t, CW);
@@ -6334,16 +6565,29 @@ function drawMontee(t, a, m, taux){
   ctx.fillStyle=RED; ctx.font=`bold ${fs}px Arial`;
   ctx.fillText(`${t}°C`, x_t+4, g1_top+fs+2);
 
-  // Point P1: intersection ligne Tdeg x courbe altitude (calcule)
-  const y_p1 = rpy_m(Math.max(0, bR_mon(t,a)), CW);
+  // Point P1: intersection ligne Tdeg x courbe altitude
+  // On positionne P1 sur la VRAIE courbe d'altitude de l'image (interpolation graphique entre courbes etiquetees),
+  // pas sur la valeur calculee de bR_mon (qui ne correspond pas forcement a la position graphique)
+  const y_p1 = y_curve_alt(t, a, CW);
   ctx.fillStyle=RED;
   ctx.beginPath(); ctx.arc(x_t, y_p1, r, 0, Math.PI*2); ctx.fill();
   ctx.strokeStyle='white'; ctx.lineWidth=2; ctx.stroke(); ctx.lineWidth=lw;
 
-  // Ligne horizontale P1 -> connexion
+  // Ligne horizontale P1 -> connexion (jusqu'a l'entree du panel 2)
+  // Le passage panel 1 -> panel 2 doit se faire en preservant la valeur ft/min,
+  // donc on calcule la coordonnee Y sur l'echelle du panel 2 pour la meme valeur
+  const v_at_p1 = Math.max(0, bR_mon(t,a));  // valeur ft/min a 750kg (masse ref tableau)
+  const y_p1_panel2 = rpy_m(v_at_p1, CW);     // meme valeur sur echelle panel 2
   const x_cn = xcn_m(CW);
   ctx.strokeStyle=RED;
+  // Trace : du point P1 (panel 1) horizontalement, puis transition vers panel 2 si besoin
   ctx.beginPath(); ctx.moveTo(x_t, y_p1); ctx.lineTo(x_cn, y_p1); ctx.stroke();
+  // Transition verticale courte si les echelles different, puis horizontale dans panel 2
+  if(Math.abs(y_p1 - y_p1_panel2) > 2){
+    ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.moveTo(x_cn, y_p1); ctx.lineTo(x_cn, y_p1_panel2); ctx.stroke();
+    ctx.setLineDash([]);
+  }
 
   // Ligne verticale Masse (panel 2)
   const x_m = mpx_m(m, CW);
@@ -6351,8 +6595,8 @@ function drawMontee(t, a, m, taux){
   ctx.fillStyle=RED; ctx.font=`bold ${fs}px Arial`;
   ctx.fillText(`${m}kg`, x_m+4, g2_top+fs+2);
 
-  // Point P2: intersection ligne horizontale x ligne masse
-  const y_p2 = y_p1;  // meme hauteur (ligne horizontale)
+  // Point P2: intersection ligne horizontale (panel 2) x ligne masse
+  const y_p2 = y_p1_panel2;  // sur l'echelle du panel 2
   ctx.fillStyle=RED;
   ctx.beginPath(); ctx.arc(x_m, y_p2, r, 0, Math.PI*2); ctx.fill();
   ctx.strokeStyle='white'; ctx.lineWidth=2; ctx.stroke(); ctx.lineWidth=lw;
@@ -6372,6 +6616,946 @@ function drawMontee(t, a, m, taux){
 }
 
 CHART_MONTEE.onload = () => computeMontee();
+
+// ===== OUTIL DE CALIBRATION INTERACTIF DU NOMOGRAMME MONTEE =====
+const CAL_MON = {
+  active: false,
+  step: 0,
+  points: {},
+  steps: [
+    { id:'tpx_m30',     label:'Cliquez sur la graduation -30°C de l\'axe X (panel 1)',          field:'CM.tpx_m30',     coord:'x' },
+    { id:'tpx_p40',     label:'Cliquez sur la graduation +40°C de l\'axe X (panel 1)',          field:'CM.tpx_p40',     coord:'x' },
+    { id:'g1_y_in',     label:'Cliquez sur l\'INTERSECTION axe X et axe Y du panel 1 (en bas)', field:'CM.g1_y_in',     coord:'y' },
+    { id:'g1_v0_y',     label:'Cliquez sur le 0 ft/min de l\'axe Y droit du panel 1',           field:'CM.g1_v0_y',     coord:'y' },
+    { id:'g1_v1500_y',  label:'Cliquez sur le 1500 ft/min de l\'axe Y droit du panel 1',         field:'CM.g1_v1500_y',  coord:'y' },
+    { id:'mpx_750',     label:'Cliquez sur la graduation 750 kg de l\'axe X (panel 2)',         field:'CM.mpx_750',     coord:'x' },
+    { id:'mpx_550',     label:'Cliquez sur la graduation 550 kg de l\'axe X (panel 2)',         field:'CM.mpx_550',     coord:'x' },
+    { id:'rpy_0',       label:'Cliquez sur le 0 ft/min de l\'axe Y droit du panel 2',           field:'CM.rpy_0',       coord:'y' },
+    { id:'rpy_1500',    label:'Cliquez sur le 1500 ft/min de l\'axe Y droit du panel 2',         field:'CM.rpy_1500',    coord:'y' },
+  ],
+};
+
+function toggleCalMon(){
+  CAL_MON.active = !CAL_MON.active;
+  const btn = document.getElementById('btn-cal-mon');
+  const panel = document.getElementById('cal-mon-panel');
+  const cv = document.getElementById('cv-montee');
+  if(CAL_MON.active){
+    CAL_MON.step = 0;
+    CAL_MON.points = {};
+    btn.textContent = '✕ Annuler la calibration';
+    btn.style.background = '#e94560';
+    panel.style.display = 'block';
+    cv.style.cursor = 'crosshair';
+    cv.addEventListener('click', calMonClickHandler);
+    updateCalMonUI();
+  } else {
+    btn.innerHTML = '🎯 Démarrer la calibration';
+    btn.style.background = '#0F274C';
+    panel.style.display = 'none';
+    cv.style.cursor = 'default';
+    cv.removeEventListener('click', calMonClickHandler);
+    drawMontee(+document.getElementById('mon-temp').value,
+               getAltValue('mon-alt'),
+               +document.getElementById('mon-mass').value,
+               +document.getElementById('mon-res').textContent || 0);
+  }
+}
+
+function updateCalMonUI(){
+  const step = CAL_MON.steps[CAL_MON.step];
+  const instr = document.getElementById('cal-mon-instruction');
+  const pts = document.getElementById('cal-mon-points');
+  const nextBtn = document.getElementById('cal-mon-next');
+  if(!step){
+    instr.textContent = '✓ Calibration complète. Cliquez sur "Valider" pour sauvegarder.';
+    nextBtn.textContent = '✓ Valider';
+  } else {
+    instr.innerHTML = `<b>Étape ${CAL_MON.step+1}/${CAL_MON.steps.length}</b> : ${step.label}`;
+    nextBtn.textContent = (CAL_MON.step === CAL_MON.steps.length-1) ? '✓ Valider' : 'Passer →';
+  }
+  let html = '';
+  CAL_MON.steps.forEach((s,i) => {
+    const v = CAL_MON.points[s.id];
+    const mark = v!=null ? `<span style="color:#2e7d32;">✓</span>` : (i===CAL_MON.step ? `<span style="color:#e65100;">▶</span>` : `<span style="color:#bbb;">○</span>`);
+    html += `${mark} ${s.id}: ${v!=null ? v.toFixed(0)+'px' : '—'}<br>`;
+  });
+  pts.innerHTML = html;
+}
+
+function calMonClickHandler(e){
+  if(!CAL_MON.active) return;
+  const step = CAL_MON.steps[CAL_MON.step];
+  if(!step) return;
+  const cv = document.getElementById('cv-montee');
+  const rect = cv.getBoundingClientRect();
+  const scale = 0.6;
+  const cw_canvas = cv.width;
+  // Conversion: clic en pixel canvas -> coordonnees image originale (2000px de large)
+  const x_canvas = (e.clientX - rect.left) * (cv.width / rect.width);
+  const y_canvas = (e.clientY - rect.top)  * (cv.height / rect.height);
+  const x_img = Math.round(x_canvas * IMG_W_MON / cw_canvas);
+  const y_img = Math.round(y_canvas * IMG_W_MON / cw_canvas);
+  CAL_MON.points[step.id] = (step.coord === 'x') ? x_img : y_img;
+  // Avancer automatiquement
+  if(CAL_MON.step < CAL_MON.steps.length){
+    CAL_MON.step++;
+  }
+  updateCalMonUI();
+  // Re-dessiner avec marqueurs de calibration
+  redrawCalMonOverlay();
+  if(CAL_MON.step >= CAL_MON.steps.length){
+    // Tous les points placés, sauvegarder automatiquement
+    setTimeout(()=>{ if(confirm('Calibration complète. Sauvegarder et appliquer ?')) saveCalMon(); }, 100);
+  }
+}
+
+function redrawCalMonOverlay(){
+  const cv = document.getElementById('cv-montee');
+  if(!CHART_MONTEE.complete) return;
+  const scale = 0.6;
+  const CW = Math.round(CHART_MONTEE.naturalWidth * scale);
+  cv.width = CW; cv.height = Math.round(CHART_MONTEE.naturalHeight * scale);
+  const ctx = cv.getContext('2d');
+  ctx.drawImage(CHART_MONTEE, 0, 0, CW, cv.height);
+  // Tracer chaque point déjà placé
+  Object.keys(CAL_MON.points).forEach(id => {
+    const step = CAL_MON.steps.find(s => s.id === id);
+    const v = CAL_MON.points[id];
+    const px = v * CW / IMG_W_MON;
+    ctx.strokeStyle = '#2e7d32';
+    ctx.fillStyle = 'rgba(46,125,50,0.2)';
+    ctx.lineWidth = 2;
+    if(step.coord === 'x'){
+      ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, cv.height); ctx.stroke();
+    } else {
+      ctx.beginPath(); ctx.moveTo(0, px); ctx.lineTo(CW, px); ctx.stroke();
+    }
+    // Etiquette
+    ctx.fillStyle = '#2e7d32';
+    ctx.font = 'bold 11px Arial';
+    if(step.coord === 'x'){
+      ctx.fillText(id, px+3, 14);
+    } else {
+      ctx.fillText(id, 4, px-3);
+    }
+  });
+}
+
+function calMonStepBack(){
+  if(CAL_MON.step > 0){
+    CAL_MON.step--;
+    delete CAL_MON.points[CAL_MON.steps[CAL_MON.step].id];
+    updateCalMonUI();
+    redrawCalMonOverlay();
+  }
+}
+
+function calMonStepNext(){
+  if(CAL_MON.step >= CAL_MON.steps.length){
+    saveCalMon();
+  } else {
+    // Sauter cette étape (garder valeur par défaut)
+    CAL_MON.step++;
+    updateCalMonUI();
+  }
+}
+
+function saveCalMon(){
+  // Construire l'objet de calibration
+  const newCM = {};
+  CAL_MON.steps.forEach(s => {
+    if(CAL_MON.points[s.id] != null){
+      newCM[s.id] = CAL_MON.points[s.id];
+    }
+  });
+  // Si rpy_0 et rpy_1500 placés, mettre à jour aussi g2_y_in/g2_y_top pour cohérence
+  if(newCM.rpy_0!=null) newCM.g2_y_in = newCM.rpy_0;
+  if(newCM.rpy_1500!=null) newCM.g2_y_top = newCM.rpy_1500;
+  // Si g1_y_in placé, mettre x_connect au niveau de tpx_p40
+  if(newCM.tpx_p40!=null) newCM.x_connect = newCM.tpx_p40;
+
+  // Sauvegarder
+  const existing = JSON.parse(localStorage.getItem('CAL_MONTEE_PARAMS')||'{}');
+  existing.CM = Object.assign({}, existing.CM||{}, newCM);
+  localStorage.setItem('CAL_MONTEE_PARAMS', JSON.stringify(existing));
+  // Appliquer immédiatement
+  Object.assign(CM, newCM);
+
+  document.getElementById('cal-mon-status').innerHTML = '<span style="color:#2e7d32;">✓ calibré</span>';
+  document.getElementById('btn-cal-reset').style.display = 'block';
+  alert('Calibration sauvegardée et appliquée. Rechargez la page pour vérification persistante.');
+  toggleCalMon(); // désactive le mode
+}
+
+function resetCalMon(){
+  if(!confirm('Réinitialiser la calibration aux valeurs par défaut ?')) return;
+  localStorage.removeItem('CAL_MONTEE_PARAMS');
+  // Restaurer les valeurs d'origine
+  Object.assign(CM, {
+    tpx_m30:472, tpx_p40:1066,
+    g1_y_in:1073, g1_y_top:512,
+    mpx_750:1128, mpx_550:1705,
+    g2_y_in:1073, g2_y_top:308,
+    rpy_0:1073, rpy_1500:308,
+    x_connect:1066,
+  });
+  delete CM.g1_v0_y; delete CM.g1_v1500_y; delete CM.g1_vMax;
+  // Restaurer aussi les courbes d'altitude
+  ALT_CURVES = ALT_CURVES_DEFAULT.map(c => ({...c}));
+  document.getElementById('cal-mon-status').textContent = '';
+  document.getElementById('btn-cal-reset').style.display = 'none';
+  computeMontee();
+  alert('Calibration réinitialisée.');
+}
+
+// Au chargement, indiquer si une calibration est active
+window.addEventListener('DOMContentLoaded', function(){
+  const cal = localStorage.getItem('CAL_MONTEE_PARAMS');
+  if(cal){
+    const status = document.getElementById('cal-mon-status');
+    const btn = document.getElementById('btn-cal-reset');
+    if(status) status.innerHTML = '<span style="color:#2e7d32;">✓ calibré</span>';
+    if(btn) btn.style.display = 'block';
+  }
+});
+
+// ===== CALIBRATION DES COURBES D'ALTITUDE =====
+// Permet de cliquer sur l'image pour positionner chaque courbe d'altitude (MSL, 2000ft, ..., 14000ft)
+// a ses 2 extremites (T=-30degC et T=+40degC).
+const CAL_CURVES = {
+  active: false,
+  step: 0,
+  // 8 altitudes x 2 extremites = 16 etapes
+  // Pour aller plus vite, on peut aussi se contenter de 4 altitudes cle (MSL, 4000, 8000, 14000)
+  steps: [
+    { alt:0,     side:'left',  label:'MSL · côté gauche (T=-30°C)' },
+    { alt:0,     side:'right', label:'MSL · côté droit (T=+40°C)' },
+    { alt:4000,  side:'left',  label:'4000 ft · côté gauche (T=-30°C)' },
+    { alt:4000,  side:'right', label:'4000 ft · côté droit (T=+40°C)' },
+    { alt:8000,  side:'left',  label:'8000 ft · côté gauche (T=-30°C)' },
+    { alt:8000,  side:'right', label:'8000 ft · côté droit (T=+40°C)' },
+    { alt:14000, side:'left',  label:'14000 ft · côté gauche (T=-30°C)' },
+    { alt:14000, side:'right', label:'14000 ft · côté droit (T=+40°C)' },
+  ],
+  data: {}, // {alt: {y_left: ..., y_right: ...}}
+};
+
+function toggleCalCurves(){
+  CAL_CURVES.active = !CAL_CURVES.active;
+  const btn = document.getElementById('btn-cal-curves');
+  const panel = document.getElementById('cal-curves-panel');
+  const cv = document.getElementById('cv-montee');
+  if(CAL_CURVES.active){
+    // S'assurer que l'autre mode est désactivé
+    if(CAL_MON.active){ toggleCalMon(); }
+    CAL_CURVES.step = 0;
+    CAL_CURVES.data = {};
+    btn.textContent = '✕ Annuler';
+    btn.style.background = '#e94560';
+    panel.style.display = 'block';
+    cv.style.cursor = 'crosshair';
+    cv.addEventListener('click', calCurvesClickHandler);
+    updateCalCurvesUI();
+  } else {
+    btn.innerHTML = '📈 Calibrer les courbes d\'altitude';
+    btn.style.background = '#0F274C';
+    panel.style.display = 'none';
+    cv.style.cursor = 'default';
+    cv.removeEventListener('click', calCurvesClickHandler);
+    if(typeof computeMontee === 'function') computeMontee();
+  }
+}
+
+function updateCalCurvesUI(){
+  const step = CAL_CURVES.steps[CAL_CURVES.step];
+  const instr = document.getElementById('cal-curves-instruction');
+  const status = document.getElementById('cal-curves-status');
+  if(!step){
+    instr.innerHTML = '✓ Toutes les courbes positionnées. Cliquez sur "✓ Sauver" pour appliquer.';
+  } else {
+    instr.innerHTML = `<b>Étape ${CAL_CURVES.step+1}/${CAL_CURVES.steps.length}</b><br>Cliquez sur la courbe <b>${step.label}</b>`;
+  }
+  // Afficher l'état des courbes calibrées
+  let html = '';
+  const altsDone = Object.keys(CAL_CURVES.data).map(Number).sort((a,b)=>a-b);
+  altsDone.forEach(alt => {
+    const d = CAL_CURVES.data[alt];
+    const L = d.y_left!=null ? '✓' : '·';
+    const R = d.y_right!=null ? '✓' : '·';
+    html += `${alt.toString().padStart(5,' ')} ft: L${L} R${R}<br>`;
+  });
+  status.innerHTML = html || '<i>Aucun point cliqué</i>';
+}
+
+function calCurvesClickHandler(e){
+  if(!CAL_CURVES.active) return;
+  const step = CAL_CURVES.steps[CAL_CURVES.step];
+  if(!step) return;
+  const cv = document.getElementById('cv-montee');
+  const rect = cv.getBoundingClientRect();
+  const y_canvas = (e.clientY - rect.top) * (cv.height / rect.height);
+  const y_img = Math.round(y_canvas * IMG_W_MON / cv.width);
+  if(!CAL_CURVES.data[step.alt]) CAL_CURVES.data[step.alt] = {};
+  if(step.side === 'left') CAL_CURVES.data[step.alt].y_left = y_img;
+  else CAL_CURVES.data[step.alt].y_right = y_img;
+  // Avancer
+  if(CAL_CURVES.step < CAL_CURVES.steps.length){
+    CAL_CURVES.step++;
+  }
+  updateCalCurvesUI();
+  redrawCalCurvesOverlay();
+}
+
+function redrawCalCurvesOverlay(){
+  const cv = document.getElementById('cv-montee');
+  if(!CHART_MONTEE.complete) return;
+  const scale = 0.6;
+  const CW = Math.round(CHART_MONTEE.naturalWidth * scale);
+  cv.width = CW; cv.height = Math.round(CHART_MONTEE.naturalHeight * scale);
+  const ctx = cv.getContext('2d');
+  ctx.drawImage(CHART_MONTEE, 0, 0, CW, cv.height);
+  const sc = CW / IMG_W_MON;
+  // Tracer chaque courbe positionnée
+  Object.keys(CAL_CURVES.data).forEach(alt => {
+    const d = CAL_CURVES.data[alt];
+    const xL = Math.round(CM.tpx_m30 * sc);
+    const xR = Math.round(CM.tpx_p40 * sc);
+    if(d.y_left != null && d.y_right != null){
+      // Tracer la ligne complète
+      ctx.strokeStyle = '#2e7d32';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6,3]);
+      ctx.beginPath();
+      ctx.moveTo(xL, d.y_left * sc);
+      ctx.lineTo(xR, d.y_right * sc);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = '#2e7d32';
+      ctx.font = 'bold 11px Arial';
+      ctx.fillText(alt + ' ft', xR + 3, d.y_right * sc + 4);
+    } else {
+      // Tracer juste les points placés
+      ctx.fillStyle = '#2e7d32';
+      if(d.y_left != null){
+        ctx.beginPath();
+        ctx.arc(xL, d.y_left * sc, 4, 0, Math.PI*2);
+        ctx.fill();
+      }
+      if(d.y_right != null){
+        ctx.beginPath();
+        ctx.arc(xR, d.y_right * sc, 4, 0, Math.PI*2);
+        ctx.fill();
+      }
+    }
+  });
+}
+
+function calCurvesStepBack(){
+  if(CAL_CURVES.step > 0){
+    CAL_CURVES.step--;
+    const step = CAL_CURVES.steps[CAL_CURVES.step];
+    if(CAL_CURVES.data[step.alt]){
+      if(step.side === 'left') delete CAL_CURVES.data[step.alt].y_left;
+      else delete CAL_CURVES.data[step.alt].y_right;
+    }
+    updateCalCurvesUI();
+    redrawCalCurvesOverlay();
+  }
+}
+
+function calCurvesSkip(){
+  if(CAL_CURVES.step < CAL_CURVES.steps.length){
+    CAL_CURVES.step++;
+    updateCalCurvesUI();
+  }
+}
+
+function calCurvesSave(){
+  // Construire ALT_CURVES depuis les données calibrées (interpoler entre les points cliqués)
+  const measured = Object.keys(CAL_CURVES.data)
+    .map(k => ({alt: +k, ...CAL_CURVES.data[k]}))
+    .filter(c => c.y_left != null && c.y_right != null)
+    .sort((a,b) => a.alt - b.alt);
+
+  if(measured.length < 2){
+    alert('Veuillez placer au moins 2 courbes complètes (gauche + droite).');
+    return;
+  }
+
+  // Pour chaque altitude standard (0,2000,...,14000), interpoler depuis les points mesures
+  const altsStd = [0,2000,4000,6000,8000,10000,12000,14000];
+  function interp(alt, side){
+    if(alt <= measured[0].alt) return measured[0]['y_'+side];
+    if(alt >= measured[measured.length-1].alt) return measured[measured.length-1]['y_'+side];
+    for(let i=0;i<measured.length-1;i++){
+      if(alt >= measured[i].alt && alt <= measured[i+1].alt){
+        const t = (alt - measured[i].alt) / (measured[i+1].alt - measured[i].alt);
+        return measured[i]['y_'+side] + t * (measured[i+1]['y_'+side] - measured[i]['y_'+side]);
+      }
+    }
+  }
+  const newCurves = altsStd.map(alt => ({
+    alt: alt,
+    y_left: Math.round(interp(alt, 'left')),
+    y_right: Math.round(interp(alt, 'right'))
+  }));
+
+  // Sauvegarder
+  const existing = JSON.parse(localStorage.getItem('CAL_MONTEE_PARAMS') || '{}');
+  existing.altCurves = newCurves;
+  localStorage.setItem('CAL_MONTEE_PARAMS', JSON.stringify(existing));
+  ALT_CURVES = newCurves;
+
+  document.getElementById('cal-mon-status').innerHTML = '<span style="color:#2e7d32;">✓ courbes calibrées</span>';
+  document.getElementById('btn-cal-reset').style.display = 'block';
+  alert('Courbes d\'altitude calibrées et sauvegardées.');
+  toggleCalCurves();
+}
+
+// ===== CALIBRAGE VISUEL DES COURBES (GLISSER-DEPOSER) =====
+// Affiche les 8 courbes d'altitude en couleurs sur le nomogramme avec des poignees
+// glissables (gauche/droite). L'utilisateur ajuste chaque courbe en superposant la
+// courbe coloree sur la vraie courbe du nomogramme. Aperçu en temps réel.
+const CAL_VISUAL = {
+  active: false,
+  curves: [],     // copie de travail de ALT_CURVES
+  dragging: null, // {altIdx, side, startX, startY, origY}
+  hover: null,    // {altIdx, side}
+};
+
+// Couleurs pour chaque altitude (degrade chaud->froid)
+const ALT_COLORS = [
+  '#d32f2f',  // MSL    - rouge
+  '#f57c00',  // 2000   - orange
+  '#fbc02d',  // 4000   - jaune
+  '#7cb342',  // 6000   - vert clair
+  '#00897b',  // 8000   - turquoise
+  '#1976d2',  // 10000  - bleu
+  '#5e35b1',  // 12000  - violet
+  '#c2185b',  // 14000  - rose
+];
+
+function toggleCalVisual(){
+  CAL_VISUAL.active = !CAL_VISUAL.active;
+  const btn = document.getElementById('btn-cal-visual');
+  const panel = document.getElementById('cal-visual-panel');
+  const cv = document.getElementById('cv-montee');
+  if(CAL_VISUAL.active){
+    // Desactiver les autres modes
+    if(CAL_MON.active) toggleCalMon();
+    if(CAL_CURVES.active) toggleCalCurves();
+    if(CAL_QUICK.active) toggleCalQuick();
+    // Copier ALT_CURVES en working copy
+    CAL_VISUAL.curves = ALT_CURVES.map(c => ({...c}));
+    btn.textContent = '✕ Fermer le calibrage visuel';
+    btn.style.background = '#e94560';
+    panel.style.display = 'block';
+    cv.style.cursor = 'pointer';
+    cv.addEventListener('mousedown', calVisualMouseDown);
+    cv.addEventListener('mousemove', calVisualMouseMove);
+    cv.addEventListener('mouseup',   calVisualMouseUp);
+    cv.addEventListener('mouseleave',calVisualMouseUp);
+    cv.addEventListener('touchstart',calVisualTouchStart, {passive:false});
+    cv.addEventListener('touchmove', calVisualTouchMove,  {passive:false});
+    cv.addEventListener('touchend',  calVisualMouseUp);
+    drawCalVisual();
+    updateCalVisualStatus();
+  } else {
+    btn.innerHTML = '🎨 Calibrage visuel (glisser-déposer)';
+    btn.style.background = '#7b1fa2';
+    panel.style.display = 'none';
+    cv.style.cursor = 'default';
+    cv.removeEventListener('mousedown', calVisualMouseDown);
+    cv.removeEventListener('mousemove', calVisualMouseMove);
+    cv.removeEventListener('mouseup',   calVisualMouseUp);
+    cv.removeEventListener('mouseleave',calVisualMouseUp);
+    cv.removeEventListener('touchstart',calVisualTouchStart);
+    cv.removeEventListener('touchmove', calVisualTouchMove);
+    cv.removeEventListener('touchend',  calVisualMouseUp);
+    if(typeof computeMontee === 'function') computeMontee();
+  }
+}
+
+function drawCalVisual(){
+  const cv = document.getElementById('cv-montee');
+  if(!CHART_MONTEE.complete) return;
+  const scale = 0.6;
+  const CW = Math.round(CHART_MONTEE.naturalWidth * scale);
+  cv.width = CW; cv.height = Math.round(CHART_MONTEE.naturalHeight * scale);
+  const ctx = cv.getContext('2d');
+  ctx.drawImage(CHART_MONTEE, 0, 0, CW, cv.height);
+  const sc = CW / IMG_W_MON;
+  const xL = CM.tpx_m30 * sc;
+  const xR = CM.tpx_p40 * sc;
+  const xRange = xR - xL;
+
+  // Helper: convertit une T° en X canvas
+  const tToX = (t) => xL + ((t-(-30))/70) * xRange;
+  // Helper: interpolation Lagrange quadratique sur les 3 points de la courbe
+  const yQuadAt = (c, t) => {
+    const yL_ = c.y_left, yM = (c.y_mid != null ? c.y_mid : (c.y_left+c.y_right)/2), yR_ = c.y_right;
+    const x = t, x1=-30, x2=T_MID, x3=40;
+    const L1 = ((x-x2)*(x-x3))/((x1-x2)*(x1-x3));
+    const L2 = ((x-x1)*(x-x3))/((x2-x1)*(x2-x3));
+    const L3 = ((x-x1)*(x-x2))/((x3-x1)*(x3-x2));
+    return yL_*L1 + yM*L2 + yR_*L3;
+  };
+
+  // Tracer chaque courbe (parabole echantillonee)
+  CAL_VISUAL.curves.forEach((c, idx) => {
+    const color = ALT_COLORS[idx % ALT_COLORS.length];
+    const tmax = (c.t_max != null) ? c.t_max : 40;
+    // Echantillonnage: 30 points entre -30°C et tmax
+    const N = 30;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 3;
+    ctx.globalAlpha = 0.75;
+    ctx.beginPath();
+    for(let i=0; i<=N; i++){
+      const t = -30 + (tmax - (-30)) * i/N;
+      const x_canvas = tToX(t);
+      const y_canvas = yQuadAt(c, t) * sc;
+      if(i===0) ctx.moveTo(x_canvas, y_canvas);
+      else ctx.lineTo(x_canvas, y_canvas);
+    }
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+
+    // Etiquette altitude (a gauche, decalee pour ne pas masquer la poignee)
+    const yL_canvas = c.y_left * sc;
+    ctx.fillStyle = color;
+    ctx.font = 'bold 13px Arial';
+    ctx.textAlign = 'right';
+    const label = (c.alt === 0) ? 'MSL' : (c.alt + ' ft');
+    ctx.fillText(label, xL - 14, yL_canvas + 4);
+    ctx.textAlign = 'left';
+
+    // Poignees: gauche (T=-30), milieu (T=T_MID), droite (T=tmax)
+    const xLeft_canvas  = tToX(-30);
+    const xMid_canvas   = tToX(T_MID);
+    const xRight_canvas = tToX(tmax);
+    const yLeft_canvas  = yQuadAt(c, -30)   * sc;
+    const yMid_canvas   = yQuadAt(c, T_MID) * sc;
+    const yRight_canvas = yQuadAt(c, tmax)  * sc;
+
+    drawHandle(ctx, xLeft_canvas,  yLeft_canvas,  color,
+      CAL_VISUAL.hover && CAL_VISUAL.hover.altIdx===idx && CAL_VISUAL.hover.side==='left');
+    drawHandle(ctx, xMid_canvas,   yMid_canvas,   color,
+      CAL_VISUAL.hover && CAL_VISUAL.hover.altIdx===idx && CAL_VISUAL.hover.side==='mid');
+    drawHandle(ctx, xRight_canvas, yRight_canvas, color,
+      CAL_VISUAL.hover && CAL_VISUAL.hover.altIdx===idx && CAL_VISUAL.hover.side==='right');
+
+    // Poignee T_max (orange, carree) pour les courbes tronquees (12000/14000 ft typiquement)
+    // Permet de glisser HORIZONTALEMENT pour ajuster ou la courbe se termine
+    if(tmax < 40){
+      drawTmaxHandle(ctx, xRight_canvas, yRight_canvas,
+        CAL_VISUAL.hover && CAL_VISUAL.hover.altIdx===idx && CAL_VISUAL.hover.side==='tmax');
+      // Etiquette T_max
+      ctx.fillStyle = '#ff6f00';
+      ctx.font = 'bold 11px Arial';
+      ctx.fillText(`T_max=${tmax.toFixed(1)}°C`, xRight_canvas + 14, yRight_canvas - 8);
+    }
+  });
+
+  // Legende
+  drawCalVisualLegend(ctx, CW, cv.height);
+}
+
+// Poignee carree orange pour T_max (deplacement horizontal)
+function drawTmaxHandle(ctx, x, y, hovered){
+  const r = hovered ? 8 : 6;
+  ctx.fillStyle = '#ff6f00';
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = 2;
+  ctx.fillRect(x-r, y-r, 2*r, 2*r);
+  ctx.strokeRect(x-r, y-r, 2*r, 2*r);
+  // Fleches gauche/droite pour indiquer le drag horizontal
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(x-r+2, y); ctx.lineTo(x+r-2, y);
+  ctx.moveTo(x-r+4, y-2); ctx.lineTo(x-r+2, y); ctx.lineTo(x-r+4, y+2);
+  ctx.moveTo(x+r-4, y-2); ctx.lineTo(x+r-2, y); ctx.lineTo(x+r-4, y+2);
+  ctx.stroke();
+}
+
+function drawHandle(ctx, x, y, color, hovered){
+  const r = hovered ? 9 : 7;
+  ctx.fillStyle = '#fff';
+  ctx.strokeStyle = color;
+  ctx.lineWidth = hovered ? 3 : 2;
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI*2);
+  ctx.fill();
+  ctx.stroke();
+  // Petit point central
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.arc(x, y, 2, 0, Math.PI*2);
+  ctx.fill();
+}
+
+function drawCalVisualLegend(ctx, CW, CH){
+  // Légende compacte en haut a droite
+  const lx = CW - 130;
+  const ly = 10;
+  const lw = 120;
+  const rowH = 14;
+  const lh = CAL_VISUAL.curves.length * rowH + 16;
+  ctx.fillStyle = 'rgba(255,255,255,0.92)';
+  ctx.fillRect(lx, ly, lw, lh);
+  ctx.strokeStyle = '#999';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(lx, ly, lw, lh);
+  ctx.font = 'bold 10px Arial';
+  ctx.fillStyle = '#333';
+  ctx.fillText('Courbes', lx + 6, ly + 12);
+  ctx.font = '10px Arial';
+  CAL_VISUAL.curves.forEach((c, idx) => {
+    const y = ly + 22 + idx * rowH;
+    ctx.fillStyle = ALT_COLORS[idx];
+    ctx.fillRect(lx + 6, y - 6, 16, 3);
+    ctx.fillStyle = '#333';
+    const label = (c.alt === 0) ? 'MSL' : (c.alt + ' ft');
+    ctx.fillText(label, lx + 28, y);
+  });
+}
+
+// Detection: trouver la poignee sous le curseur (rayon de 14px)
+function findHandleAt(x_canvas, y_canvas){
+  const cv = document.getElementById('cv-montee');
+  const sc = cv.width / IMG_W_MON;
+  const xLeft  = CM.tpx_m30 * sc;
+  const xRight = CM.tpx_p40 * sc;
+  const xRange = xRight - xLeft;
+  const tToX = (t) => xLeft + ((t-(-30))/70) * xRange;
+  const yQuadAt = (c, t) => {
+    const yL_ = c.y_left, yM = (c.y_mid != null ? c.y_mid : (c.y_left+c.y_right)/2), yR_ = c.y_right;
+    const x = t, x1=-30, x2=T_MID, x3=40;
+    const L1 = ((x-x2)*(x-x3))/((x1-x2)*(x1-x3));
+    const L2 = ((x-x1)*(x-x3))/((x2-x1)*(x2-x3));
+    const L3 = ((x-x1)*(x-x2))/((x3-x1)*(x3-x2));
+    return yL_*L1 + yM*L2 + yR_*L3;
+  };
+  const TOL = 14;
+  let best = null, bestD = TOL*TOL;
+  CAL_VISUAL.curves.forEach((c, idx) => {
+    const tmax = (c.t_max != null) ? c.t_max : 40;
+    // 3 poignees Y: gauche, milieu, droite (sur la courbe parabolique)
+    const handles = [
+      { side:'left',  x: tToX(-30),   y: yQuadAt(c, -30)   * sc },
+      { side:'mid',   x: tToX(T_MID), y: yQuadAt(c, T_MID) * sc },
+      { side:'right', x: tToX(tmax),  y: yQuadAt(c, tmax)  * sc },
+    ];
+    handles.forEach(h => {
+      const d = (h.x-x_canvas)*(h.x-x_canvas) + (h.y-y_canvas)*(h.y-y_canvas);
+      if(d < bestD){ bestD = d; best = {altIdx:idx, side:h.side}; }
+    });
+    // Poignee T_max (carree orange) seulement si tmax < 40 (courbes tronquees)
+    if(tmax < 40){
+      const xTm = tToX(tmax), yTm = yQuadAt(c, tmax) * sc;
+      // La poignee T_max est superposee a la poignee 'right' mais detection prioritaire
+      // si le clic est legerement decale vers le bas-droit (zone du carre)
+      const dTm = (xTm-x_canvas)*(xTm-x_canvas) + (yTm-y_canvas)*(yTm-y_canvas);
+      // On utilise une tolerance plus serree pour T_max pour ne pas voler les clics destines a 'right'
+      // Mais si l'utilisateur clique a droite de la poignee 'right' (dx > 4px), on prefere T_max
+      if(dTm < bestD && (x_canvas - xTm) > 0){
+        bestD = dTm;
+        best = {altIdx:idx, side:'tmax'};
+      }
+    }
+  });
+  return best;
+}
+
+function getCanvasCoords(e){
+  const cv = document.getElementById('cv-montee');
+  const rect = cv.getBoundingClientRect();
+  const cx = (e.clientX !== undefined) ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+  const cy = (e.clientY !== undefined) ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+  return {
+    x: (cx - rect.left) * (cv.width / rect.width),
+    y: (cy - rect.top)  * (cv.height / rect.height)
+  };
+}
+
+function calVisualMouseDown(e){
+  if(!CAL_VISUAL.active) return;
+  e.preventDefault();
+  const p = getCanvasCoords(e);
+  const handle = findHandleAt(p.x, p.y);
+  if(handle){
+    const c = CAL_VISUAL.curves[handle.altIdx];
+    const sc = document.getElementById('cv-montee').width / IMG_W_MON;
+    let origVal;
+    if(handle.side === 'left')       origVal = c.y_left;
+    else if(handle.side === 'mid')   origVal = (c.y_mid != null ? c.y_mid : (c.y_left+c.y_right)/2);
+    else if(handle.side === 'right') origVal = c.y_right;
+    else if(handle.side === 'tmax')  origVal = (c.t_max != null ? c.t_max : 40);
+    CAL_VISUAL.dragging = {
+      altIdx: handle.altIdx,
+      side: handle.side,
+      origVal: origVal,
+      startCanvasX: p.x,
+      startCanvasY: p.y,
+      sc: sc,
+    };
+  }
+}
+function calVisualTouchStart(e){
+  if(!CAL_VISUAL.active) return;
+  if(e.touches && e.touches.length === 1) calVisualMouseDown(e);
+}
+
+function calVisualMouseMove(e){
+  if(!CAL_VISUAL.active) return;
+  const p = getCanvasCoords(e);
+  if(CAL_VISUAL.dragging){
+    e.preventDefault();
+    const d = CAL_VISUAL.dragging;
+    const c = CAL_VISUAL.curves[d.altIdx];
+    if(d.side === 'tmax'){
+      // Drag horizontal: convertir dx canvas en delta T°C
+      // X = xL + ((t+30)/70) * xRange  ->  t = -30 + 70 * (X - xL) / xRange
+      const cv = document.getElementById('cv-montee');
+      const xL = CM.tpx_m30 * d.sc;
+      const xR = CM.tpx_p40 * d.sc;
+      const xRange = xR - xL;
+      const newT = -30 + 70 * (p.x - xL) / xRange;
+      // Borner entre -30 et +40
+      c.t_max = Math.max(-30, Math.min(40, Math.round(newT*10)/10));
+    } else {
+      // Drag vertical: nouvelle valeur Y
+      const dy_canvas = p.y - d.startCanvasY;
+      const dy_img = dy_canvas / d.sc;
+      const newY_img = Math.round(d.origVal + dy_img);
+      const shiftMode = document.getElementById('cal-visual-mode-shift') &&
+                        document.getElementById('cal-visual-mode-shift').checked;
+      if(shiftMode){
+        // Translation globale: appliquer le delta a TOUTES les courbes sur le meme cote
+        const delta = newY_img - d.origVal;
+        CAL_VISUAL.curves.forEach((cc, i) => {
+          const ref = ALT_CURVES[i] || cc;
+          if(d.side === 'left')       cc.y_left  = (ref.y_left  || cc.y_left)  + delta;
+          else if(d.side === 'mid')   cc.y_mid   = ((ref.y_mid != null ? ref.y_mid : (ref.y_left+ref.y_right)/2)) + delta;
+          else if(d.side === 'right') cc.y_right = (ref.y_right || cc.y_right) + delta;
+        });
+      } else {
+        if(d.side === 'left')       c.y_left  = newY_img;
+        else if(d.side === 'mid')   c.y_mid   = newY_img;
+        else if(d.side === 'right') c.y_right = newY_img;
+      }
+    }
+    drawCalVisual();
+    updateCalVisualStatus();
+  } else {
+    // Hover
+    const handle = findHandleAt(p.x, p.y);
+    const changed = JSON.stringify(handle) !== JSON.stringify(CAL_VISUAL.hover);
+    CAL_VISUAL.hover = handle;
+    let cursor = 'default';
+    if(handle){
+      cursor = (handle.side === 'tmax') ? 'ew-resize' : 'grab';
+    }
+    document.getElementById('cv-montee').style.cursor = cursor;
+    if(changed) drawCalVisual();
+  }
+}
+function calVisualTouchMove(e){
+  if(!CAL_VISUAL.active) return;
+  if(e.touches && e.touches.length === 1) calVisualMouseMove(e);
+}
+
+function calVisualMouseUp(e){
+  if(!CAL_VISUAL.active) return;
+  if(CAL_VISUAL.dragging){
+    // Snapshot des valeurs actuelles comme nouvelle base si shift mode
+    ALT_CURVES.forEach((c, i) => {
+      c.y_left  = CAL_VISUAL.curves[i].y_left;
+      c.y_mid   = CAL_VISUAL.curves[i].y_mid;
+      c.y_right = CAL_VISUAL.curves[i].y_right;
+      c.t_max   = CAL_VISUAL.curves[i].t_max;
+    });
+    CAL_VISUAL.dragging = null;
+    updateCalVisualStatus();
+  }
+}
+
+function updateCalVisualStatus(){
+  const el = document.getElementById('cal-visual-status');
+  if(!el) return;
+  let html = '';
+  CAL_VISUAL.curves.forEach((c, idx) => {
+    const color = ALT_COLORS[idx];
+    const label = (c.alt === 0) ? 'MSL    ' : (c.alt + ' ft').padEnd(7,' ');
+    const yM = (c.y_mid != null ? c.y_mid : Math.round((c.y_left+c.y_right)/2));
+    const tmax = (c.t_max != null ? c.t_max : 40);
+    const tmaxStr = (tmax < 40) ? ` <span style="color:#ff6f00;">Tmax=${tmax.toFixed(1)}°C</span>` : '';
+    html += `<span style="color:${color};font-weight:bold;">●</span> ${label} L=${Math.round(c.y_left)} M=${Math.round(yM)} R=${Math.round(c.y_right)}${tmaxStr}<br>`;
+  });
+  el.innerHTML = html;
+}
+
+function calVisualReset(){
+  if(!confirm('Réinitialiser toutes les courbes aux valeurs par défaut ?')) return;
+  CAL_VISUAL.curves = ALT_CURVES_DEFAULT.map(c => ({...c}));
+  ALT_CURVES = ALT_CURVES_DEFAULT.map(c => ({...c}));
+  drawCalVisual();
+  updateCalVisualStatus();
+}
+
+function calVisualSave(){
+  // Sauvegarder dans localStorage (format altCurves avec y_mid + t_max)
+  const newCurves = CAL_VISUAL.curves.map(c => ({
+    alt: c.alt,
+    y_left: Math.round(c.y_left),
+    y_mid: Math.round(c.y_mid != null ? c.y_mid : (c.y_left+c.y_right)/2),
+    y_right: Math.round(c.y_right),
+    t_max: c.t_max
+  }));
+  const existing = JSON.parse(localStorage.getItem('CAL_MONTEE_PARAMS') || '{}');
+  existing.altCurves = newCurves;
+  localStorage.setItem('CAL_MONTEE_PARAMS', JSON.stringify(existing));
+  ALT_CURVES = newCurves;
+
+  document.getElementById('cal-mon-status').innerHTML = '<span style="color:#2e7d32;">✓ courbes calibrées (visuel)</span>';
+  document.getElementById('btn-cal-reset').style.display = 'block';
+  // Afficher le code dans le textarea
+  calVisualExport();
+  alert('✓ Calibrage sauvegardé.\n\nLe code à coller pour rendre les valeurs permanentes est affiché en bas du panneau.');
+}
+
+function calVisualExport(){
+  // Genere le code ALT_CURVES_DEFAULT a coller dans le source pour rendre permanent
+  const curves = (CAL_VISUAL.curves && CAL_VISUAL.curves.length) ? CAL_VISUAL.curves : ALT_CURVES;
+  let code = 'const ALT_CURVES_DEFAULT = [\n';
+  curves.forEach((c,i) => {
+    const tmax = (c.t_max != null) ? c.t_max : 40;
+    const altStr = String(c.alt).padStart(5,' ');
+    const yL = Math.round(c.y_left);
+    const yM = Math.round(c.y_mid != null ? c.y_mid : (c.y_left+c.y_right)/2);
+    const yR = Math.round(c.y_right);
+    const comment = (c.alt === 0) ? '  // MSL' :
+                    (tmax < 40 ? `  // tronquee a ${tmax}°C` : '');
+    code += `  { alt:${altStr}, y_left:${yL}, y_mid:${yM}, y_right:${yR}, t_max:${tmax} },${comment}\n`;
+  });
+  code += '];';
+  const exportDiv = document.getElementById('cal-visual-export');
+  const textarea  = document.getElementById('cal-visual-code');
+  if(exportDiv && textarea){
+    textarea.value = code;
+    exportDiv.style.display = 'block';
+    textarea.focus();
+    textarea.select();
+  } else {
+    console.log(code);
+    alert('Code généré (voir console F12) :\n\n' + code);
+  }
+}
+
+// ===== AJUSTEMENT RAPIDE EN 1 CLIC =====
+// L'utilisateur clique sur la position OU le point P1 devrait se trouver pour les
+// parametres T° et altitude actuellement entres dans les sliders.
+// On calcule alors l'offset Y a appliquer a TOUTES les courbes pour corriger le decalage global.
+const CAL_QUICK = { active: false };
+
+function toggleCalQuick(){
+  CAL_QUICK.active = !CAL_QUICK.active;
+  const btn = document.getElementById('btn-cal-quick');
+  const cv = document.getElementById('cv-montee');
+  if(CAL_QUICK.active){
+    if(CAL_MON.active) toggleCalMon();
+    if(CAL_CURVES.active) toggleCalCurves();
+    btn.textContent = '✕ Annuler ajustement';
+    btn.style.background = '#e94560';
+    cv.style.cursor = 'crosshair';
+    cv.addEventListener('click', calQuickClickHandler);
+    // Affichage instruction
+    alert(
+      `Cliquez sur n'importe quelle courbe d'altitude visible sur le nomogramme.\n\n` +
+      `On vous demandera ensuite quelle altitude (0, 2000, ..., 14000 ft) cette courbe représente.\n\n` +
+      `L'écart entre la position cliquée et la position théorique sera appliqué uniformément à toutes les courbes.`
+    );
+  } else {
+    btn.innerHTML = '⚡ Ajustement rapide (1 clic)';
+    btn.style.background = '#2e7d32';
+    cv.style.cursor = 'default';
+    cv.removeEventListener('click', calQuickClickHandler);
+    if(typeof computeMontee === 'function') computeMontee();
+  }
+}
+
+function calQuickClickHandler(e){
+  if(!CAL_QUICK.active) return;
+  const cv = document.getElementById('cv-montee');
+  const rect = cv.getBoundingClientRect();
+  const y_canvas = (e.clientY - rect.top) * (cv.height / rect.height);
+  const x_canvas = (e.clientX - rect.left) * (cv.width / rect.width);
+  const y_img_clicked = Math.round(y_canvas * IMG_W_MON / cv.width);
+  const x_img_clicked = Math.round(x_canvas * IMG_W_MON / cv.width);
+
+  // Demander explicitement sur quelle courbe d'altitude l'utilisateur a clique
+  const t = +document.getElementById('mon-temp').value;
+  const aSlider = getAltValue('mon-alt');
+  const altStr = prompt(
+    `Vous avez cliqué sur le nomogramme.\n\nSur quelle courbe d'altitude (en ft) avez-vous cliqué ?\n\n` +
+    `Altitudes étiquetées sur le nomogramme : 0 (MSL), 2000, 4000, 6000, 8000, 10000, 12000, 14000\n\n` +
+    `(Slider actuel : ${Math.round(aSlider)} ft)`,
+    Math.round(aSlider).toString()
+  );
+  if(altStr === null){ toggleCalQuick(); return; }
+  const altClicked = parseFloat(altStr);
+  if(isNaN(altClicked) || altClicked < 0 || altClicked > 14000){
+    alert('Altitude invalide. Annulation.');
+    toggleCalQuick();
+    return;
+  }
+
+  // Calculer la position Y theorique actuelle pour cette altitude et la T° actuelle
+  const sc = cv.width / IMG_W_MON;
+  const y_img_theoretical = y_curve_alt(t, altClicked, cv.width) / sc;
+
+  const offsetY = Math.round(y_img_clicked - y_img_theoretical);
+
+  // Conversion en ft (calibrage approximatif: ~26 px image pour 1000 ft sur le nomogramme Aquila)
+  // Calcul plus precis: prendre la pente reelle des courbes existantes
+  const c0 = ALT_CURVES.find(c=>c.alt===0) || ALT_CURVES[0];
+  const c14 = ALT_CURVES.find(c=>c.alt===14000) || ALT_CURVES[ALT_CURVES.length-1];
+  const xFrac = Math.max(0, Math.min(1, (t-(-30))/70));
+  const y0 = c0.y_left + xFrac*(c0.y_right - c0.y_left);
+  const y14 = c14.y_left + xFrac*(c14.y_right - c14.y_left);
+  const ftPerPx = (14000 - 0) / Math.max(1, (y14 - y0));
+  const offsetFt = Math.round(offsetY * ftPerPx);
+
+  if(!confirm(
+    `Vous avez cliqué sur la courbe ${altClicked} ft à T=${t}°C.\n` +
+    `Position cliquée   : Y=${y_img_clicked} px (image)\n` +
+    `Position théorique : Y=${Math.round(y_img_theoretical)} px (image)\n` +
+    `Décalage à corriger : ${offsetY} px (≈ ${offsetFt} ft)\n\n` +
+    `Appliquer cet ajustement uniformément à toutes les courbes ?`
+  )){
+    toggleCalQuick();
+    return;
+  }
+
+  // Appliquer l'offset à TOUTES les courbes
+  ALT_CURVES = ALT_CURVES.map(c => ({
+    alt: c.alt,
+    y_left: c.y_left + offsetY,
+    y_right: c.y_right + offsetY,
+  }));
+
+  // Sauvegarder
+  const existing = JSON.parse(localStorage.getItem('CAL_MONTEE_PARAMS') || '{}');
+  existing.altCurves = ALT_CURVES.map(c => ({...c}));
+  localStorage.setItem('CAL_MONTEE_PARAMS', JSON.stringify(existing));
+
+  document.getElementById('cal-mon-status').innerHTML = '<span style="color:#2e7d32;">✓ ajusté</span>';
+  document.getElementById('btn-cal-reset').style.display = 'block';
+  toggleCalQuick();
+  alert('Ajustement appliqué et sauvegardé.');
+}
 
 // ===== AUTONOMIE =====
 const CHART_AUTO = new Image();
@@ -8769,6 +9953,40 @@ async function checkAdminPwd() {
   }
 }
 
+// ── Toggle visibilité du card de calibration sur l'onglet Montée ──
+// Persistance via localStorage. Réservé à l'admin principal (alexandre.kilinc@gmail.com)
+// pour modification, mais l'effet (masquage du card) s'applique à TOUS les utilisateurs.
+// PAR DÉFAUT : MASQUÉ. L'admin doit explicitement cocher pour afficher.
+const LS_CALIB_MONTEE_VISIBLE = 'aquila.calibMonteeVisible';
+
+function isCalibMonteeVisible() {
+  // Par défaut: masqué (false). Seule la valeur 'true' explicitement sauvegardée affiche le card.
+  const v = localStorage.getItem(LS_CALIB_MONTEE_VISIBLE);
+  return v === 'true';
+}
+
+function setCalibMonteeVisible(visible) {
+  localStorage.setItem(LS_CALIB_MONTEE_VISIBLE, visible ? 'true' : 'false');
+  applyCalibMonteeVisibility();
+  // Mettre à jour le label dans le panneau admin
+  const stateEl = document.getElementById('admin-calib-montee-state');
+  if (stateEl) stateEl.textContent = visible ? 'Affiché' : 'Masqué';
+}
+
+function applyCalibMonteeVisibility() {
+  const card = document.getElementById('card-calib-montee');
+  if (!card) return;
+  const visible = isCalibMonteeVisible();
+  card.style.display = visible ? '' : 'none';
+  // Si on masque alors qu'un mode de calibration est actif, le désactiver proprement
+  if (!visible) {
+    if (typeof CAL_VISUAL !== 'undefined' && CAL_VISUAL.active && typeof toggleCalVisual === 'function') toggleCalVisual();
+    if (typeof CAL_MON !== 'undefined' && CAL_MON.active && typeof toggleCalMon === 'function') toggleCalMon();
+    if (typeof CAL_CURVES !== 'undefined' && CAL_CURVES.active && typeof toggleCalCurves === 'function') toggleCalCurves();
+    if (typeof CAL_QUICK !== 'undefined' && CAL_QUICK.active && typeof toggleCalQuick === 'function') toggleCalQuick();
+  }
+}
+
 // ── Restrictions visuelles sur la modale Admin selon le rôle de l'utilisateur ──
 // Pour les utilisateurs non-admin :
 //   - "Données avions" → grisée et désactivée (visible mais en lecture seule)
@@ -8813,6 +10031,20 @@ function _applyAdminRestrictions() {
   if (secMode) {
     const isMainAdmin = !!(CURRENT_USER && CURRENT_USER.email === ADMIN_EMAIL);
     secMode.style.display = isMainAdmin ? '' : 'none';
+  }
+  // Toggle "Outils de calibration onglet Montée" : visible UNIQUEMENT pour l'admin principal.
+  // Synchroniser l'état du checkbox avec la valeur localStorage actuelle.
+  const calibToggle = document.getElementById('admin-calib-montee-toggle');
+  if (calibToggle) {
+    const isMainAdmin = !!(CURRENT_USER && CURRENT_USER.email === ADMIN_EMAIL);
+    calibToggle.style.display = isMainAdmin ? '' : 'none';
+    if (isMainAdmin) {
+      const visible = isCalibMonteeVisible();
+      const cb = document.getElementById('admin-calib-montee-visible');
+      const stateEl = document.getElementById('admin-calib-montee-state');
+      if (cb) cb.checked = visible;
+      if (stateEl) stateEl.textContent = visible ? 'Affiché' : 'Masqué';
+    }
   }
 }
 
@@ -9032,6 +10264,147 @@ function adminLoadPanel() {
 
   // Remplir la liste des utilisateurs (visible seulement par l'admin via _applyAdminRestrictions)
   if (typeof adminLoadUsers === 'function') adminLoadUsers();
+  // Remplir le panneau d'info des paramètres de calibration des nomogrammes
+  if (typeof adminLoadCalibInfo === 'function') adminLoadCalibInfo();
+}
+
+// ── Accordéon de la section "Calibration nomogrammes" (admin) ──
+// Toggle simple : on bascule l'affichage du contenu et on tourne le chevron.
+// La section entière est masquée pour les non-admins via _applyAdminRestrictions(),
+// donc cet accordéon n'est visible que pour l'admin.
+function toggleAdminCalibAccordion() {
+  const content = document.getElementById('admin-calib-content');
+  const chevron = document.getElementById('admin-calib-chevron');
+  if (!content) return;
+  const isOpen = content.style.display !== 'none';
+  content.style.display = isOpen ? 'none' : 'block';
+  if (chevron) chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(90deg)';
+}
+
+// ── Panneau d'info des paramètres de calibration des nomogrammes (admin) ──
+// Affiche les valeurs courantes pour Décollage, Atterrissage, Montée,
+// Masse & Centrage et Autonomie (axes + courbes ALT_CURVES).
+// Permet à l'admin de retrouver les paramètres en cas de modification de l'image source.
+// Pour Montée, propose aussi des boutons d'export du code et de réinitialisation.
+function adminLoadCalibInfo() {
+  const el = document.getElementById('admin-calib-info');
+  if (!el) return;
+
+  let html = '';
+
+  // ── Décollage ──
+  if (typeof CAL_DECO !== 'undefined') {
+    html += `<div style="margin-bottom:8px;"><strong>Décollage</strong> — Image source : <code>${CAL_DECO.IMG_W}px</code><br>`;
+    html += `&nbsp;&nbsp;· T : coef ${CAL_DECO.T_COEF_DEG}px/°C, offset ${CAL_DECO.T_COEF_0}<br>`;
+    html += `&nbsp;&nbsp;· M : ${CAL_DECO.M_X_750}px @ 750kg · ${CAL_DECO.M_PX_PER_50KG}px / 50kg<br>`;
+    html += `&nbsp;&nbsp;· W : ${CAL_DECO.W_X_0KT}–${CAL_DECO.W_X_20KT}px<br>`;
+    html += `&nbsp;&nbsp;· Y roul. : 0m=${CAL_DECO.Y_0M}px, span700=${CAL_DECO.Y_SPAN_700M}px<br>`;
+    html += `&nbsp;&nbsp;· Y 50ft : 0m=${CAL_DECO.Y50_0M}px, span1000=${CAL_DECO.Y50_SPAN_1000M}px</div>`;
+  }
+
+  // ── Atterrissage ──
+  if (typeof CAL_ATT !== 'undefined') {
+    html += `<div style="margin-bottom:8px;"><strong>Atterrissage</strong> — Image source : <code>${CAL_ATT.IMG_W}px</code><br>`;
+    html += `&nbsp;&nbsp;· T : ${CAL_ATT.T_X_M30}–${CAL_ATT.T_X_P40}px (T=-30 → T=+40)<br>`;
+    html += `&nbsp;&nbsp;· M : ${CAL_ATT.M_X_750}–${CAL_ATT.M_X_550}px (750 → 550 kg)<br>`;
+    html += `&nbsp;&nbsp;· V : ${CAL_ATT.V_X_0KT}–${CAL_ATT.V_X_20KT}px (0 → 20 kt)<br>`;
+    html += `&nbsp;&nbsp;· Y : ${CAL_ATT.R_Y_0M}–${CAL_ATT.R_Y_1000M}px (0 → 1000 m)</div>`;
+  }
+
+  // ── Montée ──
+  if (typeof CM !== 'undefined' && typeof IMG_W_MON !== 'undefined') {
+    html += `<div style="margin-bottom:6px;"><strong>Montée</strong> — Image source : <code>${IMG_W_MON}px</code></div>`;
+    html += `<div style="margin-left:10px;margin-bottom:4px;"><em>Repères axes (panel 1 + panel 2) :</em><br>`;
+    html += `&nbsp;&nbsp;· T (panel 1) : ${CM.tpx_m30}–${CM.tpx_p40}px (T=-30 → T=+40)<br>`;
+    html += `&nbsp;&nbsp;· Y panel 1 : haut=${CM.g1_y_top}px, bas=${CM.g1_y_in}px<br>`;
+    html += `&nbsp;&nbsp;· M (panel 2) : ${CM.mpx_750}–${CM.mpx_550}px (750 → 550 kg)<br>`;
+    html += `&nbsp;&nbsp;· Y panel 2 : haut=${CM.g2_y_top}px, bas=${CM.g2_y_in}px<br>`;
+    html += `&nbsp;&nbsp;· Échelle ft/min : 0=${CM.rpy_0}px, 1500=${CM.rpy_1500}px<br>`;
+    html += `&nbsp;&nbsp;· X connection panel1↔panel2 : ${CM.x_connect}px</div>`;
+    // Courbes d'altitude (ALT_CURVES)
+    if (typeof ALT_CURVES !== 'undefined' && Array.isArray(ALT_CURVES)) {
+      const isCustom = !!(localStorage.getItem('CAL_MONTEE_PARAMS') &&
+                          JSON.parse(localStorage.getItem('CAL_MONTEE_PARAMS') || '{}').altCurves);
+      const badge = isCustom
+        ? '<span style="background:#7b1fa2;color:#fff;padding:1px 6px;border-radius:3px;font-size:9px;font-weight:700;margin-left:6px;">CALIBRÉ</span>'
+        : '<span style="background:#a0aec0;color:#fff;padding:1px 6px;border-radius:3px;font-size:9px;font-weight:700;margin-left:6px;">DÉFAUT</span>';
+      html += `<div style="margin-left:10px;"><em>Courbes d'altitude (8 courbes × 3 points) ${badge} :</em><br>`;
+      html += `<table style="width:100%;font-size:10px;font-family:monospace;border-collapse:collapse;margin-top:4px;">`;
+      html += `<tr style="background:#fef3c7;"><th style="padding:2px 4px;text-align:left;">Alt</th><th style="padding:2px 4px;">y_left<br>(T=-30°C)</th><th style="padding:2px 4px;">y_mid<br>(T=+5°C)</th><th style="padding:2px 4px;">y_right<br>(T=+40 ou Tmax)</th><th style="padding:2px 4px;">T_max</th></tr>`;
+      ALT_CURVES.forEach(c => {
+        const lbl = (c.alt === 0) ? 'MSL' : (c.alt + ' ft');
+        const yM = (c.y_mid != null ? c.y_mid : Math.round((c.y_left+c.y_right)/2));
+        const tmax = (c.t_max != null) ? c.t_max : 40;
+        const tmaxStr = (tmax < 40) ? `<strong style="color:#ff6f00;">${tmax}°C</strong>` : `${tmax}°C`;
+        html += `<tr><td style="padding:1px 4px;font-weight:700;">${lbl}</td><td style="padding:1px 4px;text-align:center;">${c.y_left}</td><td style="padding:1px 4px;text-align:center;">${yM}</td><td style="padding:1px 4px;text-align:center;">${c.y_right}</td><td style="padding:1px 4px;text-align:center;">${tmaxStr}</td></tr>`;
+      });
+      html += `</table></div>`;
+    }
+  }
+
+  // ── Masse & Centrage ──
+  // C_RAW : pixels de l'image originale du graphique de centrage (1872x1872px).
+  // Les coordonnées (px0,py0)–(px1,py1) délimitent la zone du diagramme et
+  // (mx0,mx1)–(my0,my1) les valeurs physiques de moment (m·kg) et masse (kg)
+  // correspondantes. Les bras de levier et limites avion sont des constantes
+  // physiques de l'AQUILA AT01.
+  if (typeof C_RAW !== 'undefined') {
+    html += `<div style="margin-top:10px;margin-bottom:6px;"><strong>Masse &amp; Centrage</strong> — Image source : <code>1872×1872px</code></div>`;
+    html += `<div style="margin-left:10px;margin-bottom:4px;"><em>Repères pixels (zone du diagramme) :</em><br>`;
+    html += `&nbsp;&nbsp;· X moment : ${C_RAW.px0}–${C_RAW.px1}px (mom=${C_RAW.mx0} → mom=${C_RAW.mx1} m·kg)<br>`;
+    html += `&nbsp;&nbsp;· Y masse : ${C_RAW.py0}–${C_RAW.py1}px (m=${C_RAW.my0} → m=${C_RAW.my1} kg)</div>`;
+    if (typeof MTOW !== 'undefined' && typeof CG_MIN !== 'undefined' && typeof CG_MAX !== 'undefined') {
+      html += `<div style="margin-left:10px;margin-bottom:4px;"><em>Limites avion (AQUILA AT01) :</em><br>`;
+      html += `&nbsp;&nbsp;· MTOW : <strong>${MTOW} kg</strong><br>`;
+      html += `&nbsp;&nbsp;· Centre de gravité : <strong>${CG_MIN}–${CG_MAX} mm</strong> (depuis référence)</div>`;
+    }
+    if (typeof BRAS_PILOTE !== 'undefined') {
+      html += `<div style="margin-left:10px;"><em>Bras de levier (m) :</em><br>`;
+      html += `&nbsp;&nbsp;· Pilote / Passager : ${BRAS_PILOTE.toFixed(3)} m<br>`;
+      html += `&nbsp;&nbsp;· Bagages : ${BRAS_BAGAGE.toFixed(3)} m<br>`;
+      html += `&nbsp;&nbsp;· Essence : ${BRAS_ESSENCE.toFixed(3)} m`;
+      if (typeof DENS_ESSENCE !== 'undefined') {
+        html += ` &nbsp;<span style="color:#92400e;">(densité ${DENS_ESSENCE} kg/L)</span>`;
+      }
+      html += `</div>`;
+    }
+  }
+
+  // ── Autonomie ──
+  // CA_AUTO : repères pixels de l'image du graphique d'autonomie (2000px de large).
+  // Panel gauche = axes (T° en X, alt. densité en Y).
+  // Panel droit = courbes de puissance (PG, 85%, 75%, 65%, 55%) chacune définie
+  // par 2 points : [x_bas, y_bas, x_haut, y_haut] sur l'image originale.
+  if (typeof CA_AUTO !== 'undefined' && typeof IMG_W_AUTO !== 'undefined') {
+    html += `<div style="margin-top:10px;margin-bottom:6px;"><strong>Autonomie</strong> — Image source : <code>${IMG_W_AUTO}px</code></div>`;
+    html += `<div style="margin-left:10px;margin-bottom:4px;"><em>Repères axes (panel gauche) :</em><br>`;
+    html += `&nbsp;&nbsp;· T : ${CA_AUTO.tpx_m60}–${CA_AUTO.tpx_p40}px (T=-60 → T=+40 °C)<br>`;
+    html += `&nbsp;&nbsp;· Y alt. densité : 0=${CA_AUTO.ady_0}px, 12000ft=${CA_AUTO.ady_12000}px<br>`;
+    html += `&nbsp;&nbsp;· X connection panel gauche↔droit : ${CA_AUTO.x_connect}px<br>`;
+    html += `&nbsp;&nbsp;· X autonomie (panel droit) : ${CA_AUTO.apx_30}–${CA_AUTO.apx_80}px (3.0h → 8.0h)</div>`;
+    // Courbes de puissance : 4 valeurs [x_bas, y_bas, x_haut, y_haut]
+    html += `<div style="margin-left:10px;"><em>Courbes de puissance (5 courbes × 2 points) :</em><br>`;
+    html += `<table style="width:100%;font-size:10px;font-family:monospace;border-collapse:collapse;margin-top:4px;">`;
+    html += `<tr style="background:#fef3c7;"><th style="padding:2px 4px;text-align:left;">Puissance</th><th style="padding:2px 4px;">x_bas</th><th style="padding:2px 4px;">y_bas</th><th style="padding:2px 4px;">x_haut</th><th style="padding:2px 4px;">y_haut</th></tr>`;
+    const _autoCurves = [
+      {key:'PG',  lbl:'PG (pleine)'},
+      {key:'p85', lbl:'85 %'},
+      {key:'p75', lbl:'75 %'},
+      {key:'p65', lbl:'65 %'},
+      {key:'p55', lbl:'55 %'},
+    ];
+    _autoCurves.forEach(c => {
+      const v = CA_AUTO[c.key];
+      if (Array.isArray(v) && v.length === 4) {
+        html += `<tr><td style="padding:1px 4px;font-weight:700;">${c.lbl}</td><td style="padding:1px 4px;text-align:center;">${v[0]}</td><td style="padding:1px 4px;text-align:center;">${v[1]}</td><td style="padding:1px 4px;text-align:center;">${v[2]}</td><td style="padding:1px 4px;text-align:center;">${v[3]}</td></tr>`;
+      }
+    });
+    html += `</table></div>`;
+  }
+
+  html += `<div style="margin-top:8px;font-style:italic;color:#92400e;font-size:10px;">Pour recalibrer si l'image source change : éditer les constantes <code>CAL_DECO</code>, <code>CAL_ATT</code>, <code>CM</code>, <code>ALT_CURVES_DEFAULT</code>, <code>C_RAW</code> et <code>CA_AUTO</code> dans le source JS, ou utiliser l'outil de calibrage visuel sur l'onglet Montée.</div>`;
+
+  el.innerHTML = html;
 }
 
 function adminSave() {
@@ -9247,20 +10620,35 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
 
         <div id="admin-section-calib" style="margin-bottom:18px;">
-          <div style="font-size:11px;font-weight:700;color:#e94560;text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px;border-bottom:1px solid #fee2e2;padding-bottom:6px;">Calibration nomogrammes</div>
-          <div style="background:#fffbeb;border:1px solid #d69e2e;border-radius:6px;padding:10px 12px;font-size:11px;color:#744210;line-height:1.7;">
-            <strong>Décollage</strong> — Image source : <code>${CAL_DECO.IMG_W}px</code>
-            · T: coef ${CAL_DECO.T_COEF_DEG}px/°C, offset ${CAL_DECO.T_COEF_0}
-            · M: ${CAL_DECO.M_X_750}px@750kg, ${CAL_DECO.M_PX_PER_50KG}px/50kg
-            · W: ${CAL_DECO.W_X_0KT}–${CAL_DECO.W_X_20KT}px
-            · Y roul: 0m=${CAL_DECO.Y_0M}, span700=${CAL_DECO.Y_SPAN_700M}px
-            · Y 50ft: 0m=${CAL_DECO.Y50_0M}, span1000=${CAL_DECO.Y50_SPAN_1000M}px<br>
-            <strong>Atterrissage</strong> — Image source : <code>${CAL_ATT.IMG_W}px</code>
-            · T: ${CAL_ATT.T_X_M30}–${CAL_ATT.T_X_P40}px
-            · M: ${CAL_ATT.M_X_750}–${CAL_ATT.M_X_550}px
-            · V: ${CAL_ATT.V_X_0KT}–${CAL_ATT.V_X_20KT}px
-            · Y: ${CAL_ATT.R_Y_0M}–${CAL_ATT.R_Y_1000M}px<br>
-            <em>Pour recalibrer si l'image source change : éditer les constantes <code>CAL_DECO</code> et <code>CAL_ATT</code> dans le source JS.</em>
+          <!-- En-tête cliquable de l'accordéon : replie / déplie tout le contenu de la section calibration -->
+          <div onclick="toggleAdminCalibAccordion()"
+               style="font-size:11px;font-weight:700;color:#e94560;text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px;border-bottom:1px solid #fee2e2;padding-bottom:6px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none;"
+               title="Cliquer pour déplier / replier">
+            <span>Calibration nomogrammes</span>
+            <span id="admin-calib-chevron" style="font-size:14px;color:#e94560;transition:transform .2s ease;display:inline-block;">▸</span>
+          </div>
+
+          <!-- Contenu de l'accordéon : replié par défaut -->
+          <div id="admin-calib-content" style="display:none;">
+
+            <!-- Toggle visibilité outil de calibration onglet Montée (admin principal uniquement) -->
+            <div id="admin-calib-montee-toggle" style="display:none;background:#f0f9ff;border:1px solid #7dd3fc;border-radius:6px;padding:10px 12px;margin-bottom:10px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+                <div style="font-size:12px;color:#0c4a6e;line-height:1.4;flex:1;min-width:200px;">
+                  <strong>Outils de calibration onglet Montée</strong><br>
+                  <span style="font-size:11px;color:#0369a1;">Affiche/masque le bloc « 🎨 Calibration nomogramme » sur l'onglet Montée pour tous les utilisateurs.</span>
+                </div>
+                <label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;font-weight:700;color:#0c4a6e;">
+                  <input type="checkbox" id="admin-calib-montee-visible" onchange="setCalibMonteeVisible(this.checked)" style="width:18px;height:18px;cursor:pointer;">
+                  <span id="admin-calib-montee-state">Affiché</span>
+                </label>
+              </div>
+            </div>
+
+            <div id="admin-calib-info" style="background:#fffbeb;border:1px solid #d69e2e;border-radius:6px;padding:10px 12px;font-size:11px;color:#744210;line-height:1.7;">
+              <em>Chargement des paramètres de calibration…</em>
+            </div>
+
           </div>
         </div>
 
@@ -9583,6 +10971,23 @@ function updateAdminModeUI(mode) {
 
 // Application au chargement DOM
 document.addEventListener('DOMContentLoaded', applyAppMode);
+
+// ── Reset systématique de la visibilité du card de calibration Montée ──
+// Le recalibrage des nomogrammes est une opération très occasionnelle, réservée à
+// l'administrateur. Pour éviter qu'un état "affiché" reste actif entre deux sessions
+// et soit visible par les pilotes, on force la valeur à 'masqué' à CHAQUE chargement
+// de page. L'admin peut toujours cocher la case dans le modal admin pendant la session
+// courante pour effectuer un calibrage ; au prochain rechargement, la calibration sera
+// de nouveau masquée pour tous.
+document.addEventListener('DOMContentLoaded', () => {
+  try {
+    localStorage.setItem(LS_CALIB_MONTEE_VISIBLE, 'false');
+  } catch (e) { /* ignore */ }
+});
+
+// Application de la visibilité du card de calibration sur l'onglet Montée
+// (réglage admin, persisté dans localStorage, appliqué à tous les utilisateurs)
+document.addEventListener('DOMContentLoaded', applyCalibMonteeVisibility);
 
 // Secret partagé connu de l'admin uniquement (légèrement obfusqué)
 const _ACTIVATION_SECRET = atob('YWtfY2x1Yl9zZWNyZXRfMjAyNl9hcXVpbGE='); // = "ak_club_secret_2026_aquila"
