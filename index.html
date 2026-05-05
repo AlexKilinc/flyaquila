@@ -6380,19 +6380,37 @@ function rpy_m1(v, cw){ return panel1_y(20, 0, cw); }
 // quand le taux atteint 0 ft/min. Le champ t_max indique la T° de cette terminaison.
 // Au-dela de t_max, le point P1 reste plaque a l'extremite droite reelle de la courbe.
 //
-// Valeurs par defaut: courbure parabolique legere (y_mid = (y_left+y_right)/2 + decalage).
-// L'utilisateur ajuste via l'outil de calibrage visuel.
+// Valeurs par defaut: calibrage visuel realise par l'admin le 05/05/2026.
+// L'admin peut ajuster via l'outil de calibrage visuel sur l'onglet Montee
+// (toggle dans le modal admin > Calibration nomogrammes).
 const ALT_CURVES_DEFAULT = [
-  { alt:0,     y_left:485, y_mid:585, y_right:689, t_max:40   },  // MSL
-  { alt:2000,  y_left:535, y_mid:635, y_right:739, t_max:40   },
-  { alt:4000,  y_left:587, y_mid:687, y_right:789, t_max:40   },
-  { alt:6000,  y_left:639, y_mid:739, y_right:841, t_max:40   },
-  { alt:8000,  y_left:691, y_mid:790, y_right:891, t_max:40   },
-  { alt:10000, y_left:743, y_mid:842, y_right:943, t_max:40   },
-  { alt:12000, y_left:795, y_mid:894, y_right:993, t_max:21.6 },  // tronquee a +21.6°C (taux=0 au-dela)
-  { alt:14000, y_left:849, y_mid:947, y_right:1045,t_max:-1.4 },  // tronquee a -1.4°C (taux=0 au-dela)
+  { alt:    0, y_left:582, y_mid:690,  y_right:788,  t_max:40   },  // MSL
+  { alt: 2000, y_left:643, y_mid:751,  y_right:845,  t_max:40   },
+  { alt: 4000, y_left:700, y_mid:804,  y_right:891,  t_max:40   },
+  { alt: 6000, y_left:761, y_mid:864,  y_right:953,  t_max:40   },
+  { alt: 8000, y_left:823, y_mid:923,  y_right:1011, t_max:40   },
+  { alt:10000, y_left:876, y_mid:978,  y_right:1069, t_max:40   },
+  { alt:12000, y_left:937, y_mid:1039, y_right:1126, t_max:21.6 },  // tronquee a +21.6°C (taux=0 au-dela)
+  { alt:14000, y_left:996, y_mid:1088, y_right:1118, t_max:-1.4 },  // tronquee a -1.4°C (taux=0 au-dela)
 ];
 let ALT_CURVES = ALT_CURVES_DEFAULT.map(c => ({...c}));
+
+// ── Purge unique de l'ancienne calibration localStorage ──
+// Les valeurs par defaut ALT_CURVES_DEFAULT ci-dessus ont ete mises a jour le 05/05/2026
+// avec un calibrage visuel verifie par l'admin. Pour que ces nouvelles valeurs s'appliquent
+// effectivement a tous les utilisateurs (y compris ceux qui auraient une ancienne calibration
+// stockee en localStorage qui ecraserait les nouveaux defauts), on purge UNE SEULE FOIS la
+// cle CAL_MONTEE_PARAMS au prochain chargement. Pour declencher une nouvelle purge a l'avenir
+// (apres une nouvelle calibration de reference), incrementer _CAL_MONTEE_DEFAULTS_VERSION.
+const _CAL_MONTEE_DEFAULTS_VERSION = '2026-05-05';
+try{
+  const lastApplied = localStorage.getItem('aquila.calMonteeDefaultsVersion');
+  if(lastApplied !== _CAL_MONTEE_DEFAULTS_VERSION){
+    localStorage.removeItem('CAL_MONTEE_PARAMS');
+    localStorage.setItem('aquila.calMonteeDefaultsVersion', _CAL_MONTEE_DEFAULTS_VERSION);
+  }
+}catch(e){}
+
 // Charger calibration custom si disponible (et ajouter y_mid si manquant pour retro-compat)
 try{
   const cal = JSON.parse(localStorage.getItem('CAL_MONTEE_PARAMS')||'null');
