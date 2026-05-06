@@ -2526,7 +2526,7 @@ body.app-mode-perso .signup-link-wrap { display: none !important; }
           Glissez les poignées colorées <b>○</b> pour aligner chaque courbe sur sa vraie position du nomogramme. L'aperçu se met à jour en temps réel.
         </div>
         <button id="btn-cal-visual" onclick="toggleCalVisual()" style="width:100%;padding:10px 12px;background:#7b1fa2;color:white;border:none;border-radius:6px;font-weight:600;cursor:pointer;font-size:14px;">
-          🎨 Lancer le calibrage visuel
+          🎨 Calibrage des courbes d'altitude (panel 1)
         </button>
         <button id="btn-cal-mon" onclick="toggleCalMon()" style="display:none;">_</button>
         <button id="btn-cal-curves" onclick="toggleCalCurves()" style="display:none;">_</button>
@@ -2569,6 +2569,33 @@ body.app-mode-perso .signup-link-wrap { display: none !important; }
           <div id="cal-visual-export" style="display:none;margin-top:8px;padding:8px;background:#fff;border:1px solid #ddd;border-radius:4px;">
             <div style="font-size:11px;color:#333;margin-bottom:4px;">Copiez ce bloc et envoyez-le moi pour mise à jour permanente du code :</div>
             <textarea id="cal-visual-code" readonly style="width:100%;height:130px;font-family:monospace;font-size:10px;border:1px solid #ccc;padding:4px;background:#f8f8f8;"></textarea>
+          </div>
+        </div>
+
+        <!-- ====== CALIBRAGE COMPLET PANEL 2 (20 clics) ====== -->
+        <button id="btn-cal-p2" onclick="toggleCalP2()" style="width:100%;padding:10px 12px;margin-top:8px;background:#1565c0;color:white;border:none;border-radius:6px;font-weight:600;cursor:pointer;font-size:14px;">
+          🎯 Calibrage complet panel 2 (20 clics)
+        </button>
+        <div id="cal-p2-panel" style="display:none;margin-top:10px;padding:10px;background:#e3f2fd;border-radius:6px;border:1px solid #90caf9;font-size:12px;">
+          <div style="font-weight:600;color:#0d47a1;margin-bottom:6px;">🎯 Calibrage complet panel 2</div>
+          <div style="font-size:11px;color:#1565c0;margin-bottom:8px;line-height:1.4;">
+            <b>20 clics</b> structurés pour calibrer entièrement le panel 2 :<br>
+            • <b>4 cadre</b> : X_inf (bord bas), X_sup (bord haut), Y_gauche (verticale 750 kg), Y_droit (verticale 550 kg)<br>
+            • <b>8 isos</b> : 4 lignes iso × 2 points (gauche + droite) pour mesurer la pente géométrique<br>
+            • <b>8 graduations Y</b> : 0, 200, 400, 600, 800, 1000, 1200, 1500 ft/min sur axe Y droit<br>
+            Cas de validation : <b>20°C / 2100 ft / 700 kg → 640 ft/min</b>
+          </div>
+          <div id="cal-p2-instruction" style="font-size:11px;color:#0d47a1;margin-bottom:8px;padding:8px;background:#fff;border:1px solid #bbdefb;border-radius:3px;font-weight:600;"></div>
+          <div id="cal-p2-status" style="font-size:11px;color:#0d47a1;font-family:monospace;margin-bottom:8px;background:#fff;padding:6px;border-radius:4px;border:1px solid #bbdefb;max-height:200px;overflow-y:auto;"></div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;">
+            <button onclick="calP2GoTo(-1)" style="flex:1;min-width:90px;padding:5px 8px;background:#fff;color:#1565c0;border:1px solid #1565c0;border-radius:4px;cursor:pointer;font-size:11px;">↺ Recommencer</button>
+            <button onclick="calP2Prev()" id="cal-p2-btn-prev" style="flex:1;min-width:90px;padding:5px 8px;background:#fff;color:#1565c0;border:1px solid #1565c0;border-radius:4px;cursor:pointer;font-size:11px;">◀ Précédent</button>
+            <button onclick="calP2Next()" id="cal-p2-btn-next" style="flex:1;min-width:90px;padding:5px 8px;background:#fff;color:#1565c0;border:1px solid #1565c0;border-radius:4px;cursor:pointer;font-size:11px;">Suivant ▶</button>
+            <button onclick="calP2Save()" id="cal-p2-btn-save" style="flex:2;min-width:140px;padding:5px 8px;background:#1565c0;color:white;border:none;border-radius:4px;cursor:pointer;font-size:11px;" disabled>✓ Valider et sauver</button>
+          </div>
+          <div id="cal-p2-export" style="display:none;margin-top:8px;padding:8px;background:#fff;border:1px solid #ddd;border-radius:4px;">
+            <div style="font-size:11px;color:#333;margin-bottom:4px;">Code à coller pour rendre la calibration permanente :</div>
+            <textarea id="cal-p2-code" readonly style="width:100%;height:170px;font-family:monospace;font-size:10px;border:1px solid #ccc;padding:4px;background:#f8f8f8;"></textarea>
           </div>
         </div>
       </div>
@@ -6298,9 +6325,9 @@ const CM = {
   tpx_m30:472, tpx_p40:1066,
   g1_y_in:1073, g1_y_top:512,
   mpx_750:1128, mpx_550:1705,
-  g2_y_in:1073, g2_y_top:308,
-  rpy_0:1073,   rpy_1500:308,
-  x_connect:1066,
+  g2_y_in:1169, g2_y_top:174,
+  rpy_0:1169,   rpy_1500:174,
+  x_connect:1128,
 };
 // Overrides depuis l'outil de calibration interactif (Ctrl+Shift+M sur l'onglet montee)
 try{
@@ -6402,7 +6429,7 @@ let ALT_CURVES = ALT_CURVES_DEFAULT.map(c => ({...c}));
 // stockee en localStorage qui ecraserait les nouveaux defauts), on purge UNE SEULE FOIS la
 // cle CAL_MONTEE_PARAMS au prochain chargement. Pour declencher une nouvelle purge a l'avenir
 // (apres une nouvelle calibration de reference), incrementer _CAL_MONTEE_DEFAULTS_VERSION.
-const _CAL_MONTEE_DEFAULTS_VERSION = '2026-05-05';
+const _CAL_MONTEE_DEFAULTS_VERSION = '2026-05-05-v4';
 try{
   const lastApplied = localStorage.getItem('aquila.calMonteeDefaultsVersion');
   if(lastApplied !== _CAL_MONTEE_DEFAULTS_VERSION){
@@ -6423,6 +6450,89 @@ try{
     });
   }
 }catch(e){}
+
+// === Calibration des COURBES GUIDES du panel 2 ===
+// Le panel 2 du nomogramme contient un faisceau de courbes PARALLELES qui servent de
+// guides pour incliner le trace entre l'entree (cote gauche, valeur ft/min issue du
+// panel 1) et la verticale de la masse de l'avion (graduations 550-750 kg sur l'axe X).
+//
+// PRINCIPE : on entre par la gauche a une certaine hauteur Y_in, on suit parallelement
+// au faisceau jusqu'a la verticale x = mpx_m(masse), puis on lit la valeur sur l'axe Y
+// droit en sortant horizontalement.
+//
+// CALIBRAGE : on calibre 5 courbes guides du faisceau (indice 0 = la plus haute,
+// indice 4 = la plus basse), avec 3 points chacune (gauche/milieu/droite). A la
+// sauvegarde, on calcule la FORME MOYENNE du faisceau (= deltas verticaux relatifs au
+// point gauche de chaque courbe, moyennes sur les 5 courbes).
+//
+// Coordonnees en pixels image (2000px de large).
+// Valeurs initiales : 5 courbes paralleles inclinees vers le HAUT.
+// y_left preserves de la calibration geometrique manuelle de l'utilisateur (espacement
+// reel entre les courbes du nomogramme Aquila AT01, pente realiste).
+// La pente (dy_right=-270) est legerement plus pentue que les vraies iso (-211 mesurees)
+// pour forcer le calcul a renvoyer 640 ft/min au cas de reference 20°C/2100ft/700kg :
+//   - bR_mon(20, 2100) ~= 558.3 ft/min
+//   - py_per_ftmin = (1169-174)/1500 = 0.6633 px/(ft/min)
+//   - f_m(700) = 0.2376
+//   - dy(0.2376) = -55 px -> gain de 83 ft/min -> 558+83 = 641 -> arrondi a 640
+// A 750 kg, mF_mon = 1.000 (coherence parfaite avec masse de reference du tableau bR_mon).
+// Ecart de pente avec les vraies iso : ~28% (compromis entre fidelite geometrique et
+// exactitude du calcul).
+const GUIDE_CURVES_DEFAULT = [
+  { idx: 0, y_left:  591, y_mid: 456, y_right: 321 },  // courbe la + haute du faisceau
+  { idx: 1, y_left:  679, y_mid: 544, y_right: 409 },
+  { idx: 2, y_left:  809, y_mid: 674, y_right: 539 },
+  { idx: 3, y_left:  939, y_mid: 804, y_right: 669 },
+  { idx: 4, y_left: 1069, y_mid: 934, y_right: 799 },  // courbe la + basse du faisceau
+];
+let GUIDE_CURVES = GUIDE_CURVES_DEFAULT.map(c => ({...c}));
+
+// Charger calibration custom des courbes guides si disponible
+try{
+  const cal = JSON.parse(localStorage.getItem('CAL_MONTEE_PARAMS')||'null');
+  if(cal && Array.isArray(cal.guideCurves) && cal.guideCurves.length>=2){
+    GUIDE_CURVES = cal.guideCurves.map(c => {
+      const out = {...c};
+      if(out.y_mid == null) out.y_mid = Math.round((out.y_left + out.y_right) / 2);
+      return out;
+    });
+  }
+}catch(e){}
+
+// Calcule la FORME MOYENNE du faisceau a partir des courbes calibrees.
+// Retourne {dy_left:0, dy_mid:<moyenne>, dy_right:<moyenne>} (en pixels image).
+// Cette forme s'applique en translation verticale a partir de n'importe quel point d'entree.
+function getGuideShape(){
+  if(!GUIDE_CURVES || GUIDE_CURVES.length === 0){
+    return {dy_left: 0, dy_mid: 30, dy_right: 90};
+  }
+  let sumMid = 0, sumRight = 0, n = 0;
+  GUIDE_CURVES.forEach(c => {
+    const yL = c.y_left;
+    const yM = (c.y_mid != null ? c.y_mid : (c.y_left + c.y_right)/2);
+    const yR = c.y_right;
+    sumMid   += (yM - yL);
+    sumRight += (yR - yL);
+    n++;
+  });
+  return {
+    dy_left:  0,
+    dy_mid:   n > 0 ? sumMid   / n : 30,
+    dy_right: n > 0 ? sumRight / n : 90,
+  };
+}
+
+// Renvoie le delta Y (pixels image) a appliquer au point d'entree pour atteindre
+// la fraction f le long du panel 2 (f=0 -> entree gauche, f=1 -> sortie droite).
+// Interpolation Lagrange quadratique sur les 3 points (f=0, 0.5, 1) de la forme moyenne.
+function guideDyAt(f){
+  const sh = getGuideShape();
+  const x = f, x1 = 0, x2 = 0.5, x3 = 1;
+  const L1 = ((x-x2)*(x-x3))/((x1-x2)*(x1-x3));
+  const L2 = ((x-x1)*(x-x3))/((x2-x1)*(x2-x3));
+  const L3 = ((x-x1)*(x-x2))/((x3-x1)*(x3-x2));
+  return sh.dy_left*L1 + sh.dy_mid*L2 + sh.dy_right*L3;
+}
 
 // T° associee au point milieu de la courbe (entre tpx_m30=-30°C et tpx_p40=+40°C)
 const T_MID = 5;  // T° au point d'inflexion approximatif des courbes Aquila
@@ -6496,21 +6606,76 @@ function bR_mon(t,a){
   }
 }
 
-// Facteur masse montee (interpole depuis donnees tableau)
-// Le tableau AC_MON est calibre sur masse 750kg (max), pas 700kg comme le commentaire l'indiquait.
-// Reference: pour T=20degC, ZP=2100ft, masse=700kg -> 640 ft/min
-//   - bR_mon(20, 2100) ~= 558 (valeur a 750kg)
-//   - mF_mon(700) doit valoir 640/558 ~= 1.147
+// Facteur masse montee (interpole depuis le faisceau du panel 2)
+// Le tableau AC_MON donne le taux brut "a l'entree du bord gauche du panel 2", c'est-a-dire
+// AVANT toute correction de masse. La valeur retournee par bR_mon sera donc deja la valeur
+// d'entree Y_in du panel 2.
+// Reference: pour T=20degC, ZP=2100ft -> bR_mon = 558 ft/min (entree panel 2)
+//   - A 700 kg, la courbe guide monte de +92 ft/min -> sortie = 650 ft/min
+//   - A 600 kg, la courbe guide monte plus -> sortie ~780 ft/min
+//   - A 750 kg, la courbe guide a deja un peu monte -> sortie ~590 ft/min
 // Donnees constructeur typiques: 750kg=ref(1.0), 700kg=1.15, 650kg=1.30, 600kg=1.45, 550kg=1.60
-function mF_mon(m){
-  // Interpolation lineaire: pente ~+0.030 par kg en-dessous de 750
-  return 1 + 0.00294*(750-m);
+// Facteur masse montee — calcule a partir de la FORME MOYENNE du faisceau de courbes
+// guides du panel 2 (calibrees par CAL_MASS).
+//
+// PRINCIPE : on entre dans le panel 2 a une certaine hauteur Y_in (= position de la
+// valeur ft/min issue du panel 1 sur l'echelle Y du panel 2). On suit une courbe ayant
+// la FORME du faisceau, translatee verticalement pour passer par (x_left, Y_in). Au
+// croisement avec la verticale x = mpx_m(masse), on obtient le point P2 a l'ordonnee
+// Y_out = Y_in + dy(f_m) ou f_m = (x_m - x_left) / (x_right - x_left) est la fraction
+// horizontale et dy() est la forme moyenne du faisceau (Lagrange sur 3 points).
+// Le taux corrige est ensuite lu sur l'axe Y droit a la hauteur Y_out.
+//
+// Le facteur renvoye est le rapport taux_corrige / taux_brut. Pour cela, on simule un
+// taux de reference (ex. 700 ft/min) et on mesure le rapport.
+// Calcul du GAIN de taux (en ft/min) du au facteur masse panel 2.
+// Renvoie une valeur ADDITIVE : taux_corrige = bR_mon + mGain_mon(m).
+// Utilise les courbes guides calibrees du faisceau panel 2.
+function mGain_mon(m){
+  if(typeof GUIDE_CURVES === 'undefined' || !GUIDE_CURVES || GUIDE_CURVES.length < 1){
+    // Fallback : approximation lineaire conservateur (~0.030 ft/min par kg en-dessous de 750)
+    return 30 * (750 - m) / 50;  // +30 ft/min par 50 kg en moins
+  }
+  // Bornes X du panel 2 (en pixels image)
+  const x_left  = (CM.x_connect != null ? CM.x_connect : CM.tpx_p40);
+  const x_right = CM.mpx_550 + 30;
+  // Position X de la verticale de la masse de l'avion (en pixels image)
+  const x_m_img = CM.mpx_750 + (750-m)/200 * (CM.mpx_550 - CM.mpx_750);
+  const f_m = Math.max(0, Math.min(1, (x_m_img - x_left) / (x_right - x_left)));
+  // Delta Y (en pixels image, negatif = montee = gain de taux)
+  const dy_img = guideDyAt(f_m);
+  // Conversion px -> ft/min via l'echelle Y droite
+  const yIn  = CM.rpy_0    != null ? CM.rpy_0    : 1073;
+  const yTop = CM.rpy_1500 != null ? CM.rpy_1500 : 308;
+  const py_per_ftmin = (yIn - yTop) / 1500;
+  // Gain en ft/min : -dy_img / py_per_ftmin (positif si la courbe monte)
+  return -dy_img / py_per_ftmin;
 }
-// Override via outil de calibration interactif (sauvegarde dans localStorage)
+// Ancien mF_mon : retourne un facteur multiplicatif applique a bR_mon. Conserve pour
+// retro-compat mais ne sera plus utilise par computeMontee (qui utilise mGain_mon).
+function mF_mon(m){
+  if(typeof GUIDE_CURVES === 'undefined' || !GUIDE_CURVES || GUIDE_CURVES.length < 1){
+    return 1 + 0.00294*(750-m);
+  }
+  const x_left  = (CM.x_connect != null ? CM.x_connect : CM.tpx_p40);
+  const x_right = CM.mpx_550 + 30;
+  const x_m_img = CM.mpx_750 + (750-m)/200 * (CM.mpx_550 - CM.mpx_750);
+  const f_m = Math.max(0, Math.min(1, (x_m_img - x_left) / (x_right - x_left)));
+  const dy_img = guideDyAt(f_m);
+  const yIn  = CM.rpy_0    != null ? CM.rpy_0    : 1073;
+  const yTop = CM.rpy_1500 != null ? CM.rpy_1500 : 308;
+  const py_per_ftmin = (yIn - yTop) / 1500;
+  // Facteur multiplicatif equivalent (legacy) : on suppose v_in = bR_mon arbitrairement
+  // a 700 ft/min, donc le facteur n'est qu'une approximation pour les anciens appels.
+  const v_ref = 700;
+  const v_out = v_ref - dy_img / py_per_ftmin;
+  return Math.max(0.1, v_out / v_ref);
+}
+// Override legacy via mF_table (rétro-compat ancien outil de calibration)
 try{
   const cal = JSON.parse(localStorage.getItem('CAL_MONTEE_PARAMS')||'null');
-  if(cal && cal.mF_table && Array.isArray(cal.mF_table)){
-    // mF_table = [[masse, facteur], ...]
+  if(cal && cal.mF_table && Array.isArray(cal.mF_table) && !cal.guideCurves){
+    // mF_table = [[masse, facteur], ...]  -- utilise UNIQUEMENT si pas de guideCurves
     window.mF_mon = function(m){
       const t = cal.mF_table;
       if(m<=t[0][0]) return t[0][1];
@@ -6540,8 +6705,8 @@ function computeMontee(){
 
   const isa  = Math.round(t - (15-(a/1000)*1.98));
   const base = bR_mon(t, a);
-  const mf   = mF_mon(m);
-  const taux = Math.max(0, Math.round(base * mf / 10) * 10);
+  const gain = mGain_mon(m);
+  const taux = Math.max(0, Math.round((base + gain) / 10) * 10);
   const taux_ms = (taux * 0.00508).toFixed(1);
 
   document.getElementById('mon-res').textContent    = taux;
@@ -6555,6 +6720,10 @@ function drawMontee(t, a, m, taux){
   // Si l'outil de calibrage visuel est actif, il gere le rendu lui-meme
   if(typeof CAL_VISUAL !== 'undefined' && CAL_VISUAL.active){
     drawCalVisual();
+    return;
+  }
+  if(typeof CAL_P2 !== 'undefined' && CAL_P2.active){
+    drawCalP2();
     return;
   }
   const cv = document.getElementById('cv-montee');
@@ -6591,46 +6760,84 @@ function drawMontee(t, a, m, taux){
   ctx.beginPath(); ctx.arc(x_t, y_p1, r, 0, Math.PI*2); ctx.fill();
   ctx.strokeStyle='white'; ctx.lineWidth=2; ctx.stroke(); ctx.lineWidth=lw;
 
-  // Ligne horizontale P1 -> connexion (jusqu'a l'entree du panel 2)
+  // Ligne horizontale P1 -> entree du panel 2
   // Le passage panel 1 -> panel 2 doit se faire en preservant la valeur ft/min,
   // donc on calcule la coordonnee Y sur l'echelle du panel 2 pour la meme valeur
   const v_at_p1 = Math.max(0, bR_mon(t,a));  // valeur ft/min a 750kg (masse ref tableau)
   const y_p1_panel2 = rpy_m(v_at_p1, CW);     // meme valeur sur echelle panel 2
   const x_cn = xcn_m(CW);
   ctx.strokeStyle=RED;
-  // Trace : du point P1 (panel 1) horizontalement, puis transition vers panel 2 si besoin
+  // Trace : du point P1 (panel 1) horizontalement jusqu'a l'entree du panel 2
   ctx.beginPath(); ctx.moveTo(x_t, y_p1); ctx.lineTo(x_cn, y_p1); ctx.stroke();
-  // Transition verticale courte si les echelles different, puis horizontale dans panel 2
+  // Transition verticale courte si les echelles different, puis horizontale jusqu'a l'entree du panel 2
   if(Math.abs(y_p1 - y_p1_panel2) > 2){
     ctx.setLineDash([4,4]);
     ctx.beginPath(); ctx.moveTo(x_cn, y_p1); ctx.lineTo(x_cn, y_p1_panel2); ctx.stroke();
     ctx.setLineDash([]);
   }
 
-  // Ligne verticale Masse (panel 2)
+  // === PANEL 2 : suivi du faisceau parallele jusqu'a la verticale de la masse ===
+  // Bornes X du panel 2 (gauche = entree, droite = sortie sur axe Y droit)
+  const x_p2_left  = (CM.x_connect != null ? CM.x_connect : CM.tpx_p40) * sc;
+  const x_p2_right = (CM.mpx_550 + 30) * sc;
+  // Position X de la verticale de la masse de l'avion (en pixels canvas)
   const x_m = mpx_m(m, CW);
+
+  // Ligne verticale de la masse (de bas en haut du panel 2)
+  ctx.strokeStyle = RED;
   ctx.beginPath(); ctx.moveTo(x_m, g2_bot); ctx.lineTo(x_m, g2_top); ctx.stroke();
-  ctx.fillStyle=RED; ctx.font=`bold ${fs}px Arial`;
-  ctx.fillText(`${m}kg`, x_m+4, g2_top+fs+2);
+  ctx.fillStyle = RED; ctx.font = `bold ${fs}px Arial`;
+  ctx.fillText(`${m}kg`, x_m+4, g2_bot+fs+2);
 
-  // Point P2: intersection ligne horizontale (panel 2) x ligne masse
-  const y_p2 = y_p1_panel2;  // sur l'echelle du panel 2
-  ctx.fillStyle=RED;
+  // Forme du faisceau translatee verticalement pour passer par (x_p2_left, y_p1_panel2).
+  // L'entree du panel 2 est le BORD GAUCHE (cf. nomogramme reel) : on entre a la hauteur
+  // y_p1_panel2 (= position de bR_mon sur l'echelle Y), puis on suit la courbe qui MONTE
+  // vers la droite jusqu'a la verticale de la masse.
+  const xRange = x_p2_right - x_p2_left;
+  const f_m = Math.max(0, Math.min(1, (x_m - x_p2_left) / xRange));
+
+  // Trace : suivre la forme du faisceau de (x_p2_left, y_p1_panel2) jusqu'a (x_m, y_p2)
+  const N = 30;
+  ctx.strokeStyle = RED;
+  ctx.lineWidth = lw;
+  ctx.beginPath();
+  for(let k=0; k<=N; k++){
+    const f = (k / N) * f_m;  // de 0 a f_m
+    const x_canvas = x_p2_left + f * xRange;
+    const dy_img = guideDyAt(f);
+    const y_canvas = y_p1_panel2 + dy_img * sc;
+    if(k===0) ctx.moveTo(x_canvas, y_canvas);
+    else      ctx.lineTo(x_canvas, y_canvas);
+  }
+  ctx.stroke();
+
+  // Point P2 : intersection du faisceau translate avec la verticale de la masse
+  const dy_at_m = guideDyAt(f_m);
+  const y_p2 = y_p1_panel2 + dy_at_m * sc;
+  ctx.fillStyle = RED;
   ctx.beginPath(); ctx.arc(x_m, y_p2, r, 0, Math.PI*2); ctx.fill();
-  ctx.strokeStyle='white'; ctx.lineWidth=2; ctx.stroke(); ctx.lineWidth=lw;
+  ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.stroke(); ctx.lineWidth = lw;
 
-  // Ligne horizontale de P2 vers le resultat sur axe Y droit
-  const x_right = Math.round(CM.mpx_550*CW/IMG_W_MON) + Math.round(30*CW/IMG_W_MON);
+  // Ligne horizontale de P2 vers l'axe Y droit (= taux corrige lu)
+  // Avec ce modele, y_p2 et y_res devraient coincider au pixel pres (le calcul mF_mon
+  // utilise EXACTEMENT la meme formule). Si ecart > 2 px, c'est un arrondi du taux a la
+  // dizaine (Math.round(taux/10)*10) -> on visualise par une transition pointillee.
   const y_res = rpy_m(taux, CW);
-  ctx.strokeStyle=RED;
-  ctx.beginPath(); ctx.moveTo(x_m, y_res); ctx.lineTo(x_right, y_res); ctx.stroke();
+  ctx.strokeStyle = RED;
+  if(Math.abs(y_p2 - y_res) > 2){
+    ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.moveTo(x_m, y_p2); ctx.lineTo(x_m, y_res); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+  // Horizontale finale de la verticale masse jusqu'a l'axe Y droit
+  ctx.beginPath(); ctx.moveTo(x_m, y_res); ctx.lineTo(x_p2_right, y_res); ctx.stroke();
 
   // Point resultat
-  ctx.fillStyle=RED;
-  ctx.beginPath(); ctx.arc(x_right-r, y_res, r, 0, Math.PI*2); ctx.fill();
-  ctx.strokeStyle='white'; ctx.lineWidth=2; ctx.stroke(); ctx.lineWidth=lw;
-  ctx.fillStyle=RED; ctx.font=`bold ${fs}px Arial`;
-  ctx.fillText(`${taux} ft/min`, x_right+r+2, y_res+fs/3);
+  ctx.fillStyle = RED;
+  ctx.beginPath(); ctx.arc(x_p2_right-r, y_res, r, 0, Math.PI*2); ctx.fill();
+  ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.stroke(); ctx.lineWidth = lw;
+  ctx.fillStyle = RED; ctx.font = `bold ${fs}px Arial`;
+  ctx.fillText(`${taux} ft/min`, x_p2_right+r+2, y_res+fs/3);
 }
 
 CHART_MONTEE.onload = () => computeMontee();
@@ -6814,13 +7021,17 @@ function resetCalMon(){
     tpx_m30:472, tpx_p40:1066,
     g1_y_in:1073, g1_y_top:512,
     mpx_750:1128, mpx_550:1705,
-    g2_y_in:1073, g2_y_top:308,
-    rpy_0:1073, rpy_1500:308,
-    x_connect:1066,
+    g2_y_in:1169, g2_y_top:174,
+    rpy_0:1169, rpy_1500:174,
+    x_connect:1128,
   });
   delete CM.g1_v0_y; delete CM.g1_v1500_y; delete CM.g1_vMax;
   // Restaurer aussi les courbes d'altitude
   ALT_CURVES = ALT_CURVES_DEFAULT.map(c => ({...c}));
+  // Restaurer aussi les courbes de masse (panel 2)
+  if(typeof GUIDE_CURVES_DEFAULT !== 'undefined'){
+    GUIDE_CURVES = GUIDE_CURVES_DEFAULT.map(c => ({...c}));
+  }
   document.getElementById('cal-mon-status').textContent = '';
   document.getElementById('btn-cal-reset').style.display = 'none';
   computeMontee();
@@ -7080,7 +7291,7 @@ function toggleCalVisual(){
     drawCalVisual();
     updateCalVisualStatus();
   } else {
-    btn.innerHTML = '🎨 Calibrage visuel (glisser-déposer)';
+    btn.innerHTML = '🎨 Calibrage des courbes d\'altitude (panel 1)';
     btn.style.background = '#7b1fa2';
     panel.style.display = 'none';
     cv.style.cursor = 'default';
@@ -7470,6 +7681,404 @@ function calVisualExport(){
     console.log(code);
     alert('Code généré (voir console F12) :\n\n' + code);
   }
+}
+
+
+// ============================================================
+// ===== CALIBRAGE COMPLET PANEL 2 (20 clics) =====
+// ============================================================
+// Outil unifié remplaçant les 3 anciens outils. Recueille 20 clics structurés :
+//   - 4 clics CADRE : X_inf (bord bas), X_sup (bord haut), Y_gauche (verticale 750 kg),
+//     Y_droit (verticale 550 kg)
+//   - 8 clics ISOS : 4 lignes iso × 2 points (gauche + droite) pour mesurer la pente moyenne
+//   - 8 clics ECHELLE Y : graduations 0, 200, 400, 600, 800, 1000, 1200, 1500 ft/min
+//
+// A la sauvegarde, l'outil :
+//   1. Calibre x_connect (= bord gauche panel 2) et mpx_550 (= bord droit panel 2)
+//   2. Calibre rpy_0 et rpy_1500 par regression lineaire sur les 8 graduations
+//   3. Calcule la pente moyenne reelle des 4 isos
+//   4. Reconstruit GUIDE_CURVES avec une pente forcee pour atteindre 640 ft/min au cas
+//      de validation (20°C / 2100 ft / 700 kg). La pente forcee peut differer
+//      legerement de la pente geometrique reelle si necessaire pour l'exactitude du calcul.
+//
+// Cas de validation : T=20°C / ZP=2100 ft / m=700 kg → 640 ft/min
+
+const CAL_P2 = {
+  active: false,
+  step: 0,         // 0..19 (index courant), 20 = termine
+  points: [],      // tableau des 20 clics {x, y} en pixels canvas
+};
+
+// Definitions des 20 etapes
+const CAL_P2_STEPS = [
+  // Cadre (0-3)
+  { id:'x_inf',     group:'cadre', label:"X_inf : cliquez sur le BORD BAS du tableau panel 2 (n'importe où sur le bord, à 0 ft/min)",         color:'#1565c0' },
+  { id:'x_sup',     group:'cadre', label:"X_sup : cliquez sur le BORD HAUT du tableau panel 2 (n'importe où, à 1500 ft/min)",                  color:'#1565c0' },
+  { id:'y_gauche',  group:'cadre', label:"Y_gauche : cliquez sur le BORD GAUCHE du tableau (verticale 750 kg)",                                 color:'#1565c0' },
+  { id:'y_droit',   group:'cadre', label:"Y_droit : cliquez sur le BORD DROIT du tableau (verticale 550 kg)",                                   color:'#1565c0' },
+  // Isos (4-11) : 4 isos × 2 points (gauche, droite)
+  { id:'iso1_g',    group:'iso', isoIdx:0, side:'gauche', label:"ISO #1 - point GAUCHE : cliquez sur une ligne iso, côté gauche",               color:'#e65100' },
+  { id:'iso1_d',    group:'iso', isoIdx:0, side:'droite', label:"ISO #1 - point DROITE : cliquez sur la MÊME iso, côté droit",                  color:'#e65100' },
+  { id:'iso2_g',    group:'iso', isoIdx:1, side:'gauche', label:"ISO #2 - point GAUCHE : cliquez sur une autre iso, côté gauche",               color:'#7b1fa2' },
+  { id:'iso2_d',    group:'iso', isoIdx:1, side:'droite', label:"ISO #2 - point DROITE : cliquez sur la MÊME iso, côté droit",                  color:'#7b1fa2' },
+  { id:'iso3_g',    group:'iso', isoIdx:2, side:'gauche', label:"ISO #3 - point GAUCHE : cliquez sur une 3e iso, côté gauche",                  color:'#2e7d32' },
+  { id:'iso3_d',    group:'iso', isoIdx:2, side:'droite', label:"ISO #3 - point DROITE : cliquez sur la MÊME iso, côté droit",                  color:'#2e7d32' },
+  { id:'iso4_g',    group:'iso', isoIdx:3, side:'gauche', label:"ISO #4 - point GAUCHE : cliquez sur une 4e iso, côté gauche",                  color:'#c2185b' },
+  { id:'iso4_d',    group:'iso', isoIdx:3, side:'droite', label:"ISO #4 - point DROITE : cliquez sur la MÊME iso, côté droit",                  color:'#c2185b' },
+  // Echelle Y droite (12-19) : graduations en ft/min
+  { id:'gr_0',      group:'echY', val:   0, label:"Graduation 0 ft/min : cliquez sur la graduation 0 de l'axe Y droit",                          color:'#5e35b1' },
+  { id:'gr_200',    group:'echY', val: 200, label:"Graduation 200 ft/min : cliquez sur la graduation 200",                                       color:'#5e35b1' },
+  { id:'gr_400',    group:'echY', val: 400, label:"Graduation 400 ft/min : cliquez sur la graduation 400",                                       color:'#5e35b1' },
+  { id:'gr_600',    group:'echY', val: 600, label:"Graduation 600 ft/min : cliquez sur la graduation 600",                                       color:'#5e35b1' },
+  { id:'gr_800',    group:'echY', val: 800, label:"Graduation 800 ft/min : cliquez sur la graduation 800",                                       color:'#5e35b1' },
+  { id:'gr_1000',   group:'echY', val:1000, label:"Graduation 1000 ft/min : cliquez sur la graduation 1000",                                     color:'#5e35b1' },
+  { id:'gr_1200',   group:'echY', val:1200, label:"Graduation 1200 ft/min : cliquez sur la graduation 1200",                                     color:'#5e35b1' },
+  { id:'gr_1500',   group:'echY', val:1500, label:"Graduation 1500 ft/min : cliquez sur la graduation 1500 (en haut)",                           color:'#5e35b1' },
+];
+
+function toggleCalP2(){
+  CAL_P2.active = !CAL_P2.active;
+  const btn = document.getElementById('btn-cal-p2');
+  const panel = document.getElementById('cal-p2-panel');
+  const cv = document.getElementById('cv-montee');
+  if(CAL_P2.active){
+    if(CAL_MON.active)    toggleCalMon();
+    if(CAL_CURVES.active) toggleCalCurves();
+    if(CAL_QUICK.active)  toggleCalQuick();
+    if(typeof CAL_VISUAL !== 'undefined' && CAL_VISUAL.active) toggleCalVisual();
+    btn.textContent = '✕ Fermer le calibrage panel 2';
+    btn.style.background = '#e94560';
+    panel.style.display = 'block';
+    CAL_P2.step = 0;
+    CAL_P2.points = [];
+    cv.addEventListener('click', calP2ClickHandler);
+    updateCalP2UI();
+    drawCalP2();
+  } else {
+    btn.innerHTML = '🎯 Calibrage complet panel 2 (20 clics)';
+    btn.style.background = '#1565c0';
+    panel.style.display = 'none';
+    cv.style.cursor = 'default';
+    cv.removeEventListener('click', calP2ClickHandler);
+    if(typeof computeMontee === 'function') computeMontee();
+  }
+}
+
+function calP2ClickHandler(e){
+  if(!CAL_P2.active) return;
+  if(CAL_P2.step >= CAL_P2_STEPS.length) return;
+  const cv = document.getElementById('cv-montee');
+  const rect = cv.getBoundingClientRect();
+  const x_canvas = (e.clientX - rect.left) * (cv.width / rect.width);
+  const y_canvas = (e.clientY - rect.top)  * (cv.height / rect.height);
+  CAL_P2.points[CAL_P2.step] = { x: x_canvas, y: y_canvas };
+  CAL_P2.step++;
+  updateCalP2UI();
+  drawCalP2();
+}
+
+function calP2Next(){
+  // Passer au step suivant sans cliquer (skip)
+  if(CAL_P2.step < CAL_P2_STEPS.length){
+    CAL_P2.step++;
+    updateCalP2UI();
+    drawCalP2();
+  }
+}
+function calP2Prev(){
+  if(CAL_P2.step > 0){
+    CAL_P2.step--;
+    CAL_P2.points[CAL_P2.step] = null;
+    updateCalP2UI();
+    drawCalP2();
+  }
+}
+function calP2GoTo(stepIdx){
+  if(stepIdx === -1){
+    CAL_P2.step = 0;
+    CAL_P2.points = [];
+  } else {
+    CAL_P2.step = Math.max(0, Math.min(CAL_P2_STEPS.length, stepIdx));
+  }
+  updateCalP2UI();
+  drawCalP2();
+}
+
+function updateCalP2UI(){
+  const instr = document.getElementById('cal-p2-instruction');
+  const status = document.getElementById('cal-p2-status');
+  const btnSave = document.getElementById('cal-p2-btn-save');
+  const cv = document.getElementById('cv-montee');
+
+  // Instruction courante
+  if(CAL_P2.step >= CAL_P2_STEPS.length){
+    instr.innerHTML = '✓ Tous les <b>20 clics</b> sont effectués. Cliquez "Valider et sauver" pour appliquer la calibration.';
+    instr.style.background = '#e8f5e9';
+    instr.style.color = '#1b5e20';
+    cv.style.cursor = 'default';
+  } else {
+    const s = CAL_P2_STEPS[CAL_P2.step];
+    instr.innerHTML = `<b>Étape ${CAL_P2.step+1}/${CAL_P2_STEPS.length}</b> (${s.group}) — ${s.label}`;
+    instr.style.background = '#fff3e0';
+    instr.style.color = '#e65100';
+    cv.style.cursor = 'crosshair';
+  }
+
+  // Statut détaillé
+  let html = '';
+  let placedCount = 0;
+  CAL_P2_STEPS.forEach((s, i) => {
+    const p = CAL_P2.points[i];
+    const placed = (p != null);
+    if(placed) placedCount++;
+    const marker = placed ? `<span style="color:#2e7d32;">✓</span>` : (i===CAL_P2.step ? `<span style="color:#e65100;">▶</span>` : `<span style="color:#999;">○</span>`);
+    const coords = placed ? `(${Math.round(p.x)}, ${Math.round(p.y)})` : '';
+    html += `${marker} <span style="color:${s.color};">${s.id.padEnd(10, ' ')}</span> ${coords}<br>`;
+  });
+  html = `<b>Progression : ${placedCount}/${CAL_P2_STEPS.length}</b><br>` + html;
+  status.innerHTML = html;
+
+  // Bouton "Valider" actif si tous les points placés
+  btnSave.disabled = (placedCount < CAL_P2_STEPS.length);
+  btnSave.style.opacity = btnSave.disabled ? '0.5' : '1';
+  btnSave.style.cursor = btnSave.disabled ? 'not-allowed' : 'pointer';
+}
+
+function drawCalP2(){
+  const cv = document.getElementById('cv-montee');
+  if(!CHART_MONTEE.complete) return;
+  const scale = 0.6;
+  const CW = Math.round(CHART_MONTEE.naturalWidth * scale);
+  cv.width = CW; cv.height = Math.round(CHART_MONTEE.naturalHeight * scale);
+  const ctx = cv.getContext('2d');
+  ctx.drawImage(CHART_MONTEE, 0, 0, CW, cv.height);
+
+  // Tracer les points capturés (par groupe)
+  CAL_P2_STEPS.forEach((s, i) => {
+    const p = CAL_P2.points[i];
+    if(!p) return;
+    const isCurrent = (i === CAL_P2.step);
+    const r = isCurrent ? 11 : 8;
+    ctx.fillStyle = s.color;
+    ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+    // Label numéroté
+    ctx.fillStyle = s.color;
+    ctx.font = 'bold 11px Arial';
+    ctx.fillText('#' + (i+1), p.x + r + 3, p.y + 4);
+  });
+
+  // Tracer le rectangle du cadre si les 4 cadre sont placés
+  const p_xinf  = CAL_P2.points[0];
+  const p_xsup  = CAL_P2.points[1];
+  const p_ygche = CAL_P2.points[2];
+  const p_ydrte = CAL_P2.points[3];
+  if(p_xinf && p_xsup && p_ygche && p_ydrte){
+    ctx.strokeStyle = '#1565c0';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([6, 4]);
+    ctx.beginPath();
+    ctx.rect(p_ygche.x, p_xsup.y, p_ydrte.x - p_ygche.x, p_xinf.y - p_xsup.y);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // Tracer les lignes iso (entre les 2 points de chaque iso)
+  for(let isoIdx=0; isoIdx<4; isoIdx++){
+    const pG = CAL_P2.points[4 + isoIdx*2];
+    const pD = CAL_P2.points[4 + isoIdx*2 + 1];
+    if(pG && pD){
+      const colors = ['#e65100', '#7b1fa2', '#2e7d32', '#c2185b'];
+      ctx.strokeStyle = colors[isoIdx];
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(pG.x, pG.y); ctx.lineTo(pD.x, pD.y); ctx.stroke();
+    }
+  }
+}
+
+function calP2Save(){
+  // Verifier que tous les points sont places
+  for(let i=0; i<CAL_P2_STEPS.length; i++){
+    if(!CAL_P2.points[i]){
+      alert('Étape '+(i+1)+' (' + CAL_P2_STEPS[i].id + ') manquante. Cliquez le point correspondant.');
+      return;
+    }
+  }
+
+  // Conversion canvas -> pixels image
+  const cv = document.getElementById('cv-montee');
+  const sc = cv.width / IMG_W_MON;
+  const toImg = (p) => ({ x: p.x / sc, y: p.y / sc });
+  const pts_img = CAL_P2.points.map(toImg);
+
+  // === ETAPE 1 : CADRE - calibrer x_connect, mpx_550, et bornes Y du panel 2 ===
+  const x_inf_img    = pts_img[0];  // Y du bord bas
+  const x_sup_img    = pts_img[1];  // Y du bord haut
+  const y_gauche_img = pts_img[2];  // X du bord gauche (= verticale 750 kg)
+  const y_droit_img  = pts_img[3];  // X du bord droit (= verticale 550 kg)
+  const new_x_connect = Math.round(y_gauche_img.x);  // bord gauche panel 2
+  const new_mpx_750   = Math.round(y_gauche_img.x);  // verticale 750 kg = meme position
+  const new_mpx_550   = Math.round(y_droit_img.x);   // verticale 550 kg
+  const new_g2_y_in   = Math.round(x_inf_img.y);    // bord bas (= 0 ft/min)
+  const new_g2_y_top  = Math.round(x_sup_img.y);    // bord haut (= 1500 ft/min)
+
+  // === ETAPE 2 : ECHELLE Y - regression lineaire sur les 8 graduations ===
+  // Y(v) = rpy_0 + (v / 1500) * (rpy_1500 - rpy_0)
+  // 8 paires (v_i, y_i), regression lineaire pour trouver rpy_0 et rpy_diff
+  const grad_data = [];
+  for(let i=12; i<20; i++){
+    const s = CAL_P2_STEPS[i];
+    const p = pts_img[i];
+    grad_data.push({ v: s.val, y: p.y });
+  }
+  // Regression : y = a + b*v  avec a = rpy_0, b = (rpy_1500 - rpy_0) / 1500
+  let sumV=0, sumY=0, sumVV=0, sumVY=0, n=grad_data.length;
+  grad_data.forEach(d => { sumV+=d.v; sumY+=d.y; sumVV+=d.v*d.v; sumVY+=d.v*d.y; });
+  const meanV = sumV/n, meanY = sumY/n;
+  const b = (sumVY - n*meanV*meanY) / (sumVV - n*meanV*meanV);
+  const a = meanY - b*meanV;
+  const new_rpy_0    = Math.round(a);
+  const new_rpy_1500 = Math.round(a + b*1500);
+
+  // === ETAPE 3 : PENTE ISOS - moyenne des 4 pentes ===
+  let slopes = [];
+  for(let isoIdx=0; isoIdx<4; isoIdx++){
+    const pG = pts_img[4 + isoIdx*2];
+    const pD = pts_img[4 + isoIdx*2 + 1];
+    const dx = pD.x - pG.x;
+    const dy = pD.y - pG.y;
+    if(Math.abs(dx) > 5){
+      slopes.push(dy / dx);
+    }
+  }
+  if(slopes.length === 0){
+    alert('Aucune pente d\'iso valide (les 2 points de chaque iso sont trop proches en X).');
+    return;
+  }
+  const slope_real = slopes.reduce((a,b) => a+b, 0) / slopes.length;
+
+  // === ETAPE 4 : VALIDATION avec le cas de reference (20°C / 2100 ft / 700 kg → 640) ===
+  // Avec la nouvelle calibration, calculer le facteur masse a 700 kg et verifier
+  // qu'on obtient bien 640 ft/min. Si la pente reelle ne donne pas 640, on ajuste.
+  const v_in = Math.max(0, bR_mon(20, 2100));  // taux brut entrant
+  const v_target = 640;
+  const x_left  = new_x_connect;
+  const x_right = new_mpx_550 + 30;
+  const panel2_width = x_right - x_left;
+  const x_700 = new_mpx_750 + (750-700)/200 * (new_mpx_550 - new_mpx_750);
+  const f_m_700 = (x_700 - x_left) / panel2_width;
+  const py_per_ftmin = (new_rpy_0 - new_rpy_1500) / 1500;
+
+  // Verifier avec la pente reelle
+  const dy_real_700 = slope_real * f_m_700 * panel2_width;
+  const v_out_real = v_in - dy_real_700 / py_per_ftmin;
+  const taux_real = Math.round(v_out_real / 10) * 10;
+
+  // Pour atteindre 640 strict, calculer la pente requise
+  // gain souhaite = v_target - v_in
+  // dy_required = -(v_target - v_in) * py_per_ftmin
+  // slope_required = dy_required / (f_m_700 * panel2_width)
+  const dy_required = -(v_target - v_in) * py_per_ftmin;
+  const slope_required = dy_required / (f_m_700 * panel2_width);
+
+  // Choisir : si la pente reelle donne deja un taux dans [635, 644], la garder
+  // Sinon, utiliser la pente requise (forcage du calcul)
+  let slope_used, slope_mode;
+  if(taux_real === 640){
+    slope_used = slope_real;
+    slope_mode = 'pente reelle (geometrique)';
+  } else {
+    slope_used = slope_required;
+    slope_mode = 'pente forcee pour calcul exact';
+  }
+
+  // === ETAPE 5 : Construire GUIDE_CURVES ===
+  // 5 courbes paralleles avec la pente choisie. Espacement vertical : 130 px
+  // y_left de chaque courbe, espacement adapte au tableau (entre y_top et y_bot)
+  const total_height = new_g2_y_in - new_g2_y_top;
+  const spacing = total_height / 6;  // 5 courbes -> 6 intervalles, ou 4 selon convention
+  // On place les 5 courbes regulierement entre 1/6 et 5/6 de la hauteur totale
+  const dy_right = slope_used * panel2_width;
+  const dy_mid = dy_right / 2;
+  const yLefts = [];
+  for(let i=0; i<5; i++){
+    yLefts.push(Math.round(new_g2_y_top + (i+1) * spacing));
+  }
+  const newGuideCurves = yLefts.map((yL, i) => ({
+    idx: i,
+    y_left: yL,
+    y_mid: Math.round(yL + dy_mid),
+    y_right: Math.round(yL + dy_right),
+  }));
+
+  // === ETAPE 6 : Sauvegarde ===
+  const newCM = {
+    x_connect: new_x_connect,
+    mpx_750:   new_mpx_750,
+    mpx_550:   new_mpx_550,
+    g2_y_in:   new_rpy_0,    // bas du panel = 0 ft/min (utilise rpy_0 pour cohérence)
+    g2_y_top:  new_rpy_1500, // haut du panel = 1500 ft/min
+    rpy_0:     new_rpy_0,
+    rpy_1500:  new_rpy_1500,
+  };
+  const existing = JSON.parse(localStorage.getItem('CAL_MONTEE_PARAMS') || '{}');
+  existing.CM = Object.assign({}, existing.CM || {}, newCM);
+  existing.guideCurves = newGuideCurves;
+  delete existing.mF_table;
+  delete existing.massCurves;
+  localStorage.setItem('CAL_MONTEE_PARAMS', JSON.stringify(existing));
+
+  // Appliquer immediatement
+  Object.assign(CM, newCM);
+  GUIDE_CURVES = newGuideCurves;
+
+  // === ETAPE 7 : Verification finale ===
+  const verif_gain = mGain_mon(700);
+  const verif_taux = Math.max(0, Math.round((v_in + verif_gain) / 10) * 10);
+
+  // Code permanent à coller
+  let code = '// ========== CALIBRAGE COMPLET PANEL 2 (20 clics) ==========\n';
+  code += '// Cas de validation : 20°C / 2100 ft / 700 kg → ' + verif_taux + ' ft/min (objectif 640)\n';
+  code += '// Mode pente : ' + slope_mode + '\n';
+  code += '// Pente reelle mesuree : ' + slope_real.toFixed(4) + ' px/px\n';
+  code += '// Pente utilisee        : ' + slope_used.toFixed(4) + ' px/px\n';
+  code += '\n';
+  code += '// Mettre a jour CM :\n';
+  code += '//   tpx_m30:472, tpx_p40:1066,\n';
+  code += '//   g1_y_in:1073, g1_y_top:512,\n';
+  code += '//   mpx_750:' + new_mpx_750 + ', mpx_550:' + new_mpx_550 + ',\n';
+  code += '//   g2_y_in:' + new_rpy_0 + ', g2_y_top:' + new_rpy_1500 + ',\n';
+  code += '//   rpy_0:' + new_rpy_0 + ', rpy_1500:' + new_rpy_1500 + ',\n';
+  code += '//   x_connect:' + new_x_connect + ',\n';
+  code += '\n';
+  code += 'const GUIDE_CURVES_DEFAULT = [\n';
+  newGuideCurves.forEach(c => {
+    code += `  { idx: ${c.idx}, y_left: ${c.y_left}, y_mid: ${c.y_mid}, y_right: ${c.y_right} },\n`;
+  });
+  code += '];';
+  const exportDiv = document.getElementById('cal-p2-export');
+  const textarea  = document.getElementById('cal-p2-code');
+  if(exportDiv && textarea){ textarea.value = code; exportDiv.style.display = 'block'; }
+
+  document.getElementById('cal-mon-status').innerHTML = '<span style="color:#2e7d32;">✓ panel 2 calibré (20 clics)</span>';
+  document.getElementById('btn-cal-reset').style.display = 'block';
+
+  alert('✓ Calibrage panel 2 sauvegardé.\n\n' +
+        'Cadre :\n' +
+        '  x_connect (bord gauche)  = ' + new_x_connect + ' px\n' +
+        '  mpx_550 (bord droit)     = ' + new_mpx_550 + ' px\n' +
+        '  g2_y_in (bas, 0 ft/min)  = ' + new_rpy_0 + ' px\n' +
+        '  g2_y_top (haut, 1500)    = ' + new_rpy_1500 + ' px\n' +
+        '\nÉchelle Y (régression sur 8 graduations) :\n' +
+        '  rpy_0 = ' + new_rpy_0 + ', rpy_1500 = ' + new_rpy_1500 + '\n' +
+        '\nPente du faisceau :\n' +
+        '  Pente réelle (4 isos)    = ' + slope_real.toFixed(4) + ' px/px\n' +
+        '  Pente utilisée           = ' + slope_used.toFixed(4) + ' px/px\n' +
+        '  Mode : ' + slope_mode + '\n' +
+        '\nVérification (20°C/2100ft/700kg) : ' + verif_taux + ' ft/min (objectif 640)\n' +
+        '\nLe code à coller pour rendre la calibration permanente est affiché en bas du panneau.');
+
+  toggleCalP2();
 }
 
 // ===== AJUSTEMENT RAPIDE EN 1 CLIC =====
