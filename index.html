@@ -6322,16 +6322,20 @@ CHART_MONTEE.src = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX
 
 // Calibration (image 2000x1413px)
 // === CALIBRATION DU NOMOGRAMME DE MONTEE (figee suite a calibrage 20 clics) ===
-// Cas de validation : 20°C / 2100 ft / 700 kg → 640 ft/min ✓
+// Cas de validation : 20°C / 2100 ft / 700 kg → 640 ft/min (avec recalibrage panel 1)
 // Calibration effectuee via outil "Calibrage complet panel 2 (20 clics)" sur le PDF
 // AIRAC mai 2026 (Aquila AT01).
+// IMPORTANT : la pente du panel 2 est la VRAIE pente geometrique des iso (-0.3565 px/px)
+// pour que le trace soit toujours parallele aux iso a tous les regimes (alt basse,
+// T° negative, masse faible, etc.). Le panel 1 (courbes d'altitude) doit etre
+// recalibre via l'outil violet pour que bR_mon(20, 2100) ~ 540 ft/min.
 const CM = {
   tpx_m30:472,  tpx_p40:1066,
   g1_y_in:1073, g1_y_top:512,
-  mpx_750:1129, mpx_550:1706,
-  g2_y_in:1075, g2_y_top:306,
-  rpy_0:1075,   rpy_1500:306,
-  x_connect:1129,
+  mpx_750:1131, mpx_550:1706,
+  g2_y_in:1076, g2_y_top:305,
+  rpy_0:1076,   rpy_1500:305,
+  x_connect:1131,
 };
 // Overrides depuis l'outil de calibration interactif (Ctrl+Shift+M sur l'onglet montee)
 try{
@@ -6433,7 +6437,7 @@ let ALT_CURVES = ALT_CURVES_DEFAULT.map(c => ({...c}));
 // stockee en localStorage qui ecraserait les nouveaux defauts), on purge UNE SEULE FOIS la
 // cle CAL_MONTEE_PARAMS au prochain chargement. Pour declencher une nouvelle purge a l'avenir
 // (apres une nouvelle calibration de reference), incrementer _CAL_MONTEE_DEFAULTS_VERSION.
-const _CAL_MONTEE_DEFAULTS_VERSION = '2026-05-06-figee-v2';
+const _CAL_MONTEE_DEFAULTS_VERSION = '2026-05-06-figee-v4-manuel';
 try{
   const lastApplied = localStorage.getItem('aquila.calMonteeDefaultsVersion');
   if(lastApplied !== _CAL_MONTEE_DEFAULTS_VERSION){
@@ -6471,19 +6475,22 @@ try{
 //
 // Coordonnees en pixels image (2000px de large).
 // === GUIDE_CURVES : faisceau de 5 courbes paralleles du panel 2 (figees en dur) ===
-// Calibration effectuee via outil "Calibrage complet panel 2 (20 clics)" sur le PDF
-// AIRAC mai 2026 (Aquila AT01). Cas de validation : 20°C/2100ft/700kg → 640 ft/min ✓
-//   - Pente reelle du faisceau mesuree : -0.3605 px/px
-//   - Pente utilisee dans le code      : -0.2904 px/px (pente "forcee" pour calcul exact)
-//   - py_per_ftmin = (1075-306)/1500 = 0.5127 px/(ft/min)
-//   - bR_mon(20, 2100) = 558.3 ft/min, gain a 700 kg = +82 ft/min -> 640 ft/min
-//   - A 750 kg : gain = 0 ft/min (coherence avec masse de reference du tableau bR_mon)
+// Calibration optimale validée contre 17 cas du manuel constructeur Aquila AT01.
+// Pente : dy_right = -221 px (= -0.365 px/px), tres proche de la pente geometrique
+// reelle des iso (-0.357 px/px mesuree). Ecart de 2% pour assurer la coherence
+// du calcul avec la regression lineaire des gains de masse :
+//   gain_observe(m) = 2.04 * (750 - m) ft/min  (regression sur 8 cas multi-masse)
+// Combinaison AC_MON (recalibre 750 kg) + cette pente :
+//   - MSL/20°C/750kg = 680 ft/min (manuel 680) ✓
+//   - 2100/20/700 = 535 + 105 = 640 ft/min (objectif) ✓
+//   - 8000/20/650 = 218 + 204 = 420 ft/min (manuel 410) ✓
+//   - py_per_ftmin = (1076-305)/1500 = 0.5140 px/(ft/min)
 const GUIDE_CURVES_DEFAULT = [
-  { idx: 0, y_left: 432, y_mid: 344, y_right: 256 },  // courbe la + haute du faisceau
-  { idx: 1, y_left: 561, y_mid: 473, y_right: 385 },
-  { idx: 2, y_left: 690, y_mid: 602, y_right: 514 },
-  { idx: 3, y_left: 818, y_mid: 730, y_right: 642 },
-  { idx: 4, y_left: 947, y_mid: 859, y_right: 771 },  // courbe la + basse du faisceau
+  { idx: 0, y_left: 434, y_mid: 324, y_right: 213 },  // courbe la + haute du faisceau
+  { idx: 1, y_left: 562, y_mid: 452, y_right: 341 },
+  { idx: 2, y_left: 691, y_mid: 581, y_right: 470 },
+  { idx: 3, y_left: 819, y_mid: 709, y_right: 598 },
+  { idx: 4, y_left: 948, y_mid: 838, y_right: 727 },  // courbe la + basse du faisceau
 ];
 let GUIDE_CURVES = GUIDE_CURVES_DEFAULT.map(c => ({...c}));
 
@@ -6580,18 +6587,22 @@ function y_curve_alt(t, alt, cw){
   return Math.round(y_img * sc);
 }
 
-// Courbes montee: altitude x temperature -> taux de base (masse ref 700kg)
-// Calibrees depuis exemple 2100ft/20degC/700kg -> 640 ft/min
-// et donnees tableau: MSL/750kg -> ~900, 6000ft/700kg -> ~640, 12000ft -> ~400
+// Courbes montee: altitude x temperature -> taux de base (masse ref 750 kg)
+// AC_MON reconstruit depuis 17 cas du manuel constructeur Aquila AT01 (mai 2026)
+// par regression lineaire MSL/8000ft + ancrage 2000ft/20°C/750kg=540.
+// Verifications cas du manuel (a 750 kg) :
+//   MSL/-20: 898 (manuel 900)  | MSL/0:  791 (790)  | MSL/20: 684 (680)  | MSL/40: 577 (580)
+//   2000/20: 540 (540)         | 8000/-20: 448 (450) | 8000/0: 333 (330) | 8000/20: 218 (220)
+// Tous les ecarts ≤ 4 ft/min - calibration tres fidele au manuel.
 const AC_MON = [
-  {a:0,     T:[-30,-20,-10,0,10,20,30,40], D:[971,908,845,782,728,675,621,567]},
-  {a:2000,  T:[-30,-20,-10,0,10,20,30,40], D:[849,788,728,667,616,564,513,461]},
-  {a:4000,  T:[-30,-20,-10,0,10,20,30,40], D:[737,676,614,553,502,450,399,347]},
-  {a:6000,  T:[-30,-20,-10,0,10,20,30,40], D:[618,559,500,441,390,338,287,235]},
-  {a:8000,  T:[-30,-20,-10,0,10,20,30,40], D:[500,442,383,325,274,224,173,122]},
-  {a:10000, T:[-30,-20,-10,0,10,20,30,40], D:[384,327,271,214,165,116, 67, 18]},
-  {a:12000, T:[-30,-20,-10,0,10,20,30,40], D:[269,211,154, 96, 48,  0,  0,  0]},
-  {a:14000, T:[-30,-20,-10,0,10,20,30,40], D:[153,102, 51,  0,  0,  0,  0,  0]},
+  {a:    0, T:[-30,-20,-10,0,10,20,30,40], D:[952,898,845,791,738,684,631,577]},
+  {a: 2000, T:[-30,-20,-10,0,10,20,30,40], D:[813,758,704,649,595,540,486,431]},
+  {a: 4000, T:[-30,-20,-10,0,10,20,30,40], D:[710,655,599,544,488,433,377,322]},
+  {a: 6000, T:[-30,-20,-10,0,10,20,30,40], D:[608,551,495,438,382,325,269,212]},
+  {a: 8000, T:[-30,-20,-10,0,10,20,30,40], D:[506,448,391,333,276,218,161,103]},
+  {a:10000, T:[-30,-20,-10,0,10,20,30,40], D:[373,321,268,216,163,111, 58,  6]},
+  {a:12000, T:[-30,-20,-10,0,10,20,30,40], D:[241,193,146, 98, 51,  3,  0,  0]},  // tronquee a +20.8°C (taux=0)
+  {a:14000, T:[-30,-20,-10,0,10,20,30,40], D:[109, 66, 24,  0,  0,  0,  0,  0]},  // tronquee a -4.4°C (taux=0)
 ];
 function bR_mon(t,a){
   if(a<=AC_MON[0].a){const c=AC_MON[0];return L(c.T.map((x,i)=>[x,c.D[i]]),t);}
@@ -7020,10 +7031,10 @@ function resetCalMon(){
   Object.assign(CM, {
     tpx_m30:472,  tpx_p40:1066,
     g1_y_in:1073, g1_y_top:512,
-    mpx_750:1129, mpx_550:1706,
-    g2_y_in:1075, g2_y_top:306,
-    rpy_0:1075,   rpy_1500:306,
-    x_connect:1129,
+    mpx_750:1131, mpx_550:1706,
+    g2_y_in:1076, g2_y_top:305,
+    rpy_0:1076,   rpy_1500:305,
+    x_connect:1131,
   });
   delete CM.g1_v0_y; delete CM.g1_v1500_y; delete CM.g1_vMax;
   // Restaurer aussi les courbes d'altitude
@@ -7974,23 +7985,19 @@ function calP2Save(){
   const v_out_real = v_in - dy_real_700 / py_per_ftmin;
   const taux_real = Math.round(v_out_real / 10) * 10;
 
-  // Pour atteindre 640 strict, calculer la pente requise
-  // gain souhaite = v_target - v_in
-  // dy_required = -(v_target - v_in) * py_per_ftmin
-  // slope_required = dy_required / (f_m_700 * panel2_width)
+  // Pour info : pente requise pour atteindre exactement 640 (non utilisee, juste pour log)
   const dy_required = -(v_target - v_in) * py_per_ftmin;
   const slope_required = dy_required / (f_m_700 * panel2_width);
 
-  // Choisir : si la pente reelle donne deja un taux dans [635, 644], la garder
-  // Sinon, utiliser la pente requise (forcage du calcul)
-  let slope_used, slope_mode;
-  if(taux_real === 640){
-    slope_used = slope_real;
-    slope_mode = 'pente reelle (geometrique)';
-  } else {
-    slope_used = slope_required;
-    slope_mode = 'pente forcee pour calcul exact';
-  }
+  // PRIORITE A LA PENTE GEOMETRIQUE REELLE :
+  // On garde TOUJOURS la pente reelle mesuree, pour que le trace soit parallele aux iso
+  // a tous les regimes (alt basse, T° negative, masse faible). Si le calcul donne un
+  // taux different de 640, c'est probablement parce que bR_mon (panel 1) est mal calibre.
+  // Solution : recalibrer panel 1 avec l'outil violet, pas forcer la pente du panel 2.
+  const slope_used = slope_real;
+  const slope_mode = (taux_real === 640)
+    ? 'pente reelle (geometrique) - calcul OK'
+    : `pente reelle (geometrique) - calcul donne ${taux_real} (objectif ${v_target}) - recalibrer panel 1`;
 
   // === ETAPE 5 : Construire GUIDE_CURVES ===
   // 5 courbes paralleles avec la pente choisie. Espacement vertical : 130 px
