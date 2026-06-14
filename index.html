@@ -79,9 +79,11 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e;mi
 #header-airac .airac-label{color:#fbb6c4;font-weight:600;letter-spacing:.3px;}
 #header-airac .airac-val{font-weight:700;}
 /* Intro AIRAC défilante dans le bouton START (au lancement, petit écran) */
-#btn-start-label.bsl{display:inline-block;width:48px;overflow:hidden;white-space:nowrap;vertical-align:middle;}
+#btn-start-label.bsl{display:inline-block;width:54px;overflow:hidden;white-space:nowrap;vertical-align:middle;}
 #btn-start-label.bsl > span{display:inline-block;white-space:nowrap;animation:btnStartAirac 3s linear 1;}
-@keyframes btnStartAirac{0%{transform:translateX(48px);}100%{transform:translateX(-105%);}}
+@keyframes btnStartAirac{0%{transform:translateX(54px);}100%{transform:translateX(-105%);}}
+/* Pendant l'intro, masquer l'icône ▶ pour laisser toute la largeur au défilement */
+#btn-start.intro #btn-start-icon{display:none;}
 .hdr-btn{
   padding:6px 11px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);
   border-radius:6px;color:#a0aec0;font-size:11px;cursor:pointer;font-weight:600;
@@ -791,7 +793,7 @@ canvas{display:block;max-width:100%;}
   /* Mobile : masquer texte boutons, garder icônes */
   .hdr-btn{padding:5px 7px;font-size:0;min-height:34px;gap:0;}
   .hdr-btn svg{margin:0;}
-  #btn-start{font-size:11px !important;padding:5px 10px !important;gap:4px !important;}
+  #btn-start{font-size:11px !important;padding:5px 10px !important;gap:4px !important;width:74px !important;box-sizing:border-box;justify-content:center;}
   /* Mobile : masquer nom complet, garder seulement le cercle initiales */
   #user-fullname{display:none;}
   #user-badge{padding:4px 6px;gap:0;}
@@ -803,6 +805,8 @@ canvas{display:block;max-width:100%;}
   #header h1{font-size:15px;}
   /* Badge AIRAC masqué : info montrée au lancement dans START */
   #header-airac{display:none;}
+  /* Largeur fixe du bouton START (pas de reflow pendant le défilement) */
+  #btn-start{width:84px;box-sizing:border-box;justify-content:center;}
   /* Cartouche réduit en largeur avec texte défilant */
   #header-warn{font-size:10px;padding:5px 10px;max-width:180px;overflow:hidden;}
   #header-warn .header-warn-sub{display:inline;}
@@ -1507,7 +1511,7 @@ body.app-mode-perso .signup-link-wrap { display: none !important; }
              box-shadow:0 2px 8px rgba(233,69,96,0.4);"
       onmouseover="this.style.background='#c73652';this.style.boxShadow='0 2px 12px rgba(233,69,96,0.6)'"
       onmouseout="this.style.background='#e94560';this.style.boxShadow='0 2px 8px rgba(233,69,96,0.4)'">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      <svg id="btn-start-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle"><polygon points="5 3 19 12 5 21 5 3"/></svg>
       <span id="btn-start-label">START</span>
     </button>
     <!-- Nom utilisateur connecté -->
@@ -12131,11 +12135,14 @@ function playStartAiracIntro() {
   try {
     if (!window.matchMedia || !window.matchMedia('(max-width:860px)').matches) return;
     var lbl = document.getElementById('btn-start-label');
+    var btn = document.getElementById('btn-start');
     if (!lbl || lbl.dataset.airacIntroDone) return;
     lbl.dataset.airacIntroDone = '1';
+    if (btn) btn.classList.add('intro');
     lbl.classList.add('bsl');
     lbl.innerHTML = '<span>XML AIRAC 07/26</span>';
     setTimeout(function () {
+      if (btn) btn.classList.remove('intro');
       lbl.classList.remove('bsl');
       lbl.textContent = 'START';
     }, 3000);
