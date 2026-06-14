@@ -636,6 +636,9 @@ canvas{display:block;max-width:100%;}
   #header-warn svg{margin:0;}
   #header-airac{padding:5px 8px;min-height:34px;font-size:9px;gap:4px;}
   #header-airac .airac-label{display:none;}
+  /* Forcer la barre de droite (warn + boutons) sur sa propre 2e ligne complète,
+     pour garder logo + App + badge AIRAC ensemble sur la 1re ligne */
+  #header-right{flex-basis:100%;width:100%;margin-left:0;justify-content:flex-end;}
 
   #avion-bar{padding:6px 10px;gap:5px;}
   .avion-btn{padding:5px 9px;font-size:11px;}
@@ -797,6 +800,8 @@ canvas{display:block;max-width:100%;}
 @media(min-width:481px) and (max-width:860px){
   #header{padding:8px 14px;flex-wrap:wrap;}
   #header h1{font-size:15px;}
+  /* Barre de droite sur sa propre ligne (logo + badge AIRAC sur la 1re) */
+  #header-right{flex-basis:100%;width:100%;margin-left:0;justify-content:flex-end;}
   /* Cartouche réduit en largeur avec texte défilant */
   #header-warn{font-size:10px;padding:5px 10px;max-width:180px;overflow:hidden;}
   #header-warn .header-warn-sub{display:inline;}
