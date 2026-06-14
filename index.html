@@ -78,6 +78,10 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e;mi
   white-space:nowrap;flex-shrink:0;}
 #header-airac .airac-label{color:#fbb6c4;font-weight:600;letter-spacing:.3px;}
 #header-airac .airac-val{font-weight:700;}
+/* Intro AIRAC défilante dans le bouton START (au lancement, petit écran) */
+#btn-start-label.bsl{display:inline-block;width:48px;overflow:hidden;white-space:nowrap;vertical-align:middle;}
+#btn-start-label.bsl > span{display:inline-block;white-space:nowrap;animation:btnStartAirac 3s linear 1;}
+@keyframes btnStartAirac{0%{transform:translateX(48px);}100%{transform:translateX(-105%);}}
 .hdr-btn{
   padding:6px 11px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);
   border-radius:6px;color:#a0aec0;font-size:11px;cursor:pointer;font-weight:600;
@@ -634,11 +638,8 @@ canvas{display:block;max-width:100%;}
   #header-warn{font-size:0;padding:5px 7px;min-height:34px;}
   #header-warn span{display:none;}
   #header-warn svg{margin:0;}
-  #header-airac{padding:5px 8px;min-height:34px;font-size:9px;gap:4px;}
-  #header-airac .airac-label{display:none;}
-  /* Forcer la barre de droite (warn + boutons) sur sa propre 2e ligne complète,
-     pour garder logo + App + badge AIRAC ensemble sur la 1re ligne */
-  #header-right{flex-basis:100%;width:100%;margin-left:0;justify-content:flex-end;}
+  /* Badge AIRAC masqué sur petit écran : l'info défile dans le bouton START au lancement */
+  #header-airac{display:none;}
 
   #avion-bar{padding:6px 10px;gap:5px;}
   .avion-btn{padding:5px 9px;font-size:11px;}
@@ -800,8 +801,8 @@ canvas{display:block;max-width:100%;}
 @media(min-width:481px) and (max-width:860px){
   #header{padding:8px 14px;flex-wrap:wrap;}
   #header h1{font-size:15px;}
-  /* Barre de droite sur sa propre ligne (logo + badge AIRAC sur la 1re) */
-  #header-right{flex-basis:100%;width:100%;margin-left:0;justify-content:flex-end;}
+  /* Badge AIRAC masqué : info montrée au lancement dans START */
+  #header-airac{display:none;}
   /* Cartouche réduit en largeur avec texte défilant */
   #header-warn{font-size:10px;padding:5px 10px;max-width:180px;overflow:hidden;}
   #header-warn .header-warn-sub{display:inline;}
@@ -1507,7 +1508,7 @@ body.app-mode-perso .signup-link-wrap { display: none !important; }
       onmouseover="this.style.background='#c73652';this.style.boxShadow='0 2px 12px rgba(233,69,96,0.6)'"
       onmouseout="this.style.background='#e94560';this.style.boxShadow='0 2px 8px rgba(233,69,96,0.4)'">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-      START
+      <span id="btn-start-label">START</span>
     </button>
     <!-- Nom utilisateur connecté -->
     <div id="user-badge" class="hdr-btn" onclick="showProfile()" title="Mon profil"
@@ -12120,6 +12121,25 @@ function showApp() {
   if (ni && CURRENT_USER) ni.textContent = CURRENT_USER.initials;
   if (nf && CURRENT_USER) nf.textContent = CURRENT_USER.name;
   if (typeof _applyAdminRestrictions === 'function') _applyAdminRestrictions();
+  playStartAiracIntro();
+}
+
+// Au lancement (petit écran), faire défiler l'origine des données AIRAC dans le
+// bouton START, puis rétablir le texte « START ». Sur grand écran, le badge
+// #header-airac reste affiché en permanence et on ne joue pas l'animation.
+function playStartAiracIntro() {
+  try {
+    if (!window.matchMedia || !window.matchMedia('(max-width:860px)').matches) return;
+    var lbl = document.getElementById('btn-start-label');
+    if (!lbl || lbl.dataset.airacIntroDone) return;
+    lbl.dataset.airacIntroDone = '1';
+    lbl.classList.add('bsl');
+    lbl.innerHTML = '<span>XML AIRAC 07/26</span>';
+    setTimeout(function () {
+      lbl.classList.remove('bsl');
+      lbl.textContent = 'START';
+    }, 3000);
+  } catch (e) {}
 }
 
 function doLogout() {
