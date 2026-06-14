@@ -635,6 +635,7 @@ canvas{display:block;max-width:100%;}
   #header-warn span{display:none;}
   #header-warn svg{margin:0;}
   #header-airac{padding:5px 8px;min-height:34px;font-size:9px;gap:4px;}
+  #header-airac .airac-label{display:none;}
 
   #avion-bar{padding:6px 10px;gap:5px;}
   .avion-btn{padding:5px 9px;font-size:11px;}
@@ -1486,10 +1487,10 @@ body.app-mode-perso .signup-link-wrap { display: none !important; }
   <div>
     <h1>App</h1>
   </div>
+  <div id="header-airac" title="Origine des données aérodromes / AIRAC utilisées">
+    <span class="airac-label">DONNÉES</span><span class="airac-val">XML AIRAC 07/26</span>
+  </div>
   <div id="header-right">
-    <div id="header-airac" title="Origine des données aérodromes / AIRAC utilisées">
-      <span class="airac-label">DONNÉES</span><span class="airac-val">XML AIRAC 07/26</span>
-    </div>
     <div id="header-warn">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
       <span class="header-warn-text"><span class="header-warn-marquee"><strong>Le CDB est responsable de ses calculs</strong> <span class="header-warn-sub" style="color:#a0aec0;font-size:9px;">· Manuel de Vol</span></span></span>
