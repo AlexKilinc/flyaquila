@@ -44,6 +44,13 @@
 }">
 
 <!-- iOS status bar plein écran — déjà défini dans le bloc PWA ci-dessus -->
+
+<!-- ▼▼▼ AJOUT (écran de connexion) : polices Google Fonts de la maquette ▼▼▼ -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<!-- ▲▲▲ FIN AJOUT polices ▲▲▲ -->
+
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}
@@ -52,7 +59,8 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e;mi
 
 /* ===== BANDEAU BLEU MARINE ===== */
 #header{
-  background:linear-gradient(135deg,#1a1a2e,#16213e);
+  /* Harmonisation palette : portion HAUTE du dégradé vertical de la page de connexion (#0B1C38 → #0A1A33) */
+  background:linear-gradient(180deg,#0B1C38,#0A1A33);
   border-bottom:3px solid #e94560;
   padding:8px 14px;display:flex;align-items:center;gap:10px;flex-wrap:nowrap;
 }
@@ -94,7 +102,8 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e;mi
 
 /* ===== BARRE AVION ===== */
 #avion-bar{
-  background:#16213e;border-bottom:1px solid #2d3748;
+  /* Harmonisation palette : navy medium de la palette login (#173159 → #0E2348), zone éclaircie/bleutée */
+  background:linear-gradient(180deg,#173159,#0E2348);border-bottom:1px solid #2d3748;
   padding:6px 14px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;
 }
 #avion-bar > label{font-size:12px;color:#a0aec0;flex-shrink:0;}
@@ -1125,6 +1134,84 @@ body.app-mode-perso .signup-link-wrap { display: none !important; }
   margin-top:14px; text-align:center;
   font-size:10px; color:#4a5568;
 }
+
+/* ▼▼▼ AJOUT (écran de connexion) : SKIN repris VERBATIM de la maquette ▼▼▼
+   Toutes les classes/ids/keyframes sont préfixés (lg-* / login-*) pour éviter
+   tout conflit avec le reste du fichier. AUCUNE logique d'auth n'est modifiée :
+   on ne change QUE l'apparence de #login-screen / #login-box. */
+#login-screen{
+  /* palette maquette (scopée au login pour ne pas toucher le :root de l'app) */
+  --lg-navy900:#081427; --lg-navy800:#0A1A33; --lg-line:#173159;
+  --lg-blue:#3A7BFF; --lg-blue-soft:#5B9BFF; --lg-red:#D0505C;
+  --lg-text:#EAF1FB; --lg-muted:#92A7C9;
+  background:
+    radial-gradient(120% 80% at 50% -10%, rgba(58,123,255,.22), transparent 55%),
+    linear-gradient(180deg,#0B1C38 0%, var(--lg-navy800) 45%, var(--lg-navy900) 100%);
+  align-items:center;
+}
+/* La maquette n'a pas de "carte" : conteneur transparent, centré, max 400px */
+#login-screen #login-box,
+#login-screen .login-card{
+  background:transparent; border:none; box-shadow:none; backdrop-filter:none;
+  width:100%; max-width:400px; padding:24px;
+  font-family:"Inter",system-ui,sans-serif; color:var(--lg-text);
+}
+@media (max-width:480px){
+  #login-screen #login-box,
+  #login-screen .login-card{ padding:16px; }
+}
+
+/* Marque : avion papier rouge + mot-symbole « Aquila-App » (tiret rouge) */
+.lg-brand{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:8px}
+.lg-brand svg{width:40px;height:27px}
+.lg-brand .lg-wm{font-family:"Space Mono",monospace;font-weight:700;letter-spacing:.26em;font-size:12px;text-transform:uppercase;color:var(--lg-text)}
+.lg-brand .lg-wm span{color:var(--lg-red)}
+
+/* Infographie centrale « horizon / hélice » */
+.lg-stage{position:relative;width:100%;height:170px;margin:6px 0 4px;display:flex;align-items:center;justify-content:center}
+.lg-hline{position:absolute;top:50%;left:50%;transform:translateX(-50%);width:200%;height:1px;
+  background:linear-gradient(90deg,transparent, var(--lg-line) 14%, var(--lg-line) 86%, transparent)}
+.lg-hticks{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:46px}
+.lg-tk{width:1.5px;height:16px;background:var(--lg-line)}
+.lg-ref{display:flex;align-items:center;gap:12px}
+.lg-bar{width:96px;height:6px;background:var(--lg-text);opacity:.7}
+.lg-prop{width:128px;height:128px;flex:none;display:flex;align-items:center;justify-content:center}
+.lg-prop svg{width:128px;height:128px;animation:lg-spin 2.6s linear infinite}
+@keyframes lg-spin{to{transform:rotate(360deg)}}
+
+/* Libellé + titre */
+.lg-kicker{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--lg-muted);margin-top:8px;text-align:center}
+.lg-title{font-family:"Space Grotesk",sans-serif;font-weight:500;font-size:26px;letter-spacing:-.01em;margin:6px 0 26px;text-align:center;color:var(--lg-text)}
+
+/* Champs : focus bleu accent */
+#login-screen .login-field label{font-family:"Inter",sans-serif;font-size:12px;font-weight:400;letter-spacing:.04em;color:var(--lg-muted);text-transform:none}
+#login-screen .login-field input{
+  background:rgba(13,33,66,.55); border:1px solid var(--lg-line); border-radius:11px;
+  padding:13px 15px; color:var(--lg-text); font-size:15px; font-family:inherit;
+  transition:border-color .2s, box-shadow .2s;
+}
+#login-screen .login-field input::placeholder{color:#5d728f}
+#login-screen .login-field input:focus{outline:none;border-color:var(--lg-blue);box-shadow:0 0 0 3px rgba(58,123,255,.18);background:rgba(13,33,66,.55)}
+
+/* Bouton « Se connecter » rouge/rose (dégradé maquette) */
+#login-screen #login-btn{
+  background:linear-gradient(180deg,#DC6571,#C2424F);
+  border:none; border-radius:11px; cursor:pointer;
+  font-family:"Space Grotesk",sans-serif; font-weight:500; font-size:15px; letter-spacing:.02em; color:#fff;
+  padding:14px; margin-top:6px; transition:transform .15s ease, filter .2s ease;
+}
+#login-screen #login-btn:hover{filter:brightness(1.06); opacity:1}
+#login-screen #login-btn:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(208,80,92,.35)}
+#login-screen #login-btn:active{transform:translateY(1px)}
+
+/* Lien « Créer un compte » rouge/rose */
+#login-screen .signup-link-wrap{color:var(--lg-muted)}
+#login-screen .signup-link-wrap a{color:#DE6E78}
+
+/* Animation désactivée si prefers-reduced-motion */
+@media (prefers-reduced-motion:reduce){#login-screen *{animation:none!important}}
+/* ▲▲▲ FIN AJOUT skin maquette ▲▲▲ */
+
 /* Cadres (fieldsets) Aérodrome Départ / Arrivée dans le header */
 .aero-group {
   /* Hack important : <fieldset> a un min-width:min-content par défaut sur Chrome/Safari
@@ -1166,11 +1253,37 @@ body.app-mode-perso .signup-link-wrap { display: none !important; }
 <!-- ===== ÉCRAN DE LOGIN ===== -->
 <div id="login-screen">
   <div id="login-box">
-    <div class="login-logo">
-      <span class="tag-club-wrap"><span class="tag">AQUILA</span><span class="tag-club-ribbon">Club</span></span>
-      <h2>AT01 — Préparation de vol</h2>
-      <div class="sub">Accès réservé — Pilote autorisé uniquement</div>
+    <!-- ▼▼▼ AJOUT (écran de connexion) : en-tête visuel repris VERBATIM de la maquette ▼▼▼ -->
+    <div class="lg-brand">
+      <svg viewBox="0 0 100 68.2" fill="none" aria-hidden="true">
+        <path d="M99.9 0 L0 27 L19.1 42.6 L85.3 8.2 L25.9 47.8 L25.9 67.4 L36.3 58.1 L48.7 68.1 Z" fill="#D0505C"/>
+      </svg>
+      <div class="lg-wm">Aquila<span>-</span>App</div>
     </div>
+
+    <div class="lg-stage" aria-hidden="true">
+      <div class="lg-hline"></div>
+      <div class="lg-hticks">
+        <span class="lg-tk"></span><span class="lg-tk"></span>
+        <span class="lg-ref">
+          <span class="lg-bar"></span>
+          <span class="lg-prop">
+            <svg viewBox="0 0 36 36" fill="none">
+              <circle cx="18" cy="18" r="11" stroke="#D0505C" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="16 18.6" opacity=".55"/>
+              <circle cx="18" cy="18" r="7" stroke="#D0505C" stroke-width="2" stroke-linecap="round" stroke-dasharray="9 13" opacity=".35" transform="rotate(42 18 18)"/>
+              <circle cx="18" cy="18" r="5" stroke="#D0505C" stroke-width="1.6" opacity=".2"/>
+              <circle cx="18" cy="18" r="3.1" fill="#D0505C"/>
+            </svg>
+          </span>
+          <span class="lg-bar"></span>
+        </span>
+        <span class="lg-tk"></span><span class="lg-tk"></span>
+      </div>
+    </div>
+
+    <div class="lg-kicker">Application de préparation de vol</div>
+    <h1 class="lg-title">Connexion</h1>
+    <!-- ▲▲▲ FIN AJOUT en-tête maquette ▲▲▲ -->
     <div class="login-field">
       <label>Adresse e-mail</label>
       <input type="email" id="login-email" placeholder="votre@email.com"
@@ -1194,7 +1307,8 @@ body.app-mode-perso .signup-link-wrap { display: none !important; }
         </button>
       </div>
     </div>
-    <button id="login-btn" onclick="doLogin()"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:7px"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4 19-7z"/></svg>Accéder à l'application</button>
+    <!-- ▼ AJOUT (écran de connexion) : libellé bouton de la maquette « Se connecter » (logique doLogin() inchangée) ▼ -->
+    <button id="login-btn" onclick="doLogin()">Se connecter</button>
     <div id="login-error">Identifiants incorrects — accès refusé</div>
     <div id="login-session-info">Session conservée sur cet appareil</div>
     <!-- Lien Créer un compte -->
