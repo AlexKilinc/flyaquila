@@ -44,13 +44,6 @@
 }">
 
 <!-- iOS status bar plein écran — déjà défini dans le bloc PWA ci-dessus -->
-
-<!-- ▼▼▼ AJOUT (écran de connexion) : polices Google Fonts de la maquette ▼▼▼ -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<!-- ▲▲▲ FIN AJOUT polices ▲▲▲ -->
-
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}
@@ -59,8 +52,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e;mi
 
 /* ===== BANDEAU BLEU MARINE ===== */
 #header{
-  /* Harmonisation palette : portion HAUTE du dégradé vertical de la page de connexion (#0B1C38 → #0A1A33) */
-  background:linear-gradient(180deg,#0B1C38,#0A1A33);
+  background:linear-gradient(135deg,#1a1a2e,#16213e);
   border-bottom:3px solid #e94560;
   padding:8px 14px;display:flex;align-items:center;gap:10px;flex-wrap:nowrap;
 }
@@ -102,8 +94,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e;mi
 
 /* ===== BARRE AVION ===== */
 #avion-bar{
-  /* Harmonisation palette : navy medium de la palette login (#173159 → #0E2348), zone éclaircie/bleutée */
-  background:linear-gradient(180deg,#173159,#0E2348);border-bottom:1px solid #2d3748;
+  background:#16213e;border-bottom:1px solid #2d3748;
   padding:6px 14px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;
 }
 #avion-bar > label{font-size:12px;color:#a0aec0;flex-shrink:0;}
@@ -1134,84 +1125,6 @@ body.app-mode-perso .signup-link-wrap { display: none !important; }
   margin-top:14px; text-align:center;
   font-size:10px; color:#4a5568;
 }
-
-/* ▼▼▼ AJOUT (écran de connexion) : SKIN repris VERBATIM de la maquette ▼▼▼
-   Toutes les classes/ids/keyframes sont préfixés (lg-* / login-*) pour éviter
-   tout conflit avec le reste du fichier. AUCUNE logique d'auth n'est modifiée :
-   on ne change QUE l'apparence de #login-screen / #login-box. */
-#login-screen{
-  /* palette maquette (scopée au login pour ne pas toucher le :root de l'app) */
-  --lg-navy900:#081427; --lg-navy800:#0A1A33; --lg-line:#173159;
-  --lg-blue:#3A7BFF; --lg-blue-soft:#5B9BFF; --lg-red:#D0505C;
-  --lg-text:#EAF1FB; --lg-muted:#92A7C9;
-  background:
-    radial-gradient(120% 80% at 50% -10%, rgba(58,123,255,.22), transparent 55%),
-    linear-gradient(180deg,#0B1C38 0%, var(--lg-navy800) 45%, var(--lg-navy900) 100%);
-  align-items:center;
-}
-/* La maquette n'a pas de "carte" : conteneur transparent, centré, max 400px */
-#login-screen #login-box,
-#login-screen .login-card{
-  background:transparent; border:none; box-shadow:none; backdrop-filter:none;
-  width:100%; max-width:400px; padding:24px;
-  font-family:"Inter",system-ui,sans-serif; color:var(--lg-text);
-}
-@media (max-width:480px){
-  #login-screen #login-box,
-  #login-screen .login-card{ padding:16px; }
-}
-
-/* Marque : avion papier rouge + mot-symbole « Aquila-App » (tiret rouge) */
-.lg-brand{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:8px}
-.lg-brand svg{width:40px;height:27px}
-.lg-brand .lg-wm{font-family:"Space Mono",monospace;font-weight:700;letter-spacing:.26em;font-size:12px;text-transform:uppercase;color:var(--lg-text)}
-.lg-brand .lg-wm span{color:var(--lg-red)}
-
-/* Infographie centrale « horizon / hélice » */
-.lg-stage{position:relative;width:100%;height:170px;margin:6px 0 4px;display:flex;align-items:center;justify-content:center}
-.lg-hline{position:absolute;top:50%;left:50%;transform:translateX(-50%);width:200%;height:1px;
-  background:linear-gradient(90deg,transparent, var(--lg-line) 14%, var(--lg-line) 86%, transparent)}
-.lg-hticks{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:46px}
-.lg-tk{width:1.5px;height:16px;background:var(--lg-line)}
-.lg-ref{display:flex;align-items:center;gap:12px}
-.lg-bar{width:96px;height:6px;background:var(--lg-text);opacity:.7}
-.lg-prop{width:128px;height:128px;flex:none;display:flex;align-items:center;justify-content:center}
-.lg-prop svg{width:128px;height:128px;animation:lg-spin 2.6s linear infinite}
-@keyframes lg-spin{to{transform:rotate(360deg)}}
-
-/* Libellé + titre */
-.lg-kicker{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--lg-muted);margin-top:8px;text-align:center}
-.lg-title{font-family:"Space Grotesk",sans-serif;font-weight:500;font-size:26px;letter-spacing:-.01em;margin:6px 0 26px;text-align:center;color:var(--lg-text)}
-
-/* Champs : focus bleu accent */
-#login-screen .login-field label{font-family:"Inter",sans-serif;font-size:12px;font-weight:400;letter-spacing:.04em;color:var(--lg-muted);text-transform:none}
-#login-screen .login-field input{
-  background:rgba(13,33,66,.55); border:1px solid var(--lg-line); border-radius:11px;
-  padding:13px 15px; color:var(--lg-text); font-size:15px; font-family:inherit;
-  transition:border-color .2s, box-shadow .2s;
-}
-#login-screen .login-field input::placeholder{color:#5d728f}
-#login-screen .login-field input:focus{outline:none;border-color:var(--lg-blue);box-shadow:0 0 0 3px rgba(58,123,255,.18);background:rgba(13,33,66,.55)}
-
-/* Bouton « Se connecter » rouge/rose (dégradé maquette) */
-#login-screen #login-btn{
-  background:linear-gradient(180deg,#DC6571,#C2424F);
-  border:none; border-radius:11px; cursor:pointer;
-  font-family:"Space Grotesk",sans-serif; font-weight:500; font-size:15px; letter-spacing:.02em; color:#fff;
-  padding:14px; margin-top:6px; transition:transform .15s ease, filter .2s ease;
-}
-#login-screen #login-btn:hover{filter:brightness(1.06); opacity:1}
-#login-screen #login-btn:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(208,80,92,.35)}
-#login-screen #login-btn:active{transform:translateY(1px)}
-
-/* Lien « Créer un compte » rouge/rose */
-#login-screen .signup-link-wrap{color:var(--lg-muted)}
-#login-screen .signup-link-wrap a{color:#DE6E78}
-
-/* Animation désactivée si prefers-reduced-motion */
-@media (prefers-reduced-motion:reduce){#login-screen *{animation:none!important}}
-/* ▲▲▲ FIN AJOUT skin maquette ▲▲▲ */
-
 /* Cadres (fieldsets) Aérodrome Départ / Arrivée dans le header */
 .aero-group {
   /* Hack important : <fieldset> a un min-width:min-content par défaut sur Chrome/Safari
@@ -1253,37 +1166,11 @@ body.app-mode-perso .signup-link-wrap { display: none !important; }
 <!-- ===== ÉCRAN DE LOGIN ===== -->
 <div id="login-screen">
   <div id="login-box">
-    <!-- ▼▼▼ AJOUT (écran de connexion) : en-tête visuel repris VERBATIM de la maquette ▼▼▼ -->
-    <div class="lg-brand">
-      <svg viewBox="0 0 100 68.2" fill="none" aria-hidden="true">
-        <path d="M99.9 0 L0 27 L19.1 42.6 L85.3 8.2 L25.9 47.8 L25.9 67.4 L36.3 58.1 L48.7 68.1 Z" fill="#D0505C"/>
-      </svg>
-      <div class="lg-wm">Aquila<span>-</span>App</div>
+    <div class="login-logo">
+      <span class="tag-club-wrap"><span class="tag">AQUILA</span><span class="tag-club-ribbon">Club</span></span>
+      <h2>AT01 — Préparation de vol</h2>
+      <div class="sub">Accès réservé — Pilote autorisé uniquement</div>
     </div>
-
-    <div class="lg-stage" aria-hidden="true">
-      <div class="lg-hline"></div>
-      <div class="lg-hticks">
-        <span class="lg-tk"></span><span class="lg-tk"></span>
-        <span class="lg-ref">
-          <span class="lg-bar"></span>
-          <span class="lg-prop">
-            <svg viewBox="0 0 36 36" fill="none">
-              <circle cx="18" cy="18" r="11" stroke="#D0505C" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="16 18.6" opacity=".55"/>
-              <circle cx="18" cy="18" r="7" stroke="#D0505C" stroke-width="2" stroke-linecap="round" stroke-dasharray="9 13" opacity=".35" transform="rotate(42 18 18)"/>
-              <circle cx="18" cy="18" r="5" stroke="#D0505C" stroke-width="1.6" opacity=".2"/>
-              <circle cx="18" cy="18" r="3.1" fill="#D0505C"/>
-            </svg>
-          </span>
-          <span class="lg-bar"></span>
-        </span>
-        <span class="lg-tk"></span><span class="lg-tk"></span>
-      </div>
-    </div>
-
-    <div class="lg-kicker">Application de préparation de vol</div>
-    <h1 class="lg-title">Connexion</h1>
-    <!-- ▲▲▲ FIN AJOUT en-tête maquette ▲▲▲ -->
     <div class="login-field">
       <label>Adresse e-mail</label>
       <input type="email" id="login-email" placeholder="votre@email.com"
@@ -1307,8 +1194,7 @@ body.app-mode-perso .signup-link-wrap { display: none !important; }
         </button>
       </div>
     </div>
-    <!-- ▼ AJOUT (écran de connexion) : libellé bouton de la maquette « Se connecter » (logique doLogin() inchangée) ▼ -->
-    <button id="login-btn" onclick="doLogin()">Se connecter</button>
+    <button id="login-btn" onclick="doLogin()"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:7px"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4 19-7z"/></svg>Accéder à l'application</button>
     <div id="login-error">Identifiants incorrects — accès refusé</div>
     <div id="login-session-info">Session conservée sur cet appareil</div>
     <!-- Lien Créer un compte -->
@@ -1612,7 +1498,7 @@ body.app-mode-perso .signup-link-wrap { display: none !important; }
     <h1>App</h1>
   </div>
   <div id="header-airac" title="Origine des données aérodromes / AIRAC utilisées">
-    <span class="airac-label">DONNÉES</span><span class="airac-val">XML AIRAC 07/26</span>
+    <span class="airac-label">DONNÉES</span><span class="airac-val">XML AIRAC 08/26</span>
   </div>
   <div id="header-right">
     <div id="header-warn">
@@ -3807,12 +3693,12 @@ function resetAerodromes() {
 }
 
 // ═══════════════════════════════════════════════════════
-// BASE AÉRODROMES FRANÇAIS — 434 aérodromes (AIRAC juillet 2026)
+// BASE AÉRODROMES FRANÇAIS — 435 aérodromes (AIRAC août 2026)
 // Champs : i=ICAO, s=Statut(CAP/RST/PRV), n=Nom, e=Altitude_ft,
 //          tc=Type_Contrôle, r=Radio_Principal,
 //          f=Fréquences par service avec horaires (ordre ATIS/SOL/TWR/APP/FIS/VDF/AFIS/A/A, si applicable),
 //          np=Nb_Pistes, dp=Détail_Pistes, tdp=Alt_Tour_de_Piste_ft (si dispo), c=Commune
-// Source : SIA / AIP France — AIRAC juillet 2026 (cycle 2026-07-09)
+// Source : SIA / AIP France — AIRAC août 2026 (cycle 2026-08-06)
 // ═══════════════════════════════════════════════════════
 const FR_AERODROMES = [
   {"i":"LF01","s":"PRV","n":"ALBE","e":0,"tc":"NIL","np":1,"dp":"08/26* (400m, revêtue)"},
@@ -4053,16 +3939,17 @@ const FR_AERODROMES = [
   {"i":"LFKG","s":"RST","n":"GHISONACCIA ALZITONE","e":177,"tc":"NIL","np":1,"dp":"18/36* (800m, revêtue)"},
   {"i":"LFKH","s":"RST","n":"SAINT JEAN D'AVELANNE","e":964,"tc":"NIL","np":1,"dp":"02/20* (407m, non revêtue)"},
   {"i":"LFKJ","s":"CAP","n":"AJACCIO NAPOLEON BONAPARTE","e":19,"tc":"TWR","r":"AJACCIO Tour","f":"ATIS 126.930 (H24) ; SOL 121.705 (H24) ; TWR 118.075 (H24) ; APP 121.050 (H24) / 127.780 (H24) ; FIS 119.825 (H24) ; VDF 118.075 (H24) / 121.050 (H24)","np":1,"dp":"02/20* (2300m, béton bitumineux)","c":"5 km Est d'Ajaccio / 5 km East of Ajaccio"},
+  {"i":"LFKK","s":"PRV","n":"MONTMEILLEUR","e":2992,"tc":"NIL","np":1,"dp":"09/27* (560m, non revêtue)"},
   {"i":"LFKL","s":"RST","n":"LYON BRINDAS","e":1040,"tc":"NIL","np":1,"dp":"01/19* (438m, non revêtue)"},
   {"i":"LFKM","s":"RST","n":"SAINT GALMIER","e":1269,"tc":"NIL","np":1,"dp":"16/34* (650m, non revêtue)"},
   {"i":"LFKO","s":"CAP","n":"PROPRIANO","e":16,"tc":"A/A","r":"PROPRIANO","f":"A/A 118.505 (HO)","np":1,"dp":"09/27* (1400m, revêtue)"},
   {"i":"LFKP","s":"RST","n":"LA TOUR DU PIN CESSIEU","e":1055,"tc":"A/A","r":"LA TOUR DU PIN","f":"A/A 119.615 (HX)","np":1,"dp":"11/29* (586m, non revêtue)"},
-  {"i":"LFKR","s":"RST","n":"SAINT REMY DE MAURIENNE","e":1399,"tc":"NIL","np":1,"dp":"16/34* (757m, non revêtue)"},
+  {"i":"LFKR","s":"RST","n":"SAINT REMY DE MAURIENNE","e":1399,"tc":"NIL","np":1,"dp":"16/34* (847m, non revêtue)"},
   {"i":"LFKT","s":"CAP","n":"CORTE","e":1130,"tc":"NIL","np":1,"dp":"12/30* (950m, revêtue)"},
   {"i":"LFKX","s":"RST","n":"MERIBEL ROBERT MERLOZ","e":5639,"tc":"A/A","r":"MERIBEL","f":"A/A 118.755 (HX)","np":1,"dp":"15/33* (406m, revêtue)","c":"(9.5 Km SSE de Moutiers) / LES ALLUES-73"},
   {"i":"LFKY","s":"RST","n":"BELLEY-PEYRIEU","e":739,"tc":"NIL","np":1,"dp":"18/36* (638m, non revêtue)"},
   {"i":"LFLA","s":"CAP","n":"AUXERRE BRANCHES","e":523,"tc":"AFIS","r":"AUXERRE Information","f":"AFIS 129.805 (HO) ; A/A 129.805 (HX)","np":1,"dp":"18/36* (1650m, revêtue)","c":"8,5 km NW Auxerre"},
-  {"i":"LFLB","s":"CAP","n":"CHAMBERY AIX LES BAINS","e":779,"tc":"TWR","r":"CHAMBERY Tour","f":"ATIS 127.100 (HO) ; TWR 118.300 (HO) ; APP 123.700 (HO) / 121.205 (HO) ; FIS 123.700 (HO) ; A/A 123.700 (HX)","np":2,"dp":"18/36* (2020m, macadam) ; 18L/36R (700m, gazon)","c":"4,5 NM NNW CHAMBERY / 3,5 NM SSW AIX LES BAINS"},
+  {"i":"LFLB","s":"CAP","n":"CHAMBERY AIX LES BAINS","e":779,"tc":"TWR","r":"CHAMBERY Tour","f":"ATIS 127.100 (HO) ; TWR 118.305 (HO) ; APP 123.705 (HO) / 121.205 (HO) ; FIS 123.705 (HO) ; A/A 123.705 (HX)","np":2,"dp":"18/36* (2020m, béton bitumineux) ; 18L/36R (700m, gazon)","c":"4,5 NM NNW CHAMBERY / 3,5 NM SSW AIX LES BAINS"},
   {"i":"LFLC","s":"CAP","n":"CLERMONT FERRAND AUVERGNE","e":1092,"tc":"TWR","r":"CLERMONT Tour","f":"ATIS 136.405 (H24) ; SOL 121.950 (H24) ; TWR 118.625 (H24) ; APP 122.225 (H24) / 133.725 (H24) ; FIS 119.375 (H24) / 133.725 (H24) ; VDF 118.625 (H24) / 122.225 (H24)","np":3,"dp":"08/26* (3013m, revêtue) ; 01/19 (645m, gazon) ; 08L/26R (909m, gazon)","c":"6.7 km E CLERMONT FERRAND"},
   {"i":"LFLD","s":"CAP","n":"BOURGES","e":529,"tc":"AFIS","r":"BOURGES Information","f":"AFIS 119.605 (HO) ; A/A 119.605 (HX)","np":2,"dp":"06/24* (1550m, revêtue) ; 06R/24L (915m, non revêtue)","c":"3 km SW Bourges"},
   {"i":"LFLE","s":"CAP","n":"CHAMBERY CHALLES LES EAUX","e":973,"tc":"A/A","r":"CHALLES","f":"A/A 118.405 (HX)","np":2,"dp":"14L/32R (890m, non revêtue) ; 14/32* (990m, revêtue)","c":"4 km ESE de Chambéry (73 - Savoie)"},
@@ -4074,10 +3961,10 @@ const FR_AERODROMES = [
   {"i":"LFLM","s":"CAP","n":"MACON CHARNAY","e":729,"tc":"A/A","r":"MACON","f":"A/A 119.005 (HO)","np":1,"dp":"17/35* (1230m, revêtue)"},
   {"i":"LFLN","s":"CAP","n":"SAINT YAN","e":797,"tc":"TWR","r":"SAINT YAN Tour","f":"ATIS 132.480 (HO) ; SOL 121.805 (HO) ; TWR 122.300 (HO) ; APP 123.405 (HO) / 119.505 (HO) ; VDF 123.405 (HO) / 119.505 (HO)","np":3,"dp":"15L/33R* (2034m, revêtue) ; 15R/33L (1200m, revêtue) ; 15/33 (720m, non revêtue)","c":"1 km W Saint-Yan"},
   {"i":"LFLO","s":"CAP","n":"ROANNE","e":1106,"tc":"AFIS","r":"ROANNE Information","f":"AFIS 120.905 (HO)","np":2,"dp":"01/19* (1450m, revêtue) ; 01L/19R (740m, non revêtue)","c":"7 km WNW Roanne"},
-  {"i":"LFLP","s":"CAP","n":"ANNECY MEYTHET","e":1521,"tc":"TWR","r":"ANNECY Tour","f":"TWR 118.200 (HO) ; AFIS 118.200 (NOTAM) ; A/A 118.200 (HX)","np":2,"dp":"04/22* (1630m, revêtue) ; 04R/22L (845m, non revêtue)","c":"3,5 km NW Annecy"},
+  {"i":"LFLP","s":"CAP","n":"ANNECY MEYTHET","e":1521,"tc":"TWR","r":"ANNECY Tour","f":"SOL 121.730 (HO) ; TWR 118.205 (HO) ; AFIS 118.205 (NOTAM) ; A/A 118.205 (HX)","np":2,"dp":"04/22* (1630m, revêtue) ; 04R/22L (845m, non revêtue)","c":"3,5 km NW Annecy"},
   {"i":"LFLQ","s":"CAP","n":"MONTELIMAR ANCONE","e":241,"tc":"A/A","r":"MONTELIMAR","f":"A/A 119.885 (HX)","np":1,"dp":"02/20* (1200m, non revêtue)"},
   {"i":"LFLR","s":"CAP","n":"SAINT RAMBERT D'ALBON","e":509,"tc":"A/A","r":"SAINT RAMBERT","f":"A/A 119.510 (HX)","np":2,"dp":"01R/19L (900m, non revêtue) ; 01L/19R* (900m, non revêtue)"},
-  {"i":"LFLS","s":"CAP","n":"GRENOBLE ALPES ISERE","e":1302,"tc":"TWR","r":"GRENOBLE Tour","f":"ATIS 133.855 (HO) ; SOL 121.930 (HO) ; TWR 119.300 (HO) ; VDF 119.300 (HO)","np":2,"dp":"09/27* (3050m, asphalte) ; 09R/27L (900m, gazon)","c":"2.5 km NNW Saint Etienne de Saint Geoirs"},
+  {"i":"LFLS","s":"CAP","n":"GRENOBLE ALPES ISERE","e":1302,"tc":"TWR","r":"GRENOBLE Tour","f":"ATIS 133.855 (HO) ; SOL 121.930 (HO) ; TWR 119.305 (HO) ; VDF 119.305 (HO)","np":2,"dp":"09/27* (3050m, béton bitumineux) ; 09R/27L (900m, gazon)","c":"2.5 km NNW Saint Etienne de Saint Geoirs"},
   {"i":"LFLT","s":"RST","n":"MONTLUCON DOMERAT","e":771,"tc":"NIL","np":1,"dp":"11/29* (1000m, revêtue)"},
   {"i":"LFLU","s":"CAP","n":"VALENCE CHABEUIL","e":525,"tc":"AFIS","r":"VALENCE Information","f":"AFIS 120.105 (HO)","np":3,"dp":"01/19* (2100m, revêtue) ; 01L/19R (1190m, non revêtue) ; 01R/19L (400m, non revêtue)","c":"5 km ESE-Valence"},
   {"i":"LFLV","s":"CAP","n":"VICHY CHARMEIL","e":817,"tc":"AFIS","r":"VICHY Information","f":"AFIS 121.405 (HO) ; A/A 121.405 (HX)","np":1,"dp":"01/19* (2200m, revêtue)","c":"5 km NNW Vichy"},
@@ -4214,7 +4101,7 @@ const FR_AERODROMES = [
   {"i":"LFRW","s":"RST","n":"AVRANCHES LE VAL SAINT PERE","e":25,"tc":"A/A","r":"AVRANCHES","f":"A/A 119.785 (HX)","np":2,"dp":"03/21* (880m, non revêtue) ; 14/32 (550m, non revêtue)","c":"3 km SW Avranches (50 - Manche)"},
   {"i":"LFRZ","s":"CAP","n":"SAINT NAZAIRE MONTOIR","e":13,"tc":"TWR","r":"SAINT NAZAIRE Tour","f":"TWR 118.950 (HO) ; A/A 118.950 (HO)","np":1,"dp":"07/25* (2405m, revêtue)","c":"6,9 Km NE de la ville de St Nazaire / 6.9km NE St NAZAIRE"},
   {"i":"LFSA","s":"CAP","n":"BESANCON THISE","e":807,"tc":"NIL","np":2,"dp":"06R/24L (875m, non revêtue) ; 06L/24R* (875m, non revêtue)"},
-  {"i":"LFSB","s":"CAP","n":"BALE-MULHOUSE","e":885,"tc":"TWR","r":"BALE Tour","f":"ATIS 127.880 (H24) ; SOL 121.605 (H24) ; TWR 118.300 (H24) / 129.250 (H24) ; APP 125.415 (H24) / 129.250 (H24) ; FIS 134.680 (H24) / 135.850 (H24) ; VDF 133.510 (H24) / 118.300 (H24)","np":2,"dp":"15/33* (3900m, béton) ; 07/25 (1860m, béton)","c":"6 km NW de BÂLE, 22 km SE de MULHOUSE"},
+  {"i":"LFSB","s":"CAP","n":"BALE-MULHOUSE","e":885,"tc":"TWR","r":"BALE Tour","f":"ATIS 127.880 (H24) ; SOL 121.605 (H24) ; TWR 118.305 (H24) / 129.250 (H24) ; APP 125.415 (H24) / 129.250 (H24) ; FIS 134.680 (H24) / 135.855 (H24) ; VDF 133.510 (H24) / 118.305 (H24)","np":2,"dp":"15/33* (3900m, béton) ; 07/25 (1860m, béton)","c":"6 km NW de BÂLE, 22 km SE de MULHOUSE"},
   {"i":"LFSD","s":"CAP","n":"DIJON-LONGVIC","e":728,"tc":"AFIS","r":"DIJON Information","f":"AFIS 118.330 (HO) ; A/A 118.330 (HX)","np":2,"dp":"01/19 (1200m, béton bitumineux) ; 17/35* (2400m, béton bitumineux)","c":"6 km SE de DIJON (21-COTE D'OR) / 6 km SE away from DIJON (21-COTE D'OR)"},
   {"i":"LFSE","s":"CAP","n":"EPINAL DOGNEVILLE","e":1041,"tc":"NIL","np":1,"dp":"02/20* (710m, non revêtue)"},
   {"i":"LFSG","s":"CAP","n":"EPINAL MIRECOURT","e":1084,"tc":"AFIS","r":"EPINAL Information","f":"AFIS 120.205 (HO)","np":1,"dp":"08/26* (2700m, revêtue)","c":"31 km NW Epinal"},
@@ -6465,7 +6352,7 @@ CHART_MONTEE.src = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX
 // === CALIBRATION DU NOMOGRAMME DE MONTEE (figee suite a calibrage 20 clics) ===
 // Cas de validation : 20°C / 2100 ft / 700 kg → 640 ft/min (avec recalibrage panel 1)
 // Calibration effectuee via outil "Calibrage complet panel 2 (20 clics)" sur le PDF
-// AIRAC juillet 2026 (Aquila AT01).
+// AIRAC août 2026 (Aquila AT01).
 // IMPORTANT : la pente du panel 2 est la VRAIE pente geometrique des iso (-0.3565 px/px)
 // pour que le trace soit toujours parallele aux iso a tous les regimes (alt basse,
 // T° negative, masse faible, etc.). Le panel 1 (courbes d'altitude) doit etre
@@ -12254,7 +12141,7 @@ function playStartAiracIntro() {
     lbl.dataset.airacIntroDone = '1';
     if (btn) btn.classList.add('intro');
     lbl.classList.add('bsl');
-    lbl.innerHTML = '<span>XML AIRAC 07/26</span>';
+    lbl.innerHTML = '<span>XML AIRAC 08/26</span>';
     setTimeout(function () {
       if (btn) btn.classList.remove('intro');
       lbl.classList.remove('bsl');
