@@ -3,6 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<script>
+// iOS : empêche le zoom automatique au focus des champs (déclenché par les
+// polices < 16px), qui persistait ensuite dans l'app. maximum-scale est
+// ajouté seulement sur iOS : Safari l'ignore pour le pincement manuel
+// (accessibilité préservée) mais il neutralise le zoom au focus. On ne
+// l'applique pas ailleurs — sur Android il bloquerait le zoom par pincement.
+(function(){
+  var ios = /iPhone|iPad|iPod/.test(navigator.userAgent) ||
+            (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (!ios) return;
+  var vp = document.querySelector('meta[name="viewport"]');
+  if (vp) vp.setAttribute('content', vp.getAttribute('content') + ', maximum-scale=1.0');
+})();
+</script>
 <title>AQUILA AT01 — Préparation de vol</title>
 
 <!-- PWA / Mobile web app -->
