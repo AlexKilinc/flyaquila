@@ -1271,8 +1271,7 @@ body.app-mode-perso .signup-link-wrap { display: none !important; }
     <div class="login-head">
       <div class="eyebrow">Page de connexion</div>
       <h1>Aquila App<span class="h1-line2">Préparation Vol</span></h1>
-      <p class="sub">Accédez à votre application Aquila&nbsp;App.<br>
-        <span style="font-size:11.5px;color:#5b7099;">Accès réservé — Pilote autorisé uniquement</span></p>
+      <p class="sub"><span style="font-size:11.5px;color:#5b7099;">Accès réservé — Pilote autorisé uniquement</span></p>
     </div>
     <div class="login-field">
       <label>Adresse e-mail</label>
@@ -12321,7 +12320,9 @@ function doLogout() {
     if(on || !loginVisible()) return;
     if(!ctx) ctx=new (window.AudioContext||window.webkitAudioContext)();
     const run=()=>{
+      if(on) return true;                 // déjà lancé par un geste précédent
       if(ctx.state!=='running') return false;
+      autoArmed=false; removeGestures();  // le son démarre : désarmement effectif
       nodes=build(ctx);
       const t=ctx.currentTime, g=nodes.master.gain;
       g.cancelScheduledValues(t);
@@ -12360,11 +12361,17 @@ function doLogout() {
   function toggle(){ autoArmed=false; removeGestures(); on ? stop() : start(); }
   btn.addEventListener('click', toggle);
 
-  // Lecture au lancement ; repli sur la 1re interaction (autoplay souvent bloqué)
-  function autoStart(){ if(!autoArmed || !loginVisible()) return; autoArmed=false; removeGestures(); start(); }
+  // Lecture au lancement ; repli sur la 1re interaction (autoplay souvent bloqué).
+  // Sur iOS/WebKit, touchstart et pointerdown n'accordent PAS l'activation
+  // utilisateur pour l'audio (seuls touchend/click/keydown comptent) et un
+  // resume() lancé hors geste valide reste suspendu pour toujours. On écoute
+  // donc aussi touchend et click, et on ne désarme qu'une fois le son
+  // réellement démarré (dans run()), pas au premier événement reçu.
+  const GESTURE_EVTS=['pointerdown','keydown','touchstart','touchend','click'];
+  function autoStart(){ if(!autoArmed || !loginVisible()) return; start(); }
   function onGesture(e){ if(btn.contains(e.target)) return; autoStart(); }
-  function removeGestures(){ ['pointerdown','keydown','touchstart'].forEach(ev=>window.removeEventListener(ev,onGesture,true)); }
-  function armGestures(){ ['pointerdown','keydown','touchstart'].forEach(ev=>window.addEventListener(ev,onGesture,true)); }
+  function removeGestures(){ GESTURE_EVTS.forEach(ev=>window.removeEventListener(ev,onGesture,true)); }
+  function armGestures(){ GESTURE_EVTS.forEach(ev=>window.addEventListener(ev,onGesture,true)); }
   let booted=false;
   function bootAudio(){
     if(booted) return;
