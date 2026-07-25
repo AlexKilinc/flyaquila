@@ -12361,15 +12361,27 @@ function doLogout() {
   function onGesture(e){ if(btn.contains(e.target)) return; autoStart(); }
   function removeGestures(){ ['pointerdown','keydown','touchstart'].forEach(ev=>window.removeEventListener(ev,onGesture,true)); }
   function armGestures(){ ['pointerdown','keydown','touchstart'].forEach(ev=>window.addEventListener(ev,onGesture,true)); }
+  let booted=false;
   function bootAudio(){
+    if(booted) return;
     if(!loginVisible()){ autoArmed=false; return; }   // session restaurée → pas de son
+    booted=true;
     if(!ctx) ctx=new (window.AudioContext||window.webkitAudioContext)();
     armGestures();
     ctx.resume().then(()=>{ if(ctx.state==='running') autoStart(); }).catch(()=>{});
   }
-  window.addEventListener('load', bootAudio);
+  // Armement au plus tôt : « load » peut arriver très tard (polices externes
+  // lentes) et les gestes faits avant restaient perdus — sur ordi on avait le
+  // temps de se connecter sans jamais entendre le son. Sans session mémorisée,
+  // l'écran de connexion est certain : on arme immédiatement. Avec une session
+  // mémorisée, la vérification async tranche et rappelle boot() si elle
+  // aboutit quand même à l'écran de connexion.
+  let savedSession=false;
+  try{ const s=JSON.parse(localStorage.getItem(LS_AUTH)||'null'); savedSession=!!(s&&(s.email||s.ok)); }catch(e){}
+  if(!savedSession) bootAudio();
+  window.addEventListener('load', bootAudio);   // filet de sécurité (comportement historique)
 
-  window._propSound = { stop: stop };
+  window._propSound = { stop: stop, boot: bootAudio };
 })();
 
 // ── Profil utilisateur (modale) ──
@@ -12467,6 +12479,7 @@ async function requestAccountDeletion() {
         if (user.status === 'pending') {
           _pendingUser = { email: user.email, name: user.name, club: user.club || '', phone: user.phone || '', role: user.role || 'pilote', quals: user.quals || [] };
           document.getElementById('login-screen').style.display = 'flex';
+          try{ window._propSound && window._propSound.boot(); }catch(e){}
           showPending();
           return;
         }
@@ -12495,6 +12508,7 @@ async function requestAccountDeletion() {
   const emailInput = document.getElementById('login-email');
   if (emailInput) emailInput.value = '';
   document.getElementById('login-screen').style.display = 'flex';
+  try{ window._propSound && window._propSound.boot(); }catch(e){}
 })();
 </script>
 
