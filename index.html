@@ -1046,10 +1046,13 @@ canvas{display:block;max-width:100%;}
   box-sizing: border-box;
 }
 .login-wrap{
-  width:100%;max-width:440px;margin:0 auto;
+  width:100%;max-width:410px;margin:0 auto;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   text-align:center;
+  transition:max-width .25s ease;
 }
+/* Vues larges (création de compte, réinitialisation) : tous les libellés sur une ligne */
+.login-wrap.wide{max-width:560px;}
 #login-box, .login-card {
   width:100%;
   padding:28px 26px 26px;
@@ -1177,25 +1180,48 @@ body.app-mode-perso .signup-link-wrap { display: none !important; }
 .login-field {
   margin-bottom:16px;
 }
+/* Paires de champs côte à côte ; s'empilent sur petit écran */
+.login-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.login-row .login-field{min-width:0;}
+@media (max-width:480px){
+  .login-row{grid-template-columns:1fr;}
+}
 .login-field label {
   display:block; font-family:"Space Mono",monospace; font-size:11px;
   letter-spacing:.2em; text-transform:uppercase; color:#92A7C9;
   margin-bottom:8px; font-weight:400;
+  white-space:nowrap;
 }
-.login-field input {
-  width:100%; padding:13px 14px;
+/* Contrôles uniformes : même hauteur, fond, bordure, rayon et focus.
+   Police 16px minimum : indispensable pour empêcher le zoom iOS au focus. */
+.login-field input, .login-field select {
+  width:100%; height:42px; padding:0 14px;
   background:rgba(8,20,39,.55);
   border:1px solid #173159;
   border-radius:11px; color:#EAF1FB;
-  font-family:"Inter",'Segoe UI',sans-serif; font-size:15px;
+  font-family:"Inter",'Segoe UI',sans-serif; font-size:16px;
   outline:none; transition:border-color .2s ease, box-shadow .2s ease;
   box-sizing:border-box;
 }
+.login-field select {
+  appearance:none;-webkit-appearance:none;-moz-appearance:none;
+  padding-right:38px; cursor:pointer;
+  background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2392A7C9' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 12px center;
+}
+.login-field select:invalid { color:#5b7099; }
+.login-field select option { background:#0E2348; color:#EAF1FB; }
 .login-field input::placeholder { color:#5b7099; }
-.login-field input:focus {
+.login-field input:focus, .login-field select:focus {
   border-color:#3A7BFF;
   box-shadow:0 0 0 3px rgba(58,123,255,.18);
 }
+/* Lien discret « Mot de passe oublié ? » */
+.forgot-link{
+  color:#7f95bb; font-size:12px; text-decoration:underline dotted;
+  text-underline-offset:3px; cursor:pointer;
+}
+.forgot-link:hover{color:#a9bcdd;}
 #login-btn {
   width:100%; margin-top:6px; padding:14px;
   border:none; border-radius:11px;
@@ -1289,13 +1315,13 @@ body.app-mode-perso .signup-link-wrap { display: none !important; }
     </div>
     <div class="login-field">
       <label>Adresse e-mail</label>
-      <input type="email" id="login-email" placeholder="votre@email.com"
+      <input type="email" id="login-email" placeholder="votre@email.com" required
         onkeydown="if(event.key==='Enter')document.getElementById('login-pwd').focus()">
     </div>
     <div class="login-field">
       <label>Mot de passe</label>
       <div style="position:relative;">
-        <input type="password" id="login-pwd" placeholder="••••••••"
+        <input type="password" id="login-pwd" placeholder="••••••••" required
           style="padding-right:42px;"
           onkeydown="if(event.key==='Enter')doLogin()">
         <button type="button" id="login-pwd-toggle" onclick="toggleLoginPwd()"
@@ -1312,12 +1338,16 @@ body.app-mode-perso .signup-link-wrap { display: none !important; }
     </div>
     <button id="login-btn" onclick="doLogin()">Se connecter</button>
     <div id="login-error">Identifiants incorrects — accès refusé</div>
-    <div id="login-session-info">Session conservée sur cet appareil</div>
+    <!-- Lien Mot de passe oublié -->
+    <div style="text-align:center;margin-top:12px;">
+      <a href="#" class="forgot-link" onclick="event.preventDefault();showReset()">Mot de passe oublié ?</a>
+    </div>
     <!-- Lien Créer un compte -->
-    <div class="signup-link-wrap" style="text-align:center;margin-top:14px;font-size:12px;color:#a0aec0;">
+    <div class="signup-link-wrap" style="text-align:center;margin-top:12px;font-size:12px;color:#a0aec0;">
       Pas encore de compte ?
       <a href="#" onclick="event.preventDefault();showSignup()" style="color:#e94560;text-decoration:none;font-weight:700;margin-left:4px;">Créer un compte</a>
     </div>
+    <div id="login-session-info">Session conservée sur cet appareil</div>
   </div>
 
   <!-- ───────── Formulaire de création de compte ───────── -->
@@ -1327,67 +1357,55 @@ body.app-mode-perso .signup-link-wrap { display: none !important; }
       <h2>Créer un compte</h2>
       <div class="sub">Inscription pilote — Compte utilisateur</div>
     </div>
-    <div class="login-field">
-      <label>Prénom & Nom</label>
-      <input type="text" id="signup-name" placeholder="Jean Dupont"
-        onkeydown="if(event.key==='Enter')document.getElementById('signup-club').focus()">
+    <!-- Ligne 1 : Prénom | Nom -->
+    <div class="login-row">
+      <div class="login-field">
+        <label>Prénom</label>
+        <input type="text" id="signup-firstname" placeholder="Jean" required
+          onkeydown="if(event.key==='Enter')document.getElementById('signup-lastname').focus()">
+      </div>
+      <div class="login-field">
+        <label>Nom</label>
+        <input type="text" id="signup-lastname" placeholder="Dupont" required
+          onkeydown="if(event.key==='Enter')document.getElementById('signup-email').focus()">
+      </div>
     </div>
+    <!-- Ligne 2 : E-mail pleine largeur -->
     <div class="login-field">
-      <label>Aéroclub</label>
-      <input type="text" id="signup-club" placeholder="Aéroclub de Vincennes"
+      <label>E-mail</label>
+      <input type="email" id="signup-email" placeholder="votre@email.com" required
         onkeydown="if(event.key==='Enter')document.getElementById('signup-phone').focus()">
     </div>
-    <div class="login-field">
-      <label>Numéro de téléphone (international)</label>
-      <input type="tel" id="signup-phone" placeholder="+33 6 12 34 56 78"
-        onkeydown="if(event.key==='Enter')document.getElementById('signup-email').focus()">
-      <div style="font-size:10px;color:#a0aec0;margin-top:4px;">Format avec code pays, ex&nbsp;: +33 6 12 34 56 78</div>
-    </div>
-    <!-- Statut pilote : Élève / Pilote breveté + qualifications conditionnelles -->
-    <div class="login-field">
-      <label>Statut</label>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px;">
-        <label class="status-radio" style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.18);padding:8px 10px;border-radius:6px;cursor:pointer;font-size:13px;color:#fff;font-weight:600;">
-          <input type="radio" name="signup-status" value="eleve" id="signup-status-eleve" onchange="_onSignupStatusChange()" style="accent-color:#e94560;width:14px;height:14px;flex-shrink:0;margin:0;">
-          <!-- Icône casquette graduation flat (blanc) -->
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="#fff" style="flex-shrink:0;"><path d="M22 10L12 4 2 10l10 6 10-6z"/><path d="M6 12v5l6 3 6-3v-5" opacity=".55"/></svg>
-          Élève
-        </label>
-        <label class="status-radio" style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.18);padding:8px 10px;border-radius:6px;cursor:pointer;font-size:13px;color:#fff;font-weight:600;">
-          <input type="radio" name="signup-status" value="pilote" id="signup-status-pilote" onchange="_onSignupStatusChange()" style="accent-color:#e94560;width:14px;height:14px;flex-shrink:0;margin:0;">
-          <!-- Icône avion flat (blanc) -->
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="#fff" style="flex-shrink:0;"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>
-          Pilote
-        </label>
+    <!-- Ligne 3 : Téléphone | Statut -->
+    <div class="login-row">
+      <div class="login-field">
+        <label>Téléphone</label>
+        <input type="tel" id="signup-phone" placeholder="+33 6 12 34 56 78" required
+          onkeydown="if(event.key==='Enter')document.getElementById('signup-club').focus()">
       </div>
-      <!-- Qualifications additionnelles : visibles uniquement pour Pilote breveté -->
-      <div id="signup-quals-wrap" style="display:none;margin-top:6px;padding:8px 10px;background:rgba(56,107,178,0.12);border:1px solid rgba(56,107,178,0.35);border-radius:6px;">
-        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
-          <span style="font-size:9px;color:#90cdf4;text-transform:uppercase;letter-spacing:.6px;font-weight:700;flex-shrink:0;">Qualifs <span style="color:#718096;font-weight:600;font-size:8px;text-transform:none;letter-spacing:0;">(facultatif)</span> :</span>
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:#fff;font-weight:600;">
-            <input type="checkbox" id="signup-qual-fi" style="accent-color:#3182ce;width:14px;height:14px;flex-shrink:0;margin:0;">
-            <!-- Étoile pleine flat (blanc) -->
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="#fff" style="flex-shrink:0;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            FI
-          </label>
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:#fff;font-weight:600;">
-            <input type="checkbox" id="signup-qual-fe" style="accent-color:#3182ce;width:14px;height:14px;flex-shrink:0;margin:0;">
-            <!-- Médaille flat simple (un cercle avec ruban en V) (blanc) -->
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="#fff" style="flex-shrink:0;"><path d="M7 3l3 6.5L7 9 3 11l4-8z" opacity=".75"/><path d="M17 3l-3 6.5L17 9l4 2-4-8z" opacity=".75"/><circle cx="12" cy="15" r="6"/><circle cx="12" cy="15" r="3" fill="#1a1a2e"/></svg>
-            FE
-          </label>
-        </div>
+      <div class="login-field">
+        <label for="signup-status">Statut</label>
+        <select id="signup-status" required>
+          <option value="" disabled selected>— Choisir —</option>
+          <option value="eleve">Élève pilote</option>
+          <option value="pilote">Pilote breveté</option>
+          <option value="pilote-fi">Pilote-FI</option>
+        </select>
       </div>
     </div>
+    <div style="font-size:10px;color:#a0aec0;margin:-8px 0 12px;">Format avec code pays, ex&nbsp;: +33 6 12 34 56 78</div>
+    <!-- Ligne 4 : Aéroclub pleine largeur (libellé long : jamais en colonne) -->
     <div class="login-field">
-      <label>Adresse e-mail</label>
-      <input type="email" id="signup-email" placeholder="votre@email.com"
+      <label>Aéroclub</label>
+      <input type="text" id="signup-club" placeholder="Aéroclub de Vincennes" required
         onkeydown="if(event.key==='Enter')document.getElementById('signup-pwd').focus()">
     </div>
+    <!-- Ligne 5 : Mot de passe | Confirmer -->
+    <div class="login-row">
     <div class="login-field">
-      <label>Mot de passe (min. 6 caractères)</label>
+      <label>Mot de passe</label>
       <div style="position:relative;">
-        <input type="password" id="signup-pwd" placeholder="••••••••"
+        <input type="password" id="signup-pwd" placeholder="min. 6 caractères" required
           style="padding-right:42px;"
           onkeydown="if(event.key==='Enter')document.getElementById('signup-pwd2').focus()">
         <button type="button" onclick="toggleSignupPwd('signup-pwd','signup-pwd-eye-show','signup-pwd-eye-hide')"
@@ -1400,9 +1418,9 @@ body.app-mode-perso .signup-link-wrap { display: none !important; }
       </div>
     </div>
     <div class="login-field">
-      <label>Confirmer le mot de passe</label>
+      <label>Confirmer</label>
       <div style="position:relative;">
-        <input type="password" id="signup-pwd2" placeholder="••••••••"
+        <input type="password" id="signup-pwd2" placeholder="••••••••" required
           style="padding-right:42px;"
           onkeydown="if(event.key==='Enter')document.getElementById('signup-captcha').focus()">
         <button type="button" onclick="toggleSignupPwd('signup-pwd2','signup-pwd2-eye-show','signup-pwd2-eye-hide')"
@@ -1414,10 +1432,15 @@ body.app-mode-perso .signup-link-wrap { display: none !important; }
         </button>
       </div>
     </div>
-    <!-- Captcha mathématique anti-spam -->
+    </div><!-- /login-row mots de passe -->
+    <!-- Anti-spam : calcul mental simple + bouton pour tirer un autre calcul -->
     <div class="login-field">
-      <label>Anti-spam — <span id="signup-captcha-q" style="color:#fff;font-weight:800;white-space:nowrap;">…</span></label>
-      <input type="number" id="signup-captcha" placeholder="Réponse"
+      <label style="display:flex;align-items:center;gap:8px;">
+        <span>Anti-spam — Calcul&nbsp;: <span id="signup-captcha-q" style="color:#fff;font-weight:800;white-space:nowrap;">…</span></span>
+        <button type="button" onclick="_generateCaptcha(true)" title="Autre calcul" aria-label="Tirer un autre calcul"
+          style="background:transparent;border:1px solid #173159;border-radius:7px;color:#92A7C9;cursor:pointer;font-size:13px;line-height:1;padding:4px 8px;flex-shrink:0;">↻</button>
+      </label>
+      <input type="text" inputmode="numeric" pattern="[0-9]*" id="signup-captcha" placeholder="résultat" required
         onkeydown="if(event.key==='Enter')doSignup()">
     </div>
     <!-- Consentement RGPD -->
@@ -1436,6 +1459,60 @@ body.app-mode-perso .signup-link-wrap { display: none !important; }
     <div style="text-align:center;margin-top:14px;font-size:12px;color:#a0aec0;">
       Déjà un compte ?
       <a href="#" onclick="event.preventDefault();showLogin()" style="color:#e94560;text-decoration:none;font-weight:700;margin-left:4px;">Se connecter</a>
+    </div>
+  </div>
+
+  <!-- ───────── Réinitialisation du mot de passe ───────── -->
+  <div class="login-card" id="reset-card" style="display:none;">
+    <div class="login-logo">
+      <span class="tag-club-wrap"><span class="tag">AQUILA</span><span class="tag-club-ribbon">Club</span></span>
+      <h2>Mot de passe oublié</h2>
+      <div class="sub">Réinitialisation du mot de passe du compte</div>
+    </div>
+    <div class="login-field">
+      <label>E-mail du compte</label>
+      <input type="email" id="reset-email" placeholder="votre@email.com" required
+        onkeydown="if(event.key==='Enter')document.getElementById('reset-pwd').focus()">
+    </div>
+    <!-- Nouveau mot de passe | Confirmer -->
+    <div class="login-row">
+      <div class="login-field">
+        <label>Nouveau mot de passe</label>
+        <div style="position:relative;">
+          <input type="password" id="reset-pwd" placeholder="min. 6 caractères" required
+            style="padding-right:42px;"
+            onkeydown="if(event.key==='Enter')document.getElementById('reset-pwd2').focus()">
+          <button type="button" onclick="toggleSignupPwd('reset-pwd','reset-pwd-eye-show','reset-pwd-eye-hide')"
+            aria-label="Afficher le mot de passe"
+            style="position:absolute;right:6px;top:50%;transform:translateY(-50%);background:transparent;border:none;cursor:pointer;padding:6px;display:flex;align-items:center;justify-content:center;color:#a0aec0;border-radius:4px;transition:color .15s;"
+            onmouseenter="this.style.color='#fff'" onmouseleave="this.style.color='#a0aec0'">
+            <svg id="reset-pwd-eye-show" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg id="reset-pwd-eye-hide" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" y1="2" x2="22" y2="22"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="login-field">
+        <label>Confirmer</label>
+        <div style="position:relative;">
+          <input type="password" id="reset-pwd2" placeholder="••••••••" required
+            style="padding-right:42px;"
+            onkeydown="if(event.key==='Enter')doReset()">
+          <button type="button" onclick="toggleSignupPwd('reset-pwd2','reset-pwd2-eye-show','reset-pwd2-eye-hide')"
+            aria-label="Afficher le mot de passe"
+            style="position:absolute;right:6px;top:50%;transform:translateY(-50%);background:transparent;border:none;cursor:pointer;padding:6px;display:flex;align-items:center;justify-content:center;color:#a0aec0;border-radius:4px;transition:color .15s;"
+            onmouseenter="this.style.color='#fff'" onmouseleave="this.style.color='#a0aec0'">
+            <svg id="reset-pwd2-eye-show" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg id="reset-pwd2-eye-hide" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" y1="2" x2="22" y2="22"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <button id="reset-btn" onclick="doReset()"
+      style="width:100%;padding:12px;background:linear-gradient(135deg,#e94560,#c53030);border:none;border-radius:8px;color:white;font-size:14px;font-weight:800;letter-spacing:.5px;cursor:pointer;">Réinitialiser</button>
+    <div id="reset-error" style="display:none;color:#fc8181;font-size:12px;margin-top:10px;text-align:center;font-weight:600;"></div>
+    <div id="reset-success" style="display:none;color:#68d391;font-size:12px;margin-top:10px;text-align:center;font-weight:600;"></div>
+    <div style="text-align:center;margin-top:14px;font-size:12px;">
+      <a href="#" onclick="event.preventDefault();showLogin()" style="color:#a0aec0;text-decoration:none;">← Retour à la connexion</a>
     </div>
   </div>
 
@@ -11933,13 +12010,32 @@ function _computeInitials(name) {
 }
 
 // ── Captcha math anti-spam ──
+// Calcul mental simple, opérandes à 1 chiffre, résultat entier positif :
+// 50 % additions (2..9 + 2..9), 30 % soustractions à résultat positif
+// (a 3..9, b < a), 20 % multiplications (2..5 × 2..5). Jamais de division.
 let _captchaAnswer = 0;
-function _generateCaptcha() {
-  const a = Math.floor(Math.random() * 9) + 1;
-  const b = Math.floor(Math.random() * 9) + 1;
-  _captchaAnswer = a + b;
+function _generateCaptcha(clearInput) {
+  const r = Math.random();
+  let a, b, op;
+  if (r < 0.5) {
+    a = 2 + Math.floor(Math.random() * 8);        // 2..9
+    b = 2 + Math.floor(Math.random() * 8);        // 2..9
+    op = '+'; _captchaAnswer = a + b;
+  } else if (r < 0.8) {
+    a = 3 + Math.floor(Math.random() * 7);        // 3..9
+    b = 1 + Math.floor(Math.random() * (a - 1));  // 1..a-1 (résultat > 0)
+    op = '−'; _captchaAnswer = a - b;
+  } else {
+    a = 2 + Math.floor(Math.random() * 4);        // 2..5
+    b = 2 + Math.floor(Math.random() * 4);        // 2..5
+    op = '×'; _captchaAnswer = a * b;
+  }
   const q = document.getElementById('signup-captcha-q');
-  if (q) q.textContent = `Combien font ${a} + ${b} ?`;
+  if (q) q.textContent = `${a} ${op} ${b} = ?`;
+  if (clearInput) {
+    const inp = document.getElementById('signup-captcha');
+    if (inp) inp.value = '';
+  }
 }
 
 // ── Politique de confidentialité (modale) ──
@@ -11958,66 +12054,102 @@ function hidePrivacyPolicy() {
   }
 }
 
-// ── Bascule formulaires ──
+// ── Bascule formulaires (3 vues sans onglets : connexion / création / réinitialisation) ──
+// La classe .wide sur .login-wrap élargit le module (560px) sur les vues
+// création de compte et réinitialisation, pour que les libellés tiennent sur une ligne.
+function _setWide(wide) {
+  const w = document.querySelector('.login-wrap');
+  if (w) w.classList.toggle('wide', !!wide);
+}
 function showSignup() {
   // En mode Perso, création de compte désactivée
   if (getAppMode() === 'perso') return;
   document.getElementById('login-box').style.display = 'none';
+  document.getElementById('reset-card').style.display = 'none';
   document.getElementById('signup-card').style.display = 'block';
   document.getElementById('signup-error').style.display = 'none';
+  _setWide(true);
   _generateCaptcha();
   const cap = document.getElementById('signup-captcha');
   if (cap) cap.value = '';
-  // Reset statut + qualifications
-  ['signup-status-eleve','signup-status-pilote','signup-qual-fi','signup-qual-fe'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.checked = false;
-  });
-  const wrap = document.getElementById('signup-quals-wrap');
-  if (wrap) wrap.style.display = 'none';
-}
-
-// Handler du changement de statut Élève / Pilote breveté
-// Affiche/masque le bloc des qualifications FI/FE selon le choix
-function _onSignupStatusChange() {
-  const isPilote = document.getElementById('signup-status-pilote')?.checked;
-  const wrap = document.getElementById('signup-quals-wrap');
-  if (wrap) wrap.style.display = isPilote ? '' : 'none';
-  // Si on bascule sur Élève, on décoche les qualifs (un élève ne peut pas être FI/FE)
-  if (!isPilote) {
-    const fi = document.getElementById('signup-qual-fi');
-    const fe = document.getElementById('signup-qual-fe');
-    if (fi) fi.checked = false;
-    if (fe) fe.checked = false;
-  }
+  // Reset statut
+  const st = document.getElementById('signup-status');
+  if (st) st.value = '';
 }
 function showLogin() {
   document.getElementById('signup-card').style.display = 'none';
+  document.getElementById('reset-card').style.display = 'none';
   document.getElementById('pending-card').style.display = 'none';
   document.getElementById('login-box').style.display = 'block';
   document.getElementById('login-error').style.display = 'none';
+  _setWide(false);
+}
+function showReset() {
+  document.getElementById('login-box').style.display = 'none';
+  document.getElementById('signup-card').style.display = 'none';
+  document.getElementById('pending-card').style.display = 'none';
+  document.getElementById('reset-card').style.display = 'block';
+  document.getElementById('reset-error').style.display = 'none';
+  document.getElementById('reset-success').style.display = 'none';
+  ['reset-email','reset-pwd','reset-pwd2'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  _setWide(true);
+}
+
+// ── Réinitialisation du mot de passe ──
+async function doReset() {
+  const email = (document.getElementById('reset-email').value || '').trim().toLowerCase();
+  const pwd   = document.getElementById('reset-pwd').value || '';
+  const pwd2  = document.getElementById('reset-pwd2').value || '';
+  const errEl = document.getElementById('reset-error');
+  const okEl  = document.getElementById('reset-success');
+  const showErr = (msg) => { okEl.style.display = 'none'; errEl.textContent = msg; errEl.style.display = 'block'; };
+
+  if (!email || !pwd || !pwd2) return showErr('Veuillez remplir tous les champs.');
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showErr('Adresse e-mail invalide.');
+  if (pwd.length < 6) return showErr('Le mot de passe doit contenir au moins 6 caractères.');
+  if (pwd !== pwd2)   return showErr('Les deux mots de passe ne correspondent pas.');
+
+  await _ensureAdminAccount();
+  await _ensureBetaTesterAccount();
+  const users = _getUsers();
+  const user = users.find(u => u.email === email);
+  if (!user) return showErr('Aucun compte trouvé avec cet e-mail.');
+
+  user.pwdHash = await _hashPwd(pwd);
+  _saveUsers(users);
+  errEl.style.display = 'none';
+  okEl.textContent = 'Mot de passe réinitialisé — vous pouvez vous connecter.';
+  okEl.style.display = 'block';
+  setTimeout(() => { showLogin(); }, 1600);
 }
 
 // ── Création de compte ──
 async function doSignup() {
-  const name  = (document.getElementById('signup-name').value || '').trim();
+  const firstname = (document.getElementById('signup-firstname').value || '').trim();
+  const lastname  = (document.getElementById('signup-lastname').value || '').trim();
+  const name  = (firstname + ' ' + lastname).trim();
   const club  = (document.getElementById('signup-club').value || '').trim();
   const phone = (document.getElementById('signup-phone').value || '').trim();
   const email = (document.getElementById('signup-email').value || '').trim().toLowerCase();
   const pwd   = document.getElementById('signup-pwd').value || '';
   const pwd2  = document.getElementById('signup-pwd2').value || '';
-  const captcha = parseInt(document.getElementById('signup-captcha').value || '', 10);
+  const captchaRaw = (document.getElementById('signup-captcha').value || '').trim();
+  const captcha = parseInt(captchaRaw, 10);
   const errEl = document.getElementById('signup-error');
   const showErr = (msg) => { errEl.textContent = msg; errEl.style.display = 'block'; };
 
-  // Statut & qualifications
-  const statusEleve  = document.getElementById('signup-status-eleve')?.checked;
-  const statusPilote = document.getElementById('signup-status-pilote')?.checked;
-  const qualFI = document.getElementById('signup-qual-fi')?.checked;
-  const qualFE = document.getElementById('signup-qual-fe')?.checked;
+  // Statut (select) : eleve | pilote | pilote-fi
+  const statusVal = document.getElementById('signup-status')?.value || '';
+  const statusEleve  = statusVal === 'eleve';
+  const statusPilote = statusVal === 'pilote' || statusVal === 'pilote-fi';
+  const qualFI = statusVal === 'pilote-fi';
 
   // Validations
-  if (name.length < 2)  return showErr('Veuillez saisir votre prénom et nom.');
+  if (firstname.length < 1) return showErr('Veuillez saisir votre prénom.');
+  if (lastname.length < 1)  return showErr('Veuillez saisir votre nom.');
   if (club.length < 2)  return showErr('Veuillez indiquer votre aéroclub.');
   // Téléphone international : obligatoire, format souple mais doit contenir au moins 8 chiffres
   // Accepte +33 6 12 34 56 78, 0033..., +44 7..., etc.
@@ -12029,16 +12161,12 @@ async function doSignup() {
   if (pwd.length < 6)   return showErr('Le mot de passe doit contenir au moins 6 caractères.');
   if (pwd !== pwd2)     return showErr('Les deux mots de passe ne correspondent pas.');
   // Statut obligatoire
-  if (!statusEleve && !statusPilote) return showErr('Veuillez sélectionner votre statut (Élève pilote ou Pilote breveté).');
-  // Sécurité : un élève ne peut pas être FI/FE (les cases sont déjà masquées mais double-check)
-  if (statusEleve && (qualFI || qualFE)) {
-    return showErr('Un élève pilote ne peut pas avoir de qualification FI ou FE.');
-  }
+  if (!statusEleve && !statusPilote) return showErr('Veuillez sélectionner votre statut.');
   // Captcha en dernier
+  if (!captchaRaw) return showErr('Veuillez répondre au calcul anti-spam.');
   if (captcha !== _captchaAnswer) {
-    _generateCaptcha();
-    document.getElementById('signup-captcha').value = '';
-    return showErr('Réponse anti-spam incorrecte. Une nouvelle question vient d\'être générée.');
+    _generateCaptcha(true);
+    return showErr('Vérification incorrecte — nouveau calcul, réessayez.');
   }
 
   // Consentement RGPD obligatoire
@@ -12054,10 +12182,8 @@ async function doSignup() {
 
   const pwdHash = await _hashPwd(pwd);
   const isAdminEmail = (email === ADMIN_EMAIL);
-  // Construire les qualifs (FI/FE seulement pour Pilote breveté)
-  const quals = [];
-  if (statusPilote && qualFI) quals.push('FI');
-  if (statusPilote && qualFE) quals.push('FE');
+  // Qualif FI portée par le statut « Pilote-FI »
+  const quals = qualFI ? ['FI'] : [];
   const role = statusEleve ? 'eleve' : 'pilote';
 
   users.push({
@@ -12087,6 +12213,8 @@ async function doSignup() {
 function showPending() {
   document.getElementById('login-box').style.display = 'none';
   document.getElementById('signup-card').style.display = 'none';
+  document.getElementById('reset-card').style.display = 'none';
+  _setWide(false);
   document.getElementById('pending-card').style.display = 'block';
   document.getElementById('pending-error').style.display = 'none';
   document.getElementById('pending-code').value = '';
@@ -12176,6 +12304,14 @@ async function doLogin() {
   const email = (document.getElementById('login-email').value || '').trim().toLowerCase();
   const pwd   = document.getElementById('login-pwd').value || '';
   const errEl = document.getElementById('login-error');
+
+  // Champs requis : envoi bloqué si vide
+  if (!email || !pwd) {
+    errEl.textContent = 'Veuillez saisir votre e-mail et votre mot de passe.';
+    errEl.style.display = 'block';
+    setTimeout(() => { errEl.style.display = 'none'; errEl.textContent = 'Identifiants incorrects — accès refusé'; }, 3500);
+    return;
+  }
 
   // === Mode Perso : whitelist stricte (admin + compte test hardcodé) ===
   if (getAppMode() === 'perso') {
