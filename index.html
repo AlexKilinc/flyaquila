@@ -1472,6 +1472,20 @@ body.app-mode-perso .signup-link-wrap { display: none !important; }
     <div class="login-field">
       <label>E-mail du compte</label>
       <input type="email" id="reset-email" placeholder="votre@email.com" required
+        onkeydown="if(event.key==='Enter')document.getElementById('reset-code').focus()">
+    </div>
+    <!-- Étape 1 : demander le code à l'administrateur (mailto pré-rempli) -->
+    <button type="button" onclick="requestResetCode()"
+      style="width:100%;padding:11px;margin-bottom:8px;background:transparent;border:1px solid #3A7BFF;border-radius:11px;color:#90cdf4;font-size:13px;font-weight:700;cursor:pointer;">
+      ✉ Demander le code à l'administrateur
+    </button>
+    <div id="reset-mail-info" style="display:none;font-size:11px;color:#90cdf4;margin:-2px 0 10px;text-align:center;line-height:1.5;">
+      Votre messagerie s'ouvre avec la demande pré-remplie.<br>L'administrateur vous transmettra un code à 6&nbsp;chiffres.
+    </div>
+    <!-- Étape 2 : code reçu + nouveau mot de passe -->
+    <div class="login-field">
+      <label>Code de réinitialisation (6 chiffres)</label>
+      <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" id="reset-code" placeholder="______" required
         onkeydown="if(event.key==='Enter')document.getElementById('reset-pwd').focus()">
     </div>
     <!-- Nouveau mot de passe | Confirmer -->
@@ -10964,6 +10978,7 @@ function adminLoadUsers() {
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
           ${isPending ? `<button onclick="adminCalcCode('${_escHtml(u.email)}')" style="padding:5px 11px;background:#3182ce;color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:11px;font-weight:700;">🔑 Calculer le code</button>` : ''}
+          <button onclick="adminCalcResetCode('${_escHtml(u.email)}')" style="padding:5px 11px;background:#805ad5;color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:11px;font-weight:700;">🔒 Code réinit.</button>
           <button onclick="adminDeleteUser('${_escHtml(u.email)}')" style="padding:5px 11px;background:#fff;color:#e53e3e;border:1px solid #e53e3e;border-radius:5px;cursor:pointer;font-size:11px;font-weight:600;">Supprimer</button>
         </div>
         <div id="admin-code-${_escHtml(u.email).replace(/[^a-zA-Z0-9]/g,'_')}" style="flex:0 0 100%;"></div>
@@ -10981,6 +10996,22 @@ async function adminCalcCode(email) {
         <div style="font-size:11px;color:#2c5282;font-weight:600;">Code d'activation pour <strong>${_escHtml(email)}</strong> :</div>
         <div style="font-family:monospace;font-size:18px;font-weight:800;color:#1a1a2e;letter-spacing:5px;background:#fff;padding:4px 12px;border-radius:5px;border:1px solid #cbd5e0;">${code}</div>
         <button onclick="navigator.clipboard.writeText('${code}').then(()=>{this.textContent='✓ Copié !';setTimeout(()=>this.textContent='Copier le code',1500)})" style="padding:5px 11px;background:#3182ce;color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:11px;font-weight:700;">Copier le code</button>
+      </div>`;
+  }
+}
+
+// Code de réinitialisation de mot de passe : affiché à la demande de l'admin,
+// à transmettre à l'utilisateur qui en a fait la demande par e-mail.
+async function adminCalcResetCode(email) {
+  const code = await _computeResetCode(email);
+  const slotId = 'admin-code-' + email.replace(/[^a-zA-Z0-9]/g, '_');
+  const slot = document.getElementById(slotId);
+  if (slot) {
+    slot.innerHTML = `
+      <div style="margin-top:8px;padding:10px 12px;background:#faf5ff;border:1px solid #d6bcfa;border-radius:6px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <div style="font-size:11px;color:#553c9a;font-weight:600;">Code de réinitialisation pour <strong>${_escHtml(email)}</strong> :</div>
+        <div style="font-family:monospace;font-size:18px;font-weight:800;color:#1a1a2e;letter-spacing:5px;background:#fff;padding:4px 12px;border-radius:5px;border:1px solid #cbd5e0;">${code}</div>
+        <button onclick="navigator.clipboard.writeText('${code}').then(()=>{this.textContent='✓ Copié !';setTimeout(()=>this.textContent='Copier le code',1500)})" style="padding:5px 11px;background:#805ad5;color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:11px;font-weight:700;">Copier le code</button>
       </div>`;
   }
 }
@@ -11961,6 +11992,17 @@ async function _computeActivationCode(email) {
   const num = (bytes[0] * 16777216 + bytes[1] * 65536 + bytes[2] * 256 + bytes[3]) >>> 0;
   return String(num % 1000000).padStart(6, '0');
 }
+// Code de réinitialisation de mot de passe : même dérivation que le code
+// d'activation mais salée différemment — un code d'activation ne peut pas
+// servir de code de réinitialisation, et inversement.
+async function _computeResetCode(email) {
+  const enc = new TextEncoder();
+  const data = enc.encode(_ACTIVATION_SECRET + '|reset|' + email.toLowerCase().trim());
+  const hashBuf = await crypto.subtle.digest('SHA-256', data);
+  const bytes = new Uint8Array(hashBuf);
+  const num = (bytes[0] * 16777216 + bytes[1] * 65536 + bytes[2] * 256 + bytes[3]) >>> 0;
+  return String(num % 1000000).padStart(6, '0');
+}
 
 // ── Store utilisateurs ──
 function _getUsers() {
@@ -12091,7 +12133,9 @@ function showReset() {
   document.getElementById('reset-card').style.display = 'block';
   document.getElementById('reset-error').style.display = 'none';
   document.getElementById('reset-success').style.display = 'none';
-  ['reset-email','reset-pwd','reset-pwd2'].forEach(id => {
+  const mi = document.getElementById('reset-mail-info');
+  if (mi) mi.style.display = 'none';
+  ['reset-email','reset-code','reset-pwd','reset-pwd2'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
@@ -12099,16 +12143,48 @@ function showReset() {
 }
 
 // ── Réinitialisation du mot de passe ──
+// Étape 1 : l'utilisateur demande un code à l'administrateur (mailto pré-rempli,
+// même principe que la demande d'activation). Étape 2 : il saisit le code à
+// 6 chiffres transmis par l'administrateur + son nouveau mot de passe.
+function requestResetCode() {
+  const email = (document.getElementById('reset-email').value || '').trim().toLowerCase();
+  const errEl = document.getElementById('reset-error');
+  const okEl  = document.getElementById('reset-success');
+  const showErr = (msg) => { okEl.style.display = 'none'; errEl.textContent = msg; errEl.style.display = 'block'; };
+  if (!email) return showErr('Veuillez d\'abord saisir l\'e-mail de votre compte.');
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showErr('Adresse e-mail invalide.');
+  errEl.style.display = 'none';
+  const subject = encodeURIComponent('AQUILA-Club — Demande de réinitialisation de mot de passe');
+  const lines = [
+    'Bonjour Alexandre,',
+    '',
+    'J\'ai oublié le mot de passe de mon compte AQUILA-Club et je souhaite le réinitialiser.',
+    '',
+    'E-mail du compte : ' + email,
+    'Date de la demande : ' + new Date().toLocaleString('fr-FR'),
+    '',
+    'Merci de me transmettre le code de réinitialisation à 6 chiffres.',
+    '',
+    'Bien cordialement'
+  ];
+  const body = encodeURIComponent(lines.join('\n'));
+  const info = document.getElementById('reset-mail-info');
+  if (info) info.style.display = 'block';
+  window.location.href = `mailto:${ADMIN_EMAIL}?subject=${subject}&body=${body}`;
+}
+
 async function doReset() {
   const email = (document.getElementById('reset-email').value || '').trim().toLowerCase();
+  const code  = (document.getElementById('reset-code').value || '').trim();
   const pwd   = document.getElementById('reset-pwd').value || '';
   const pwd2  = document.getElementById('reset-pwd2').value || '';
   const errEl = document.getElementById('reset-error');
   const okEl  = document.getElementById('reset-success');
   const showErr = (msg) => { okEl.style.display = 'none'; errEl.textContent = msg; errEl.style.display = 'block'; };
 
-  if (!email || !pwd || !pwd2) return showErr('Veuillez remplir tous les champs.');
+  if (!email || !code || !pwd || !pwd2) return showErr('Veuillez remplir tous les champs.');
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showErr('Adresse e-mail invalide.');
+  if (!/^\d{6}$/.test(code)) return showErr('Le code doit contenir exactement 6 chiffres.');
   if (pwd.length < 6) return showErr('Le mot de passe doit contenir au moins 6 caractères.');
   if (pwd !== pwd2)   return showErr('Les deux mots de passe ne correspondent pas.');
 
@@ -12117,6 +12193,9 @@ async function doReset() {
   const users = _getUsers();
   const user = users.find(u => u.email === email);
   if (!user) return showErr('Aucun compte trouvé avec cet e-mail.');
+
+  const expected = await _computeResetCode(email);
+  if (code !== expected) return showErr('Code de réinitialisation incorrect. Vérifiez avec l\'administrateur.');
 
   user.pwdHash = await _hashPwd(pwd);
   _saveUsers(users);
