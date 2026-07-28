@@ -16,6 +16,15 @@
   var vp = document.querySelector('meta[name="viewport"]');
   if (vp) vp.setAttribute('content', vp.getAttribute('content') + ', maximum-scale=1.0');
 })();
+// ── Hors-ligne : à la première visite, le service worker met l'application
+// complète en cache ; ensuite elle démarre sans réseau (mode avion) et se met
+// à jour en arrière-plan quand une connexion est disponible.
+if ('serviceWorker' in navigator &&
+    (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('./sw.js').catch(function () { /* silencieux (ex: file://) */ });
+  });
+}
 </script>
 <title>AQUILA AT01 — Préparation de vol</title>
 
