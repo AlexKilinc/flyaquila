@@ -1064,7 +1064,12 @@ canvas{display:block;max-width:100%;}
   box-sizing: border-box;
 }
 .login-wrap{
-  width:100%;max-width:410px;margin:0 auto;
+  width:100%;max-width:410px;
+  /* margin:auto : centrage vertical quand l'écran est plus haut que le
+     contenu (équilibre la zone vide en bas) ; si le contenu dépasse
+     (vue création, petits écrans), les marges retombent à 0 et le
+     défilement reste normal. */
+  margin:auto;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   text-align:center;
   transition:max-width .25s ease;
