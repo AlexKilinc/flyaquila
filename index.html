@@ -31,7 +31,7 @@ if ('serviceWorker' in navigator &&
 <!-- PWA / Mobile web app -->
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="AQUILA">
 <meta name="theme-color" content="#0A1A33">
 
@@ -74,7 +74,13 @@ if ('serviceWorker' in navigator &&
 <!-- iOS status bar plein écran — déjà défini dans le bloc PWA ci-dessus -->
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
-html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}
+html{
+  -webkit-text-size-adjust:100%;text-size-adjust:100%;
+  /* Fond du canvas (zones hors page : barres Safari, barre d'état en mode app,
+     overscroll, safe areas) : même dégradé que le fond de l'application pour
+     qu'aucun bandeau blanc n'apparaisse — il se fond avec l'écran. */
+  background:linear-gradient(180deg,#0B1C38 0%,#0A1A33 45%,#081427 100%);
+}
 body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e;min-height:100vh;
   -webkit-tap-highlight-color:transparent;}
 
@@ -83,6 +89,8 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e;mi
   background:linear-gradient(135deg,#0B1C38,#0A1A33);
   border-bottom:3px solid #e94560;
   padding:8px 14px;display:flex;align-items:center;gap:10px;flex-wrap:nowrap;
+  /* Mode app iOS : le bandeau bleu marine s'étend sous la barre d'état translucide */
+  padding-top:calc(8px + env(safe-area-inset-top, 0px));
 }
 .logo-tag{background:#e94560;color:white;font-weight:900;font-size:13px;
   padding:3px 9px;border-radius:5px;letter-spacing:1px;flex-shrink:0;}
@@ -1051,7 +1059,8 @@ canvas{display:block;max-width:100%;}
   line-height:1.5;
   -webkit-font-smoothing:antialiased;
   overflow-y: auto;
-  padding: 30px 16px;
+  /* Safe areas iOS (barre d'état translucide en mode app, encoche, indicateur) */
+  padding: calc(30px + env(safe-area-inset-top, 0px)) 16px calc(30px + env(safe-area-inset-bottom, 0px));
   box-sizing: border-box;
 }
 .login-wrap{
@@ -1121,7 +1130,7 @@ canvas{display:block;max-width:100%;}
 /* Responsive mobile : réduire le padding pour avoir plus d'espace utile */
 @media (max-width: 480px) {
   #login-screen {
-    padding: 16px 10px;
+    padding: calc(16px + env(safe-area-inset-top, 0px)) 10px calc(16px + env(safe-area-inset-bottom, 0px));
   }
   #login-box, .login-card {
     padding: 24px 20px;
