@@ -6,13 +6,19 @@
 // suivant. Les polices Google sont mises en cache à la volée au premier
 // chargement en ligne, puis servies hors-ligne.
 
-const CACHE = 'aquila-at01-v1';
+const CACHE = 'aquila-at01-v2';
 const CORE = ['./', './index.html'];
+// SDK Supabase (auth cloud) : précaché pour que l'app démarre aussi hors-ligne
+const SDK_URL = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE)
-      .then((c) => c.addAll(CORE))
+      .then((c) => Promise.all([
+        c.addAll(CORE),
+        // cross-origin : réponse opaque acceptée ; échec non bloquant (offline)
+        c.add(new Request(SDK_URL, { mode: 'no-cors' })).catch(() => {})
+      ]))
       .then(() => self.skipWaiting())
   );
 });
@@ -32,7 +38,8 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(req.url);
   const sameOrigin = url.origin === self.location.origin;
   const isFont = url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com';
-  if (!sameOrigin && !isFont) return;
+  const isSdk = url.hostname === 'cdn.jsdelivr.net';
+  if (!sameOrigin && !isFont && !isSdk) return;
 
   // Cache d'abord (démarrage instantané et hors-ligne), réseau en arrière-plan
   // pour rafraîchir le cache quand une connexion existe.
