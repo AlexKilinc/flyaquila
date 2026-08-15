@@ -1102,6 +1102,8 @@ canvas{display:block;max-width:100%;}
 #login-screen .sound-toggle:focus-visible{outline:none;color:#5B9BFF}
 #login-screen .sound-toggle svg{width:15px;height:15px;display:block;fill:currentColor}
 @keyframes loginSpin{to{transform:rotate(360deg)}}
+@keyframes syncSpin{to{transform:rotate(360deg)}}
+.sync-spin{animation:syncSpin 1s linear infinite;transform-origin:center;}
 /* Titre au-dessus des champs */
 .login-head{text-align:center;margin-bottom:24px}
 .login-head .eyebrow{
@@ -1561,6 +1563,29 @@ canvas{display:block;max-width:100%;}
     </div>
   </div>
 
+  <!-- ───────── Écran "En attente de validation" ───────── -->
+  <div class="login-card" id="pending-card" style="display:none;">
+    <div class="login-logo">
+      <div class="tag" style="background:#d69e2e;">EN ATTENTE</div>
+      <h2>Validation en cours</h2>
+      <div class="sub" id="pending-subtitle">Bonjour <span id="pending-name">…</span></div>
+    </div>
+    <div style="background:rgba(214,158,46,0.12);border:1px solid rgba(214,158,46,0.4);border-radius:8px;padding:14px;margin-bottom:16px;font-size:12.5px;color:#e2e8f0;line-height:1.6;text-align:left;">
+      <strong style="color:#fff;display:block;margin-bottom:6px;">Compte en attente de validation par l'administrateur</strong>
+      Votre inscription a bien été enregistrée et un e-mail de confirmation vous a été envoyé. L'administrateur (prévenu par e-mail) l'examine, souvent dans la journée&nbsp;: vous pourrez vous connecter dès qu'elle sera validée.
+    </div>
+    <div id="pending-error" style="display:none;color:#fc8181;font-size:12px;margin-top:10px;text-align:center;font-weight:600;"></div>
+    <div style="text-align:center;margin-top:18px;font-size:11px;color:#718096;">
+      <a href="#" onclick="event.preventDefault();cancelPending()" style="color:#a0aec0;text-decoration:none;">← Retour à la connexion</a>
+    </div>
+  </div>
+
+  <footer class="login-foot">Akila<span>·</span>Flight</footer>
+
+  </div><!-- /login-wrap -->
+</div>
+
+<!-- Modales globales (hors écran de connexion : visibles aussi dans l'app) -->
   <!-- ───────── Modale Politique de confidentialité ───────── -->
   <div id="privacy-modal" style="display:none;position:fixed;inset:0;background:rgba(10,15,30,0.85);z-index:10000;overflow-y:auto;padding:20px 12px;">
     <div style="max-width:560px;margin:20px auto;background:#16213e;border:1px solid #2a3556;border-radius:12px;padding:22px;color:#e2e8f0;font-size:13px;line-height:1.6;">
@@ -1574,11 +1599,11 @@ canvas{display:block;max-width:100%;}
       </div>
 
       <h3 style="color:#fff;font-size:14px;margin:14px 0 6px;">Responsable du traitement</h3>
-      <p style="margin:0 0 10px;color:#cbd5e0;">Dr Alexandre Kilinc, en sa qualité personnelle.</p>
+      <p style="margin:0 0 10px;color:#cbd5e0;">Alexandre Kilinc, en sa qualité personnelle.</p>
 
       <h3 style="color:#fff;font-size:14px;margin:14px 0 6px;">Données collectées</h3>
-      <p style="margin:0 0 10px;color:#cbd5e0;">À l'inscription : nom et prénom, e-mail, numéro de téléphone, aéroclub d'appartenance, statut (élève / pilote breveté) et qualifications éventuelles (FI, FE). Aucune donnée de santé ni donnée sensible au sens de l'article 9 du RGPD n'est collectée.</p>
-      <p style="margin:0 0 10px;color:#cbd5e0;">Ces informations sont stockées uniquement dans votre navigateur (voir « Hébergement » ci-dessous). Lors de la procédure de validation, elles transitent par e-mail vers l'administrateur de l'application (<strong style="color:#fff;">alexandre.kilinc@gmail.com</strong>) afin qu'il vous transmette en retour votre code d'activation à 6 chiffres. Cet e-mail reste alors dans la boîte de l'administrateur, qui s'engage à le supprimer sur simple demande.</p>
+      <p style="margin:0 0 10px;color:#cbd5e0;">À l'inscription : nom et prénom, e-mail, numéro de téléphone, aéroclub d'appartenance, statut (élève pilote / pilote breveté / pilote-FI). Aucune donnée de santé ni donnée sensible au sens de l'article 9 du RGPD n'est collectée.</p>
+      <p style="margin:0 0 10px;color:#cbd5e0;">Ces informations sont enregistrées dans la base sécurisée de l'application (Supabase, voir « Hébergement » ci-dessous). À l'inscription, une notification contenant ces informations est adressée par e-mail à l'administrateur de l'application (<strong style="color:#fff;">alexandre.kilinc@gmail.com</strong>) afin qu'il valide votre compte. Cet e-mail reste dans la boîte de l'administrateur, qui s'engage à le supprimer sur simple demande.</p>
 
       <h3 style="color:#fff;font-size:14px;margin:14px 0 6px;">Finalité du traitement</h3>
       <p style="margin:0 0 10px;color:#cbd5e0;">Création et gestion de votre compte utilisateur, validation de l'inscription par l'administrateur, et communication relative à l'application (e-mail d'activation).</p>
@@ -1688,27 +1713,47 @@ canvas{display:block;max-width:100%;}
     </div>
   </div>
 
-  <!-- ───────── Écran "En attente de validation" ───────── -->
-  <div class="login-card" id="pending-card" style="display:none;">
-    <div class="login-logo">
-      <div class="tag" style="background:#d69e2e;">EN ATTENTE</div>
-      <h2>Validation en cours</h2>
-      <div class="sub" id="pending-subtitle">Bonjour <span id="pending-name">…</span></div>
-    </div>
-    <div style="background:rgba(214,158,46,0.12);border:1px solid rgba(214,158,46,0.4);border-radius:8px;padding:14px;margin-bottom:16px;font-size:12.5px;color:#e2e8f0;line-height:1.6;text-align:left;">
-      <strong style="color:#fff;display:block;margin-bottom:6px;">Compte en attente de validation par l'administrateur</strong>
-      Votre inscription a bien été enregistrée. L'administrateur l'examine (souvent dans la journée)&nbsp;: vous pourrez vous connecter dès qu'elle sera validée. Aucune autre action n'est nécessaire.
-    </div>
-    <div id="pending-error" style="display:none;color:#fc8181;font-size:12px;margin-top:10px;text-align:center;font-weight:600;"></div>
-    <div style="text-align:center;margin-top:18px;font-size:11px;color:#718096;">
-      <a href="#" onclick="event.preventDefault();cancelPending()" style="color:#a0aec0;text-decoration:none;">← Retour à la connexion</a>
+  <!-- ───────── Modale Informations & mentions légales ───────── -->
+  <div id="legal-modal" style="display:none;position:fixed;inset:0;background:rgba(10,15,30,0.85);z-index:10000;overflow-y:auto;padding:20px 12px;">
+    <div style="max-width:520px;margin:20px auto;background:#16213e;border:1px solid #2a3556;border-radius:12px;padding:22px;color:#e2e8f0;font-size:13px;line-height:1.6;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;border-bottom:1px solid #2a3556;padding-bottom:12px;">
+        <div>
+          <h2 style="margin:0;color:#fff;font-size:18px;font-weight:800;">Informations &amp; mentions légales</h2>
+          <div style="font-size:11px;color:#a0aec0;margin-top:4px;">AQUILA-Club — Application de préparation de vol</div>
+        </div>
+        <button onclick="hideLegalInfo()" aria-label="Fermer"
+          style="background:transparent;border:none;color:#a0aec0;font-size:22px;cursor:pointer;line-height:1;padding:0 6px;">×</button>
+      </div>
+
+      <div style="background:rgba(229,62,62,0.12);border:1.5px solid rgba(229,62,62,0.55);border-radius:8px;padding:12px 14px;margin-bottom:14px;">
+        <div style="font-size:12px;color:#fed7d7;line-height:1.6;">
+          <strong style="color:#fff;display:block;margin-bottom:4px;">⚠ Application non officielle — non validée DGAC</strong>
+          Cette application n'est validée ni par la DGAC ni par aucune autorité aéronautique et ne remplace pas la préparation réglementaire du vol.
+          <strong style="color:#fff;">Le manuel de vol (AFM) de l'Aquila AT01 est la seule référence opérationnelle.</strong>
+        </div>
+      </div>
+
+      <h3 style="color:#fff;font-size:13px;margin:12px 0 5px;">Responsabilité</h3>
+      <p style="margin:0 0 10px;color:#cbd5e0;font-size:12px;">Le commandant de bord reste seul responsable de la préparation du vol, de ses calculs (masse &amp; centrage, performances, carburant) et de la décision d'entreprendre ou de poursuivre le vol. Cette application n'est qu'une aide au calcul.</p>
+
+      <h3 style="color:#fff;font-size:13px;margin:12px 0 5px;">Données embarquées</h3>
+      <p style="margin:0 0 10px;color:#cbd5e0;font-size:12px;">Les données intégrées (aérodromes, cycle AIRAC, abaques de performances, masses) peuvent être incomplètes, obsolètes ou erronées. Vérifiez systématiquement avec la documentation officielle en vigueur : AIP, NOTAM, fiche de pesée et manuel de vol de l'appareil.</p>
+
+      <h3 style="color:#fff;font-size:13px;margin:12px 0 5px;">Éditeur</h3>
+      <p style="margin:0 0 10px;color:#cbd5e0;font-size:12px;">Alexandre Kilinc — application privée AQUILA-Club, réservée aux membres autorisés. Comptes hébergés sur Supabase ; données de préparation stockées localement sur votre appareil.</p>
+
+      <button onclick="hideLegalInfo();showPrivacyPolicy()"
+        style="width:100%;padding:9px;background:rgba(49,130,206,0.15);border:1px solid rgba(49,130,206,0.5);border-radius:6px;color:#90cdf4;font-size:12px;font-weight:700;cursor:pointer;">
+        Voir la politique de confidentialité
+      </button>
+
+      <button onclick="hideLegalInfo()"
+        style="width:100%;margin-top:12px;padding:11px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);border-radius:8px;color:#e2e8f0;font-size:13px;font-weight:700;cursor:pointer;">
+        Fermer
+      </button>
     </div>
   </div>
 
-  <footer class="login-foot">Akila<span>·</span>Flight</footer>
-
-  </div><!-- /login-wrap -->
-</div>
 
 <!-- ===== APPLICATION (masquée jusqu'au login) ===== -->
 <div id="app-wrapper" style="display:none;">
@@ -1762,6 +1807,21 @@ canvas{display:block;max-width:100%;}
       onmouseover="this.style.borderColor='#718096';this.style.color='#a0aec0'"
       onmouseout="this.style.borderColor='rgba(255,255,255,0.12)';this.style.color='#718096'">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Exit
+    </button>
+    <!-- Bouton rond Synchronisation cloud : bordure rouge = modifications non
+         synchronisées, verte = synchronisé (synchro auto au lancement puis
+         toutes les 5 min, silencieuse ; clic = synchro manuelle avec message) -->
+    <button class="hdr-btn" id="btn-sync" onclick="doCloudSync()" title="Synchronisation cloud"
+      style="border-radius:50%;width:34px;padding:0;justify-content:center;border-color:#e94560;border-width:2px;">
+      <svg id="sync-ic-cloud" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
+      <svg id="sync-ic-spin" class="sync-spin" style="display:none" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"/></svg>
+    </button>
+    <!-- Bouton rond Information / mentions légales -->
+    <button class="hdr-btn" id="btn-info" onclick="showLegalInfo()" title="Informations &amp; mentions légales"
+      style="border-radius:50%;width:34px;padding:0;justify-content:center;"
+      onmouseover="this.style.borderColor='#e94560';this.style.color='#fff'"
+      onmouseout="this.style.borderColor='rgba(255,255,255,0.2)';this.style.color='#a0aec0'">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
     </button>
   </div>
 </div>
@@ -11535,7 +11595,7 @@ document.addEventListener('DOMContentLoaded', function() {
           </div>
           <div id="admin-users-list" style="font-size:12px;"></div>
           <div style="font-size:10px;color:#718096;margin-top:8px;background:#f7f8fa;padding:6px 10px;border-radius:6px;line-height:1.5;">
-            Les comptes en attente sont créés à l'inscription. Cliquez sur <strong>Calculer le code</strong> pour obtenir le code à 6 chiffres à transmettre par e-mail au pilote.
+            Chaque inscription crée un compte <strong>en attente</strong> : validez-le (ou refusez-le) ci-dessus pour ouvrir l'accès. Un compte résilié ne peut plus se connecter ; sa suppression définitive (facultative) se fait sur supabase.com → Authentication → Users.
           </div>
         </div>
 
@@ -11921,7 +11981,6 @@ async function _verifyPwd(pwd, stored) {
   return false;
 }
 
-// ── Calcul code activation 6 chiffres (HMAC-like : SHA-256(secret|email) tronqué) ──
 
 // ── Store utilisateurs ──
 function _getUsers() {
@@ -12166,6 +12225,25 @@ async function doSignup() {
     if (/already|exist/i.test(m)) return showErr('Un compte existe déjà avec cet e-mail.');
     return showErr('Inscription refusée par le serveur : ' + m);
   }
+  // Notifier l'administrateur par e-mail (service formsubmit.co, sans clé secrète ;
+  // échec silencieux : la notification « en attente » du panneau admin reste la référence)
+  try {
+    fetch('https://formsubmit.co/ajax/' + ADMIN_EMAIL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        _subject: 'AQUILA-Club — Nouvelle inscription à valider',
+        _template: 'table',
+        Nom: name,
+        Email: email,
+        Telephone: phone,
+        Club: club,
+        Statut: statusVal === 'eleve' ? 'Élève pilote' : (statusVal === 'pilote-fi' ? 'Pilote-FI' : 'Pilote breveté'),
+        Date: new Date().toLocaleString('fr-FR'),
+        Action: 'Valider dans AQUILA → panneau Admin → Gestion des utilisateurs'
+      })
+    }).catch(function () {});
+  } catch (e) {}
   // Rester déconnecté tant que l'administrateur n'a pas validé
   try { await sb.auth.signOut(); } catch (e) {}
   _pendingUser = { email, name };
@@ -12229,6 +12307,9 @@ async function doLogin() {
     if (res && res.error) {
       if (_isNetworkError(res.error)) {
         cloudUnreachable = true;
+      } else if (/email not confirmed/i.test(String(res.error.message || ''))) {
+        showLoginErr('Confirmez d\'abord votre e-mail (lien reçu à l\'inscription), puis attendez la validation de l\'administrateur.', 6000);
+        return;
       } else {
         showLoginErr('Identifiants incorrects — accès refusé');
         document.getElementById('login-pwd').value = '';
@@ -12310,6 +12391,9 @@ function showApp() {
   if (CURRENT_USER && CURRENT_USER.isAdmin) {
     setTimeout(function () { try { adminRefreshPendingBadge(); } catch (e) {} }, 400);
   }
+  // Nuage : rouge au lancement, puis synchro automatique (silencieuse) -> vert
+  _setSyncDirty(true);
+  setTimeout(function () { try { doCloudSync(true); } catch (e) {} }, 1500);
   playStartAiracIntro();
 }
 
@@ -12499,6 +12583,106 @@ function showProfile() {
 function hideProfile() {
   const m = document.getElementById('profile-modal');
   if (m) { m.style.display = 'none'; document.body.style.overflow = ''; }
+}
+
+// ── Informations & mentions légales ──
+function showLegalInfo() {
+  const m = document.getElementById('legal-modal');
+  if (m) { m.style.display = 'block'; document.body.style.overflow = 'hidden'; }
+}
+function hideLegalInfo() {
+  const m = document.getElementById('legal-modal');
+  if (m) { m.style.display = 'none'; document.body.style.overflow = ''; }
+}
+
+// ── Synchronisation cloud (bouton nuage du bandeau) ──
+// Rafraîchit le profil du compte connecté et, pour l'administrateur, la liste
+// des inscriptions en attente. La synchronisation des données de vol viendra
+// dans une étape ultérieure.
+function _syncToast(message, ok) {
+  let t = document.getElementById('sync-toast');
+  if (!t) { t = document.createElement('div'); t.id = 'sync-toast'; document.body.appendChild(t); }
+  t.textContent = message;
+  t.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:99999;max-width:86vw;text-align:center;' +
+    'padding:16px 26px;border-radius:12px;font-size:14px;font-weight:700;box-shadow:0 14px 44px rgba(0,0,0,.55);opacity:1;transition:opacity .3s;' +
+    (ok ? 'background:#0E2348;border:1px solid #2f855a;color:#68d391;' : 'background:#0E2348;border:1px solid #c53030;color:#fc8181;');
+  clearTimeout(t._h);
+  t._h = setTimeout(function () { t.style.opacity = '0'; setTimeout(function () { t.remove(); }, 350); }, 2600);
+}
+// État de synchronisation : true = des modifications locales n'ont pas encore
+// été synchronisées (bordure rouge) ; false = à jour (bordure verte).
+let _syncDirty = true;
+function _setSyncDirty(dirty) {
+  _syncDirty = !!dirty;
+  const b = document.getElementById('btn-sync');
+  if (b) b.style.borderColor = _syncDirty ? '#e94560' : '#2f855a';
+}
+// Toute modification dans l'app (préparation, vol, réglage) repasse le nuage en rouge
+['input', 'change'].forEach(function (ev) {
+  document.addEventListener(ev, function (e) {
+    if (e.target && e.target.closest && e.target.closest('#app-wrapper')) _setSyncDirty(true);
+  }, true);
+});
+// Synchro automatique toutes les 5 minutes (silencieuse), quand on est connecté
+setInterval(function () {
+  const app = document.getElementById('app-wrapper');
+  if (CURRENT_USER && app && app.style.display !== 'none') doCloudSync(true);
+}, 5 * 60 * 1000);
+
+async function doCloudSync(auto) {
+  const icCloud = document.getElementById('sync-ic-cloud');
+  const icSpin  = document.getElementById('sync-ic-spin');
+  if (!icCloud || icSpin.style.display !== 'none') return;   // déjà en cours
+  icCloud.style.display = 'none'; icSpin.style.display = 'block';
+  const t0 = Date.now();
+  let ok = true, msg = 'Synchronisation cloud effectuée';
+  try {
+    const sb = _sb();
+    if (!sb) throw new TypeError('Failed to fetch');
+    let refreshed = false;
+    const sess = (await sb.auth.getSession()).data.session;
+    if (sess && CURRENT_USER) {
+      const q = await sb.from('profiles').select('*').eq('id', sess.user.id).single();
+      if (q.data) {
+        if (q.data.status !== 'approved') {
+          // compte résilié / repassé en attente entre-temps : déconnexion immédiate
+          icSpin.style.display = 'none'; icCloud.style.display = 'block';
+          doLogout();
+          return;
+        }
+        // rafraîchir le cache local du profil (sans toucher au mot de passe)
+        try {
+          const name = ((q.data.prenom || '') + ' ' + (q.data.nom || '')).trim() || q.data.email;
+          const users = _getUsers(); const u = users.find(x => x.email === CURRENT_USER.email);
+          if (u) {
+            u.name = name; u.club = q.data.club || ''; u.phone = q.data.tel || '';
+            u.role = (q.data.statut_pilote === 'eleve') ? 'eleve' : 'pilote';
+            u.quals = (q.data.statut_pilote === 'pilote-fi') ? ['FI'] : [];
+            u.sbRole = q.data.role || 'member';
+            u.initials = _computeInitials(name);
+            u.cachedAt = Date.now();
+            _saveUsers(users);
+          }
+        } catch (e) {}
+        refreshed = true;
+      }
+    }
+    if (!refreshed) {
+      // pas de session cloud : simple vérification de joignabilité du serveur
+      const q = await sb.from('profiles').select('id', { count: 'exact', head: true });
+      if (q.error && _isNetworkError(q.error)) throw q.error;
+    }
+    if (CURRENT_USER && CURRENT_USER.isAdmin) { try { await adminRefreshPendingBadge(); } catch (e) {} }
+  } catch (e) {
+    ok = false;
+    msg = 'Hors ligne — synchronisation impossible';
+  }
+  const wait = Math.max(0, 1100 - (Date.now() - t0));   // rotation visible au moins ~1 s
+  setTimeout(function () {
+    icSpin.style.display = 'none'; icCloud.style.display = 'block';
+    _setSyncDirty(!ok);                     // succès -> bordure verte ; échec -> rouge
+    if (!auto) _syncToast(msg, ok);         // synchro auto : silencieuse
+  }, wait);
 }
 
 // ── Résiliation de compte (traitée par l'administrateur) ──
