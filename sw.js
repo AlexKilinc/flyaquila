@@ -6,7 +6,7 @@
 // suivant. Les polices Google sont mises en cache à la volée au premier
 // chargement en ligne, puis servies hors-ligne.
 
-const CACHE = 'aquila-at01-v2';
+const CACHE = 'aquila-at01-v3';
 const CORE = ['./', './index.html'];
 // SDK Supabase (auth cloud) : précaché pour que l'app démarre aussi hors-ligne
 const SDK_URL = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
@@ -40,6 +40,33 @@ self.addEventListener('fetch', (event) => {
   const isFont = url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com';
   const isSdk = url.hostname === 'cdn.jsdelivr.net';
   if (!sameOrigin && !isFont && !isSdk) return;
+
+  // Navigations (ouverture de l'app) : RÉSEAU D'ABORD pour que les mises à
+  // jour apparaissent immédiatement ; repli sur le cache si hors-ligne ou si
+  // le réseau met plus de 3 s (l'app démarre alors sur la version en cache).
+  if (req.mode === 'navigate') {
+    event.respondWith((async () => {
+      const cached = await caches.match('./index.html');
+      try {
+        const net = await Promise.race([
+          fetch(req),
+          new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 3000))
+        ]);
+        if (net && net.ok) {
+          const c1 = net.clone(), c2 = net.clone();
+          caches.open(CACHE).then((c) => {
+            c.put('./index.html', c1).catch(() => {});
+            c.put('./', c2).catch(() => {});
+          }).catch(() => {});
+          return net;
+        }
+        throw new Error('réponse invalide');
+      } catch (e) {
+        return cached || fetch(req);
+      }
+    })());
+    return;
+  }
 
   // Cache d'abord (démarrage instantané et hors-ligne), réseau en arrière-plan
   // pour rafraîchir le cache quand une connexion existe.
