@@ -672,7 +672,9 @@ canvas{display:block;max-width:100%;}
 }
 
 @media(max-width:480px){
-  #header{padding:8px 10px;gap:7px;flex-wrap:wrap;}
+  #header{padding:8px 10px;gap:7px;flex-wrap:wrap;
+    /* bandeau bleu marine prolongé sous la Dynamic Island / barre d'état iOS */
+    padding-top:calc(8px + env(safe-area-inset-top, 0px));}
   #header h1{font-size:13px;}
   #header .sub{font-size:10px;}
   #header-warn{font-size:0;padding:5px 7px;min-height:34px;}
@@ -704,18 +706,23 @@ canvas{display:block;max-width:100%;}
   }
 
   /* ===== BARRE AVION - MOBILE ===== */
+  /* Tous les avions alignés sur UNE seule ligne (4, 5 ou 6 boutons :
+     ils se partagent la largeur automatiquement) */
   #avion-bar{
-    flex-direction:column;
+    flex-direction:row;
+    flex-wrap:wrap;
     align-items:stretch;
-    gap:8px;
+    gap:6px;
     padding:8px 10px;
   }
-  /* Ligne 1 : Avion + boutons avion + conso */
   #avion-bar > label{display:none;} /* Masquer "Avion :" */
   .avion-btn{
-    padding:6px 10px;
+    flex:1 1 0;
+    min-width:0;
+    padding:6px 4px;
     font-size:11px;
     min-height:32px;
+    text-align:center;
   }
   
   /* Ligne 2 : Date + CDB + Dép + Arr + PDF */
@@ -807,18 +814,19 @@ canvas{display:block;max-width:100%;}
     font-size: 9px !important;
     margin-left: 2px !important;
   }
-  /* Boutons PDF + Enregistrer côte à côte sur la dernière ligne */
-  #avion-bar-right > button:nth-last-child(2),
-  #avion-bar-right > button:last-child{
+  /* Dernière ligne : PDF + Enregistrer + nuage + infos côte à côte */
+  #bar-actions{
+    grid-column: 1 / -1;
+    display:flex;
+    gap:6px;
+    align-items:center;
+  }
+  #bar-actions > #btn-pdf-bar,
+  #bar-actions > button[onclick="saveToHistoryOnly()"]{
+    flex:1;
     padding:8px 8px !important;
     font-size:12px !important;
     justify-content:center;
-  }
-  #avion-bar-right > button:nth-last-child(2){
-    grid-column: 1 / span 1;
-  }
-  #avion-bar-right > button:last-child{
-    grid-column: 2 / -1;
   }
 
   /* Prépa: 1 colonne */
@@ -839,7 +847,7 @@ canvas{display:block;max-width:100%;}
 
 /* ===== RESPONSIVE TABLETTE (481px–860px iPad mini/portrait) ===== */
 @media(min-width:481px) and (max-width:860px){
-  #header{padding:8px 14px;flex-wrap:wrap;}
+  #header{padding:8px 14px;flex-wrap:wrap;padding-top:calc(8px + env(safe-area-inset-top, 0px));}
   #header h1{font-size:15px;}
   /* Badge AIRAC masqué : info montrée au lancement dans START */
   #header-airac{display:none;}
@@ -1103,6 +1111,9 @@ canvas{display:block;max-width:100%;}
 #login-screen .sound-toggle svg{width:15px;height:15px;display:block;fill:currentColor}
 @keyframes loginSpin{to{transform:rotate(360deg)}}
 @keyframes syncSpin{to{transform:rotate(360deg)}}
+/* ℹ/nuage : paire du bandeau sur grand écran, paire de la barre avion sur mobile */
+@media(min-width:861px){ #btn-sync-m, #btn-info-m{display:none !important;} }
+@media(max-width:860px){ #btn-sync, #btn-info{display:none !important;} }
 .sync-spin{animation:syncSpin 1s linear infinite;transform-origin:center;}
 /* Titre au-dessus des champs */
 .login-head{text-align:center;margin-bottom:24px}
@@ -1811,10 +1822,10 @@ canvas{display:block;max-width:100%;}
     <!-- Bouton rond Synchronisation cloud : bordure rouge = modifications non
          synchronisées, verte = synchronisé (synchro auto au lancement puis
          toutes les 5 min, silencieuse ; clic = synchro manuelle avec message) -->
-    <button class="hdr-btn" id="btn-sync" onclick="doCloudSync()" title="Synchronisation cloud"
+    <button class="hdr-btn btn-sync-state" id="btn-sync" onclick="doCloudSync()" title="Synchronisation cloud"
       style="border-radius:50%;width:34px;padding:0;justify-content:center;border-color:#e94560;border-width:2px;">
-      <svg id="sync-ic-cloud" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
-      <svg id="sync-ic-spin" class="sync-spin" style="display:none" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"/></svg>
+      <svg id="sync-ic-cloud" class="sync-ic-cloud" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
+      <svg id="sync-ic-spin" class="sync-ic-spin sync-spin" style="display:none" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"/></svg>
     </button>
     <!-- Bouton rond Information / mentions légales -->
     <button class="hdr-btn" id="btn-info" onclick="showLegalInfo()" title="Informations &amp; mentions légales"
@@ -1925,7 +1936,8 @@ canvas{display:block;max-width:100%;}
         <span id="qnh-zp-arr-lbl" style="font-size:10px;color:#a0aec0;white-space:nowrap;display:none;margin-left:4px;">→&nbsp;ZP&nbsp;<strong id="qnh-zp-arr-val" style="color:#fff;"></strong>&nbsp;ft</span>
       </div>
     </fieldset>
-    <button onclick="printPreparation()" title="Exporter en PDF (et enregistrer dans l'historique)"
+    <div id="bar-actions" style="display:flex;gap:6px;align-items:center;">
+    <button id="btn-pdf-bar" onclick="printPreparation()" title="Exporter en PDF (et enregistrer dans l'historique)"
       style="padding:6px 10px;background:#e94560;color:white;border:none;border-radius:6px;
              cursor:pointer;font-size:12px;font-weight:700;white-space:nowrap;min-height:32px;display:inline-flex;align-items:center;gap:4px;">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
@@ -1937,6 +1949,18 @@ canvas{display:block;max-width:100%;}
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
       <span>Enregistrer</span>
     </button>
+    <!-- Synchronisation cloud (mobile) : mêmes fonctions que le bouton du bandeau -->
+    <button type="button" id="btn-sync-m" class="btn-sync-state" onclick="doCloudSync()" title="Synchronisation cloud"
+      style="width:34px;height:34px;flex-shrink:0;border-radius:50%;padding:0;display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.06);border:2px solid #e94560;color:#cbd5e0;cursor:pointer;">
+      <svg class="sync-ic-cloud" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
+      <svg class="sync-ic-spin sync-spin" style="display:none" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"/></svg>
+    </button>
+    <!-- Informations & mentions légales (mobile) -->
+    <button type="button" id="btn-info-m" onclick="showLegalInfo()" title="Informations &amp; mentions légales"
+      style="width:34px;height:34px;flex-shrink:0;border-radius:50%;padding:0;display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.2);color:#a0aec0;cursor:pointer;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+    </button>
+    </div><!-- /bar-actions -->
   </div>
 </div>
 
@@ -11810,8 +11834,8 @@ const LS_ADMIN_AUTH = 'aquila_admin_auth_v1'; // Timestamp de la dernière saisi
 // ===== SUPABASE (authentification cloud) =====
 // Renseigner ces DEUX valeurs après création du projet Supabase
 // (Dashboard -> Settings -> API) :
-const SUPABASE_URL = 'REMPLACER_PAR_URL_SUPABASE';    // ex: https://xxxxxxxx.supabase.co
-const SUPABASE_KEY = 'REMPLACER_PAR_CLE_PUBLISHABLE'; // clé publishable (sb_publishable_...) — JAMAIS la clé secrète
+const SUPABASE_URL = 'https://xmqxxcurmheslgxzerzi.supabase.co';    // ex: https://xxxxxxxx.supabase.co
+const SUPABASE_KEY = 'sb_publishable_j13ZPBthfrXyAgS4rnrJsw_c3CsSSIX'; // clé publishable (sb_publishable_...) — JAMAIS la clé secrète
 let _sbClient = null;
 function _sb() {
   if (_sbClient) return _sbClient;
@@ -12614,8 +12638,9 @@ function _syncToast(message, ok) {
 let _syncDirty = true;
 function _setSyncDirty(dirty) {
   _syncDirty = !!dirty;
-  const b = document.getElementById('btn-sync');
-  if (b) b.style.borderColor = _syncDirty ? '#e94560' : '#2f855a';
+  document.querySelectorAll('.btn-sync-state').forEach(function (b) {
+    b.style.borderColor = _syncDirty ? '#e94560' : '#2f855a';
+  });
 }
 // Toute modification dans l'app (préparation, vol, réglage) repasse le nuage en rouge
 ['input', 'change'].forEach(function (ev) {
@@ -12629,11 +12654,15 @@ setInterval(function () {
   if (CURRENT_USER && app && app.style.display !== 'none') doCloudSync(true);
 }, 5 * 60 * 1000);
 
+function _syncIcons(busy) {
+  document.querySelectorAll('.sync-ic-cloud').forEach(function (el) { el.style.display = busy ? 'none' : 'block'; });
+  document.querySelectorAll('.sync-ic-spin').forEach(function (el) { el.style.display = busy ? 'block' : 'none'; });
+}
+let _syncBusy = false;
 async function doCloudSync(auto) {
-  const icCloud = document.getElementById('sync-ic-cloud');
-  const icSpin  = document.getElementById('sync-ic-spin');
-  if (!icCloud || icSpin.style.display !== 'none') return;   // déjà en cours
-  icCloud.style.display = 'none'; icSpin.style.display = 'block';
+  if (_syncBusy) return;   // déjà en cours
+  _syncBusy = true;
+  _syncIcons(true);
   const t0 = Date.now();
   let ok = true, msg = 'Synchronisation cloud effectuée';
   try {
@@ -12646,7 +12675,7 @@ async function doCloudSync(auto) {
       if (q.data) {
         if (q.data.status !== 'approved') {
           // compte résilié / repassé en attente entre-temps : déconnexion immédiate
-          icSpin.style.display = 'none'; icCloud.style.display = 'block';
+          _syncIcons(false); _syncBusy = false;
           doLogout();
           return;
         }
@@ -12679,7 +12708,7 @@ async function doCloudSync(auto) {
   }
   const wait = Math.max(0, 1100 - (Date.now() - t0));   // rotation visible au moins ~1 s
   setTimeout(function () {
-    icSpin.style.display = 'none'; icCloud.style.display = 'block';
+    _syncIcons(false); _syncBusy = false;
     _setSyncDirty(!ok);                     // succès -> bordure verte ; échec -> rouge
     if (!auto) _syncToast(msg, ok);         // synchro auto : silencieuse
   }, wait);
