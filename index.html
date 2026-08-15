@@ -12253,25 +12253,8 @@ async function doSignup() {
     if (/already|exist/i.test(m)) return showErr('Un compte existe déjà avec cet e-mail.');
     return showErr('Inscription refusée par le serveur : ' + m);
   }
-  // Notifier l'administrateur par e-mail (service formsubmit.co, sans clé secrète ;
-  // échec silencieux : la notification « en attente » du panneau admin reste la référence)
-  try {
-    fetch('https://formsubmit.co/ajax/' + ADMIN_EMAIL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify({
-        _subject: 'AQUILA-Club — Nouvelle inscription à valider',
-        _template: 'table',
-        Nom: name,
-        Email: email,
-        Telephone: phone,
-        Club: club,
-        Statut: statusVal === 'eleve' ? 'Élève pilote' : (statusVal === 'pilote-fi' ? 'Pilote-FI' : 'Pilote breveté'),
-        Date: new Date().toLocaleString('fr-FR'),
-        Action: 'Valider dans AQUILA → panneau Admin → Gestion des utilisateurs'
-      })
-    }).catch(function () {});
-  } catch (e) {}
+  // La notification e-mail à l'administrateur est envoyée côté serveur
+  // (trigger Postgres + Resend sur la création du profil pending).
   // Rester déconnecté tant que l'administrateur n'a pas validé
   try { await sb.auth.signOut(); } catch (e) {}
   _pendingUser = { email, name };
