@@ -12234,7 +12234,11 @@ async function doSignup() {
   try {
     res = await sb.auth.signUp({
       email, password: pwd,
-      options: { data: {
+      options: {
+        // Adresse de retour du lien de confirmation : l'app elle-même
+        // (doit figurer dans Authentication -> URL Configuration -> Redirect URLs)
+        emailRedirectTo: location.origin + location.pathname,
+        data: {
         prenom: firstname, nom: lastname, tel: phone, club,
         statut_pilote: statusVal,
         rgpd_consent_at: new Date().toISOString(),
