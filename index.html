@@ -175,13 +175,33 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e;mi
   width:1px;height:24px;background:#e2e8f0;margin:0 6px;flex-shrink:0;
 }
 .tab-btn{
-  padding:10px 13px;border:none;background:none;color:#718096;
-  cursor:pointer;font-size:12px;font-weight:600;border-bottom:3px solid transparent;
-  transition:all .2s;white-space:nowrap;margin-bottom:-2px;flex-shrink:0;
+  position:relative;
+  padding:10px 14px 13px;border:none;background:transparent;color:#64748b;
+  cursor:pointer;font-size:12px;font-weight:600;
+  border-radius:9px 9px 0 0;
+  transition:color .18s ease, background-color .18s ease;
+  white-space:nowrap;margin-bottom:-2px;flex-shrink:0;
   min-height:44px;-webkit-tap-highlight-color:transparent;touch-action:manipulation;
 }
-.tab-btn:hover{color:#1a1a2e;}
-.tab-btn.active{color:#e94560;border-bottom-color:#e94560;}
+/* Soulignement d'onglet : barre arrondie qui se déploie */
+.tab-btn::after{
+  content:'';position:absolute;left:9px;right:9px;bottom:0;height:3px;
+  background:transparent;border-radius:3px 3px 0 0;
+  opacity:0;transform:scaleX(.35);transform-origin:center bottom;
+  transition:transform .2s ease, opacity .2s ease, background-color .2s ease;
+}
+.tab-btn:hover{color:#1a1a2e;background-color:#eef2f7;}
+.tab-btn:hover::after{background:#c2ccda;opacity:1;transform:scaleX(1);}
+.tab-btn:active{background-color:#e6ebf2;}
+.tab-btn.active{
+  color:#e94560;font-weight:800;
+  background:linear-gradient(180deg,rgba(233,69,96,.10),rgba(233,69,96,0));
+}
+.tab-btn.active::after{
+  background:#e94560;opacity:1;transform:scaleX(1);
+  box-shadow:0 -2px 8px rgba(233,69,96,.45);
+}
+.tab-btn:focus-visible{outline:none;box-shadow:inset 0 0 0 2px rgba(233,69,96,.45);}
 
 /* ===== Ordre logique sur TOUS les écrans : Nav → Date → CDB → onglets ===== */
 /* Sur desktop, les éléments sont dans le DOM dans l'ordre Date|CDB|sep|Nav|onglets,
@@ -436,6 +456,55 @@ input[type="date"]{-webkit-appearance:none;appearance:none;box-sizing:border-box
   border:1px solid #e2e8f0;box-shadow:0 1px 4px rgba(0,0,0,.06);
 }
 canvas{display:block;max-width:100%;}
+
+/* ===== MOBILE — Masse & centrage =====
+   Graphique remonté juste sous « Avion sélectionné » : les courbes restent
+   visibles pendant le réglage des curseurs, les résultats passent en dernier.
+   Les encarts « Masse à vide / Bras à vide » sont compactés pour gagner de la
+   hauteur en mode portrait. */
+@media(max-width:860px){
+  #tab-centrage .two-col{display:flex;flex-direction:column;gap:12px;}
+  #tab-centrage .two-col > div,
+  #tab-centrage #centrage-right{display:contents;}
+  #tab-centrage .card{margin-bottom:0;}
+  /* Ordre : détails avion (compacts) -> curseurs -> abaque -> résultats */
+  #card-avion-centrage{order:1;}
+  #card-equipage-centrage{order:2;}
+  #card-carburant-centrage{order:3;}
+  #tab-centrage #centrage-canvas-wrap{order:4;position:static;top:auto;text-align:center;}
+  #card-resultats-centrage{order:5;}
+  /* Abaque limité en hauteur : courbes + derniers curseurs visibles ensemble */
+  #tab-centrage #cv-centrage{max-height:52vh;width:auto;max-width:100%;margin:0 auto;}
+  /* Détails avion : immatriculation, type, masse et bras à vide sur UNE ligne */
+  #card-avion-centrage{
+    display:flex !important;align-items:center;gap:8px;
+    padding:6px 9px !important;
+  }
+  #card-avion-centrage > h3{display:none !important;}
+  #centrage-avion-info{font-size:11px !important;white-space:nowrap;flex:0 0 auto;}
+  #centrage-vide-grid{
+    display:flex !important;flex:1 1 auto;min-width:0;
+    gap:6px !important;margin:0 !important;
+  }
+  #centrage-vide-grid > div{
+    flex:1 1 0;min-width:0;
+    display:flex !important;align-items:baseline;justify-content:center;
+    gap:4px;padding:4px 5px !important;white-space:nowrap;
+  }
+  #centrage-vide-grid > div > div{margin:0 !important;line-height:1.15 !important;}
+  /* Libellés raccourcis (« Masse à vide » -> « MASSE ») pour tenir sur la ligne */
+  #centrage-vide-grid > div > div:first-child{font-size:0 !important;letter-spacing:0 !important;}
+  #centrage-vide-grid > div:nth-child(1) > div:first-child::after{content:"MASSE";font-size:8.5px;letter-spacing:.2px;}
+  #centrage-vide-grid > div:nth-child(2) > div:first-child::after{content:"BRAS";font-size:8.5px;letter-spacing:.2px;}
+  #centrage-vide-grid > div > div:nth-child(2){font-size:14px !important;}
+  #centrage-vide-grid > div > div:last-child{font-size:8.5px !important;}
+}
+
+/* Masse & centrage : abaque + résultats côte à côte (résultats à droite des courbes) */
+#centrage-right{display:grid;grid-template-columns:auto minmax(250px,1fr);gap:12px;align-items:start;}
+#centrage-right > #centrage-canvas-wrap{min-width:0;}
+/* Pas assez de largeur pour deux colonnes : les résultats passent sous l'abaque */
+@media(max-width:1200px){ #centrage-right{grid-template-columns:1fr;} }
 
 /* ===== RÉSULTATS CENTRAGE — unifié avec res-box ===== */
 .result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;}
@@ -2184,10 +2253,10 @@ canvas{display:block;max-width:100%;}
 <div id="tab-centrage" class="tab-content">
   <div class="two-col">
     <div>
-      <div class="card">
+      <div class="card" id="card-avion-centrage">
         <h3>Avion sélectionné</h3>
         <div id="centrage-avion-info" style="font-size:13px;color:#718096;">—</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;">
+        <div id="centrage-vide-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;">
           <div style="background:#f7f8fa;border:1px solid #e2e8f0;border-radius:6px;padding:8px;text-align:center;">
             <div style="font-size:10px;color:#718096;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;">Masse à vide</div>
             <div style="font-size:20px;font-weight:800;color:#1a1a2e;" id="disp-masse-vide">—</div>
@@ -2200,7 +2269,7 @@ canvas{display:block;max-width:100%;}
           </div>
         </div>
       </div>
-      <div class="card">
+      <div class="card" id="card-equipage-centrage">
         <h3>Équipage &amp; Charge</h3>
         <div class="sl-row"><label>Pilote (gauche) <span id="lbl-p1">80 kg</span></label>
           <input type="range" id="sl-p1" min="0" max="130" value="75" step="1" oninput="updateCentrage()"></div>
@@ -2209,7 +2278,7 @@ canvas{display:block;max-width:100%;}
         <div class="sl-row"><label>Bagages <span id="lbl-bag">5 kg</span></label>
           <input type="range" id="sl-bag" min="0" max="30" value="10" step="1" oninput="updateCentrage()"></div>
       </div>
-      <div class="card">
+      <div class="card" id="card-carburant-centrage">
         <h3>Carburant</h3>
         <div class="sl-row">
           <label>
@@ -2246,54 +2315,57 @@ canvas{display:block;max-width:100%;}
           <input type="range" id="sl-ess-arr" min="0" max="109" value="20" step="1"
             oninput="this._userEdited=true;setEssMode('arr','manuel');updateCentrage()"></div>
       </div>
-      <div class="card">
-        <h3>Résultats centrage</h3>
-
-        <!-- Départ -->
-        <div style="margin-bottom:10px;">
-          <div style="font-size:10px;font-weight:700;color:#3182ce;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;display:flex;align-items:center;gap:8px;">
-            Au départ <span id="badge-dep" class="badge" style="font-size:11px;">—</span>
-          </div>
-          <div class="res-grid">
-            <div class="res-box" id="rb-masse-dep" style="border-top:3px solid #3182ce;">
-              <div class="rl">Masse départ</div>
-              <div class="rv" id="rv-masse-dep" style="color:#3182ce;">—</div>
-              <div class="ru">kg</div>
-            </div>
-            <div class="res-box" id="rb-cg-dep" style="border-top:3px solid #3182ce;">
-              <div class="rl">CG départ</div>
-              <div class="rv" id="rv-cg-dep" style="color:#3182ce;">—</div>
-              <div class="ru">mm</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Arrivée -->
-        <div>
-          <div style="font-size:10px;font-weight:700;color:#805ad5;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;display:flex;align-items:center;gap:8px;">
-            À l'arrivée <span id="badge-arr" class="badge" style="font-size:11px;">—</span>
-          </div>
-          <div class="res-grid">
-            <div class="res-box" id="rb-masse-arr" style="border-top:3px solid #805ad5;">
-              <div class="rl">Masse arrivée</div>
-              <div class="rv" id="rv-masse-arr" style="color:#805ad5;">—</div>
-              <div class="ru">kg</div>
-            </div>
-            <div class="res-box" id="rb-cg-arr" style="border-top:3px solid #805ad5;">
-              <div class="rl">CG arrivée</div>
-              <div class="rv" id="rv-cg-arr" style="color:#805ad5;">—</div>
-              <div class="ru">mm</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Limites -->
-        <div style="margin-top:10px;padding:7px 10px;background:#f7f8fa;border-radius:6px;font-size:11px;color:#718096;border-left:3px solid #e2e8f0;">
-          Limites CG : <strong style="color:#1a1a2e;">427–523 mm</strong> · MTOW : <strong style="color:#1a1a2e;">750 kg</strong>
-        </div>
-      </div>
     </div>
-    <div id="centrage-canvas-wrap" style="align-self:start;position:sticky;top:12px;"><canvas id="cv-centrage"></canvas></div>
+    <!-- Colonne droite : abaque de centrage + résultats à sa droite -->
+    <div id="centrage-right">
+      <div id="centrage-canvas-wrap" style="align-self:start;position:sticky;top:12px;"><canvas id="cv-centrage"></canvas></div>
+        <div class="card" id="card-resultats-centrage" style="margin:0;">
+          <h3>Résultats centrage</h3>
+
+          <!-- Départ -->
+          <div style="margin-bottom:10px;">
+            <div style="font-size:10px;font-weight:700;color:#3182ce;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;display:flex;align-items:center;gap:8px;">
+              Au départ <span id="badge-dep" class="badge" style="font-size:11px;">—</span>
+            </div>
+            <div class="res-grid">
+              <div class="res-box" id="rb-masse-dep" style="border-top:3px solid #3182ce;">
+                <div class="rl">Masse départ</div>
+                <div class="rv" id="rv-masse-dep" style="color:#3182ce;">—</div>
+                <div class="ru">kg</div>
+              </div>
+              <div class="res-box" id="rb-cg-dep" style="border-top:3px solid #3182ce;">
+                <div class="rl">CG départ</div>
+                <div class="rv" id="rv-cg-dep" style="color:#3182ce;">—</div>
+                <div class="ru">mm</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Arrivée -->
+          <div>
+            <div style="font-size:10px;font-weight:700;color:#805ad5;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;display:flex;align-items:center;gap:8px;">
+              À l'arrivée <span id="badge-arr" class="badge" style="font-size:11px;">—</span>
+            </div>
+            <div class="res-grid">
+              <div class="res-box" id="rb-masse-arr" style="border-top:3px solid #805ad5;">
+                <div class="rl">Masse arrivée</div>
+                <div class="rv" id="rv-masse-arr" style="color:#805ad5;">—</div>
+                <div class="ru">kg</div>
+              </div>
+              <div class="res-box" id="rb-cg-arr" style="border-top:3px solid #805ad5;">
+                <div class="rl">CG arrivée</div>
+                <div class="rv" id="rv-cg-arr" style="color:#805ad5;">—</div>
+                <div class="ru">mm</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Limites -->
+          <div style="margin-top:10px;padding:7px 10px;background:#f7f8fa;border-radius:6px;font-size:11px;color:#718096;border-left:3px solid #e2e8f0;">
+            Limites CG : <strong style="color:#1a1a2e;">427–523 mm</strong> · MTOW : <strong style="color:#1a1a2e;">750 kg</strong>
+          </div>
+        </div>
+    </div>
   </div>
 </div>
 
@@ -5076,12 +5148,12 @@ function updateCentrage(){
   const bd=document.getElementById('badge-dep'),ba=document.getElementById('badge-arr');
   if(bd){bd.textContent=depOk?'✓ OK':'⚠ HORS LIMITES';bd.className='badge '+(depOk?'ok':'error');}
   if(ba){ba.textContent=arrOk?'✓ OK':'⚠ HORS LIMITES';ba.className='badge '+(arrOk?'ok':'error');}
-  drawCentrage(momDep,mDep,momArr,mArr);
+  drawCentrage(momDep,mDep,momArr,mArr,{cgDep:cgDep,cgArr:cgArr,depOk:depOk,arrOk:arrOk});
   // Propage la masse calculée vers les onglets Décollage / Atterrissage
   if(typeof syncMassesFromCentrage === 'function') syncMassesFromCentrage();
 }
 
-function drawCentrage(momDep,mDep,momArr,mArr){
+function drawCentrage(momDep,mDep,momArr,mArr,res){
   const cv=document.getElementById('cv-centrage');
   if(!CENTRAGE_IMG.complete||!CENTRAGE_IMG.naturalWidth)return;
   // Reduire a 42% de la taille originale
@@ -5103,7 +5175,68 @@ function drawCentrage(momDep,mDep,momArr,mArr){
     ctx.beginPath();ctx.moveTo(p.x,p.y-11);ctx.lineTo(p.x,p.y+11);ctx.stroke();
     ctx.beginPath();ctx.arc(p.x,p.y,5,0,Math.PI*2);
     ctx.fillStyle=p.col;ctx.fill();ctx.strokeStyle='white';ctx.lineWidth=2;ctx.stroke();
-    ctx.fillStyle='#1a1a2e';ctx.font='bold 11px Arial';ctx.fillText(p.lbl,p.x+8,p.y-4);
+  });
+  // Résultats affichés en transparence sur l'abaque, près de chaque point
+  if(res) drawCentrageOverlay(ctx,cv,pts,mDep,mArr,res);
+}
+
+// Étiquettes translucides « masse / CG » posées sur les courbes, à côté des
+// points Départ et Arrivée (en complément du tableau de résultats).
+function _roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.closePath();
+}
+function drawCentrageOverlay(ctx,cv,pts,mDep,mArr,res){
+  const F_TIT='bold 13px Arial', F_VAL='bold 21px Arial', F_ST='bold 12px Arial';
+  const items=[
+    {p:pts[0],tit:'DÉPART', val:Math.round(mDep)+' kg  ·  '+Math.round(res.cgDep)+' mm', ok:res.depOk, col:'#2f855a'},
+    {p:pts[1],tit:'ARRIVÉE',val:Math.round(mArr)+' kg  ·  '+Math.round(res.cgArr)+' mm', ok:res.arrOk, col:'#c53030'}
+  ];
+  const boxes=[];
+  items.forEach((it,i)=>{
+    const st=it.ok?'OK':'HORS LIM.';
+    ctx.font=F_VAL; const wVal=ctx.measureText(it.val).width;
+    ctx.font=F_TIT; const wTit=ctx.measureText(it.tit).width;
+    ctx.font=F_ST;  const wSt=ctx.measureText(st).width;
+    const padX=9,padY=7,gap=12;
+    const w=Math.round(Math.max(wVal,wTit+gap+wSt))+padX*2;
+    const h=13+5+21+padY*2;
+    // à droite du point si la place le permet, sinon à gauche
+    let x=it.p.x+18, y=it.p.y-h/2;
+    if(x+w>cv.width-6) x=it.p.x-18-w;
+    x=Math.max(6,Math.min(x,cv.width-w-6));
+    y=Math.max(6,Math.min(y,cv.height-h-6));
+    // éviter le chevauchement avec l'étiquette précédente
+    boxes.forEach(b=>{
+      if(x<b.x+b.w && x+w>b.x && y<b.y+b.h && y+h>b.y){
+        y=(it.p.y>=b.y)?Math.min(b.y+b.h+6,cv.height-h-6):Math.max(6,b.y-h-6);
+      }
+    });
+    boxes.push({x:x,y:y,w:w,h:h});
+    // trait de rappel point -> étiquette
+    ctx.save();
+    ctx.strokeStyle=it.p.col; ctx.globalAlpha=.55; ctx.lineWidth=1.4;
+    ctx.beginPath(); ctx.moveTo(it.p.x,it.p.y);
+    ctx.lineTo(x>it.p.x?x:x+w, y+h/2); ctx.stroke();
+    ctx.restore();
+    // fond translucide
+    _roundRect(ctx,x,y,w,h,7);
+    ctx.fillStyle='rgba(255,255,255,.82)'; ctx.fill();
+    ctx.strokeStyle=it.p.col; ctx.lineWidth=1.6; ctx.stroke();
+    // textes
+    ctx.textBaseline='top';
+    ctx.font=F_TIT; ctx.fillStyle=it.p.col;
+    ctx.fillText(it.tit,x+padX,y+padY);
+    ctx.font=F_ST; ctx.fillStyle=it.ok?'#2f855a':'#c53030';
+    ctx.fillText(st,x+w-padX-ctx.measureText(st).width,y+padY+1);
+    ctx.font=F_VAL; ctx.fillStyle=it.ok?'#1a1a2e':'#c53030';
+    ctx.fillText(it.val,x+padX,y+padY+18);
+    ctx.textBaseline='alphabetic';
   });
 }
 
