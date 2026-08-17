@@ -1831,6 +1831,11 @@ canvas{display:block;max-width:100%;}
         style="width:100%;margin-top:12px;padding:11px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);border-radius:8px;color:#e2e8f0;font-size:13px;font-weight:700;cursor:pointer;">
         Fermer
       </button>
+
+      <div style="margin-top:14px;padding-top:10px;border-top:1px solid #2a3556;text-align:center;
+                  font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.08em;color:#5b7099;">
+        AQUILA-App — version publiée <span id="legal-version" style="color:#90cdf4;font-weight:700;">—</span>
+      </div>
     </div>
   </div>
 
@@ -11964,6 +11969,11 @@ const LS_AUTH    = 'aquila_auth_v1';
 const LS_USERS   = 'aquila_users_v1';
 const LS_ADMIN_AUTH = 'aquila_admin_auth_v1'; // Timestamp de la dernière saisie correcte du mdp Admin (bypass 5 min)
 
+// ===== VERSION PUBLIÉE =====
+// Format : mois-année-itération. À incrémenter à CHAQUE publication ;
+// affichée en bas de la fenêtre « Informations & mentions légales ».
+const APP_VERSION = '08-26-22';
+
 // ===== SUPABASE (authentification cloud) =====
 // Renseigner ces DEUX valeurs après création du projet Supabase
 // (Dashboard -> Settings -> API) :
@@ -12731,6 +12741,8 @@ function hideProfile() {
 
 // ── Informations & mentions légales ──
 function showLegalInfo() {
+  const v = document.getElementById('legal-version');
+  if (v) v.textContent = APP_VERSION;
   const m = document.getElementById('legal-modal');
   if (m) { m.style.display = 'block'; document.body.style.overflow = 'hidden'; }
 }
@@ -12755,24 +12767,41 @@ function _syncToast(message, ok) {
 }
 // État de synchronisation : true = des modifications locales n'ont pas encore
 // été synchronisées (bordure rouge) ; false = à jour (bordure verte).
-let _syncDirty = true;
+let _syncDirty = true, _syncChangeTimer = null;
 function _setSyncDirty(dirty) {
   _syncDirty = !!dirty;
   document.querySelectorAll('.btn-sync-state').forEach(function (b) {
     b.style.borderColor = _syncDirty ? '#e94560' : '#2f855a';
   });
 }
-// Toute modification dans l'app (préparation, vol, réglage) repasse le nuage en rouge
+// Vrai quand un utilisateur est connecté et que l'app (pas l'écran de connexion) est affichée
+function _syncAppReady() {
+  const app = document.getElementById('app-wrapper');
+  return !!(CURRENT_USER && app && app.style.display !== 'none');
+}
+// Toute modification dans l'app (préparation, vol, réglage) repasse le nuage en
+// rouge et déclenche une synchronisation automatique, différée de 2,5 s après la
+// DERNIÈRE saisie : un glissement de curseur ne provoque qu'un seul envoi.
 ['input', 'change'].forEach(function (ev) {
   document.addEventListener(ev, function (e) {
-    if (e.target && e.target.closest && e.target.closest('#app-wrapper')) _setSyncDirty(true);
+    if (!(e.target && e.target.closest && e.target.closest('#app-wrapper'))) return;
+    _setSyncDirty(true);
+    clearTimeout(_syncChangeTimer);
+    _syncChangeTimer = setTimeout(function () {
+      if (_syncAppReady() && _syncDirty) doCloudSync(true);
+    }, 2500);
   }, true);
 });
 // Synchro automatique toutes les 5 minutes (silencieuse), quand on est connecté
-setInterval(function () {
-  const app = document.getElementById('app-wrapper');
-  if (CURRENT_USER && app && app.style.display !== 'none') doCloudSync(true);
-}, 5 * 60 * 1000);
+setInterval(function () { if (_syncAppReady()) doCloudSync(true); }, 5 * 60 * 1000);
+// Retour de l'app au premier plan (PWA iOS : la page n'est pas rechargée)
+document.addEventListener('visibilitychange', function () {
+  if (!document.hidden && _syncAppReady() && _syncDirty) doCloudSync(true);
+});
+// Retour du réseau après une coupure : on rattrape la synchronisation en attente
+window.addEventListener('online', function () {
+  if (_syncAppReady() && _syncDirty) doCloudSync(true);
+});
 
 function _syncIcons(busy) {
   document.querySelectorAll('.sync-ic-cloud').forEach(function (el) { el.style.display = busy ? 'none' : 'block'; });
