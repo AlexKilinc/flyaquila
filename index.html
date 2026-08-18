@@ -330,7 +330,10 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e;mi
     display:grid;
     grid-template-columns:repeat(12, 1fr);
     gap:8px 6px;
-    padding:10px 8px 4px 8px;
+    /* Marge basse : la 2e rangée de languettes ne doit pas venir toucher le
+       bord inférieur de la barre (sa bordure et son ombre débordaient sur le
+       contenu). */
+    padding:6px 8px 9px 8px;
     margin-top:8px;        /* espace entre le bandeau bleu et Navigations vers */
     overflow-x:visible;
     align-items:center;
@@ -594,6 +597,41 @@ canvas{display:block;max-width:100%;}
 /* Masse & centrage : abaque + résultats côte à côte (résultats à droite des courbes) */
 /* Abaque a gauche, resultats a droite — la colonne de resultats a EXACTEMENT
    la meme largeur (320px) que la colonne de cartes situee a gauche de l'abaque. */
+/* Boutons SAVE et PDF de largeur identique (le libellé court « SAVE » permet
+   de les aligner sans créer de ligne supplémentaire). */
+#bar-actions > #btn-pdf-bar,
+#bar-actions > button[onclick="saveToHistoryOnly()"]{
+  min-width:86px;justify-content:center;box-sizing:border-box;
+}
+/* Sur tablette, la rangée d'actions rejoint la ligne des immatriculations :
+   le libellé « Aquila AT01 : » s'efface et les boutons se resserrent pour que
+   START, SAVE et PDF tiennent sur cette même ligne, sans en créer une autre. */
+#avion-bar > #bar-actions{ margin-left:auto; }
+@media (min-width:700px) and (max-width:1100px){
+  #avion-bar > label{ display:none; }
+  #avion-bar > .avion-btn{ padding:6px 10px;font-size:11px; }
+  #avion-bar > #bar-actions{ gap:5px; }
+  #avion-bar > #bar-actions > #btn-pdf-bar,
+  #avion-bar > #bar-actions > button[onclick="saveToHistoryOnly()"]{
+    min-width:72px;padding:6px 8px !important;font-size:12px !important;
+  }
+  #avion-bar > #btn-start{ width:auto !important;padding:5px 12px !important; }
+  #avion-bar > #avion-bar-right{ margin-left:0;width:100%; }
+}
+/* iPad mini / iPad portrait étroit : resserrage supplémentaire pour tenir. */
+@media (min-width:700px) and (max-width:820px){
+  #avion-bar{ gap:6px; }
+  #avion-bar > .avion-btn{ padding:6px 7px;font-size:11px;letter-spacing:0; }
+  #avion-bar > #btn-start{ padding:5px 9px !important;font-size:11px !important; }
+  #avion-bar > #bar-actions{ gap:4px; }
+  #avion-bar > #bar-actions > #btn-pdf-bar,
+  #avion-bar > #bar-actions > button[onclick="saveToHistoryOnly()"]{
+    width:64px;min-width:64px;padding:6px 4px !important;
+  }
+  #avion-bar > #bar-actions > #btn-sync-m,
+  #avion-bar > #bar-actions > #btn-info-m{ width:30px;height:30px; }
+}
+
 #centrage-right{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:12px;align-items:start;}
 /* L'abaque garde sa taille propre et reste centre dans sa colonne. */
 #centrage-right > #centrage-canvas-wrap{min-width:0;}
@@ -841,16 +879,32 @@ canvas{display:block;max-width:100%;}
     padding-top:calc(8px + env(safe-area-inset-top, 0px));}
   #header h1{font-size:13px;}
   #header .sub{font-size:10px;}
-  #header-warn{font-size:0;padding:5px 7px;min-height:34px;}
+  /* Le cartouche d'avertissement rejoint la 1re ligne (place libérée par le
+     bouton START) : pictogramme seul, cliquable — le message s'affiche au
+     centre de l'écran au clic. */
+  #header-warn{font-size:0;padding:5px 7px;min-height:34px;cursor:pointer;flex:0 0 auto;}
   #header-warn span{display:none;}
   #header-warn svg{margin:0;}
+  /* Bandeau d'accueil : au démarrage, le message occupe pendant 3 s une ligne
+     à lui, centrée, AU-DESSUS de la première ligne — le logo AQUILA App reste
+     visible. */
+  #cdb-intro{
+    order:-1;flex:1 1 100%;min-width:0;
+    display:flex;align-items:center;justify-content:center;gap:6px;text-align:center;
+    background:rgba(255,255,255,0.08);border:1px solid rgba(255,200,0,0.4);
+    border-radius:6px;padding:6px 10px;font-size:10px;color:#fbd38d;line-height:1.3;
+  }
+  #cdb-intro svg{flex-shrink:0;}
+  #cdb-intro .cdb-sub{color:#a0aec0;font-size:9px;}
   /* Badge AIRAC masqué sur petit écran : l'info défile dans le bouton START au lancement */
   #header-airac{display:none;}
 
   #avion-bar{padding:6px 10px;gap:5px;}
   .avion-btn{padding:5px 9px;font-size:11px;}
 
-  #tabs{padding:0 4px;}
+  /* Uniquement les marges latérales : les marges haute et basse de la grille
+     d'onglets (ci-dessus) doivent être conservées. */
+  #tabs{padding-left:6px;padding-right:6px;}
   .tab-btn{padding:9px 9px;font-size:11px;}
 
   .tab-content{padding:10px 10px;}
@@ -1016,10 +1070,29 @@ canvas{display:block;max-width:100%;}
   }
   #bar-actions > #btn-pdf-bar,
   #bar-actions > button[onclick="saveToHistoryOnly()"]{
-    flex:1;
-    padding:8px 8px !important;
+    flex:1 1 0;
+    min-width:0;
+    padding:8px 6px !important;
     font-size:12px !important;
     justify-content:center;
+  }
+  /* START rejoint la rangée d'actions, à gauche d'Enregistrer et PDF, sans
+     créer de ligne supplémentaire : il garde sa largeur propre, les deux
+     autres se partagent le reste. */
+  #bar-actions > #btn-start{
+    order:-1;
+    flex:0 0 auto;
+    width:auto !important;
+    padding:8px 10px !important;
+    font-size:12px !important;
+    min-height:34px;
+    border-radius:6px;
+  }
+  /* Écrans très étroits : libellés PDF / Enregistrer masqués (icônes seules)
+     pour que les cinq boutons tiennent sur une seule ligne. */
+  @media (max-width:359px){
+    #bar-actions > #btn-pdf-bar > span,
+    #bar-actions > button[onclick="saveToHistoryOnly()"] > span{display:none;}
   }
 
   /* Prépa: 1 colonne */
@@ -1970,14 +2043,14 @@ canvas{display:block;max-width:100%;}
 <!-- BANDEAU BLEU MARINE -->
 <div id="header">
   <span class="logo-tag">AQUILA</span>
-  <div>
+  <div id="header-title">
     <h1>App</h1>
   </div>
   <div id="header-airac" title="Origine des données aérodromes / AIRAC utilisées">
     <span class="airac-label">DONNÉES</span><span class="airac-val">XML AIRAC 08/26</span>
   </div>
   <div id="header-right">
-    <div id="header-warn">
+    <div id="header-warn" onclick="showCdbWarning()" title="Le CDB est responsable de ses calculs — Manuel de Vol">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
       <span class="header-warn-text"><span class="header-warn-marquee"><strong>Le CDB est responsable de ses calculs</strong> <span class="header-warn-sub" style="color:#a0aec0;font-size:9px;">· Manuel de Vol</span></span></span>
     </div>
@@ -2135,17 +2208,17 @@ canvas{display:block;max-width:100%;}
       </div>
     </fieldset>
     <div id="bar-actions" style="display:flex;gap:6px;align-items:center;">
+    <button onclick="saveToHistoryOnly()" title="Enregistrer dans l'historique (sans PDF)"
+      style="padding:6px 10px;background:#16213e;color:#fff;border:1px solid #2c5282;border-radius:6px;
+             cursor:pointer;font-size:12px;font-weight:700;white-space:nowrap;min-height:32px;display:inline-flex;align-items:center;gap:4px;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+      <span>SAVE</span>
+    </button>
     <button id="btn-pdf-bar" onclick="printPreparation()" title="Exporter en PDF (et enregistrer dans l'historique)"
       style="padding:6px 10px;background:#e94560;color:white;border:none;border-radius:6px;
              cursor:pointer;font-size:12px;font-weight:700;white-space:nowrap;min-height:32px;display:inline-flex;align-items:center;gap:4px;">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
       <span>PDF</span>
-    </button>
-    <button onclick="saveToHistoryOnly()" title="Enregistrer dans l'historique (sans PDF)"
-      style="padding:6px 10px;background:#16213e;color:#fff;border:1px solid #2c5282;border-radius:6px;
-             cursor:pointer;font-size:12px;font-weight:700;white-space:nowrap;min-height:32px;display:inline-flex;align-items:center;gap:4px;">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-      <span>Enregistrer</span>
     </button>
     <!-- Synchronisation cloud (mobile) : mêmes fonctions que le bouton du bandeau -->
     <button type="button" id="btn-sync-m" class="btn-sync-state" onclick="doCloudSync()" title="Synchronisation cloud"
@@ -12113,7 +12186,7 @@ const LS_ADMIN_AUTH = 'aquila_admin_auth_v1'; // Timestamp de la dernière saisi
 // ===== VERSION PUBLIÉE =====
 // Format : mois-année-itération. À incrémenter à CHAQUE publication ;
 // affichée en bas de la fenêtre « Informations & mentions légales ».
-const APP_VERSION = '08-26-37';
+const APP_VERSION = '08-26-40';
 
 // ===== SUPABASE (authentification cloud) =====
 // Renseigner ces DEUX valeurs après création du projet Supabase
@@ -12689,12 +12762,86 @@ function showApp() {
   // Nuage : rouge au lancement, puis synchro automatique (silencieuse) -> vert
   _setSyncDirty(true);
   setTimeout(function () { try { doCloudSync(true); } catch (e) {} }, 1500);
+  layoutResponsiveBar();
   playStartAiracIntro();
+  playCdbWarnIntro();
 }
 
 // Au lancement (petit écran), faire défiler l'origine des données AIRAC dans le
 // bouton START, puis rétablir le texte « START ». Sur grand écran, le badge
 // #header-airac reste affiché en permanence et on ne joue pas l'animation.
+// Placement responsive des commandes du bandeau :
+//  • ordinateur/tablette : le bouton START ouvre la 2e ligne, collé à gauche ;
+//    le cartouche d'avertissement reste dans le bandeau, à droite.
+//  • mobile : START rejoint la rangée d'actions (START, Enregistrer, PDF) et
+//    le cartouche d'avertissement remonte sur la 1re ligne, à la place
+//    libérée par START.
+function layoutResponsiveBar() {
+  try {
+    const mq = (q) => !!(window.matchMedia && window.matchMedia(q).matches);
+    const mobile   = mq('(max-width:480px)');
+    // Plage « tablette » (iPad mini 744 → iPad paysage) : la rangée d'actions
+    // remonte sur la ligne des immatriculations.
+    const tablette = mq('(min-width:700px) and (max-width:1100px)');
+    const start = document.getElementById('btn-start');
+    const bar   = document.getElementById('avion-bar');
+    const acts  = document.getElementById('bar-actions');
+    const right = document.getElementById('avion-bar-right');
+    if (start && bar && acts) {
+      const cible = mobile ? acts : bar;
+      if (start.parentElement !== cible) cible.insertBefore(start, cible.firstChild);
+    }
+    // Tablette : START, SAVE et PDF restent sur la ligne des immatriculations
+    // (la rangée d'actions devient un enfant direct de la barre avion) ;
+    // ailleurs elle reprend sa place à droite de la ligne des aérodromes.
+    if (acts && bar && right) {
+      if (tablette) {
+        // juste avant le bloc des aérodromes -> même ligne que les immats
+        if (acts.parentElement !== bar || acts.nextElementSibling !== right) bar.insertBefore(acts, right);
+      } else if (acts.parentElement !== right) {
+        right.appendChild(acts);
+      }
+    }
+  } catch (e) {}
+}
+window.addEventListener('resize', function () {
+  clearTimeout(window._layoutBarT);
+  window._layoutBarT = setTimeout(layoutResponsiveBar, 150);
+});
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', layoutResponsiveBar);
+} else {
+  layoutResponsiveBar();
+}
+
+// Message d'avertissement affiché au centre de l'écran (clic sur le picto).
+function showCdbWarning() {
+  _syncToast('Le CDB est responsable de ses calculs · Manuel de Vol', 'warn');
+}
+
+// Au démarrage sur mobile : le cartouche d'avertissement occupe pendant 5 s la
+// place du logo « AQUILA App » en affichant le message en entier, puis le logo
+// revient et seul le pictogramme reste (cliquable).
+function playCdbWarnIntro() {
+  try {
+    const h = document.getElementById('header');
+    if (!h || h.dataset.warnIntroDone) return;
+    if (!window.matchMedia || !window.matchMedia('(max-width:480px)').matches) return;
+    h.dataset.warnIntroDone = '1';
+    const b = document.createElement('div');
+    b.id = 'cdb-intro';
+    b.innerHTML =
+      '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+      'stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+      '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>' +
+      '<line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>' +
+      '<span><strong>Le CDB est responsable de ses calculs</strong>' +
+      '<span class="cdb-sub"> \u00b7 Manuel de Vol</span></span>';
+    h.insertBefore(b, h.firstChild);
+    setTimeout(function () { try { b.remove(); } catch (e) {} }, 3000);
+  } catch (e) {}
+}
+
 function playStartAiracIntro() {
   try {
     if (!window.matchMedia || !window.matchMedia('(max-width:860px)').matches) return;
@@ -12902,7 +13049,9 @@ function _syncToast(message, ok) {
   t.textContent = message;
   t.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:99999;max-width:86vw;text-align:center;' +
     'padding:16px 26px;border-radius:12px;font-size:14px;font-weight:700;box-shadow:0 14px 44px rgba(0,0,0,.55);opacity:1;transition:opacity .3s;' +
-    (ok ? 'background:#0E2348;border:1px solid #2f855a;color:#68d391;' : 'background:#0E2348;border:1px solid #c53030;color:#fc8181;');
+    (ok === 'warn' ? 'background:#0E2348;border:1px solid #d69e2e;color:#fbd38d;'
+     : ok ? 'background:#0E2348;border:1px solid #2f855a;color:#68d391;'
+     : 'background:#0E2348;border:1px solid #c53030;color:#fc8181;');
   clearTimeout(t._h);
   t._h = setTimeout(function () { t.style.opacity = '0'; setTimeout(function () { t.remove(); }, 350); }, 2600);
 }
