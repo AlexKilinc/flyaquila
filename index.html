@@ -1111,6 +1111,24 @@ canvas{display:block;max-width:100%;}
   #user-badge{padding:4px 6px;gap:0;}
 }
 
+/* ===== iPad PAYSAGE & écrans d'ordinateur peu larges (861px–1150px) =====
+   Le bandeau doit tenir sur UNE seule ligne : c'est #header-right qui passait
+   à deux niveaux. On réduit le cartouche d'avertissement à son pictogramme
+   (toujours cliquable, le message s'affiche au centre de l'écran) et le badge
+   utilisateur à ses initiales. */
+@media (min-width:861px) and (max-width:1150px){
+  #header-right{flex-wrap:nowrap;gap:6px;}
+  #header-warn{
+    font-size:0;padding:5px 9px;min-height:36px;
+    cursor:pointer;flex:0 0 auto;box-sizing:border-box;
+  }
+  #header-warn span{display:none;}
+  #header-warn svg{margin:0;}
+  #user-fullname{display:none;}
+  #user-badge{padding:0 6px;gap:0;}
+  .hdr-btn{padding:6px 9px;}
+}
+
 /* ===== RESPONSIVE TABLETTE (481px–860px iPad mini/portrait) ===== */
 @media(min-width:481px) and (max-width:860px){
   #header{padding:8px 14px;flex-wrap:wrap;padding-top:calc(8px + env(safe-area-inset-top, 0px));}
@@ -12186,7 +12204,7 @@ const LS_ADMIN_AUTH = 'aquila_admin_auth_v1'; // Timestamp de la dernière saisi
 // ===== VERSION PUBLIÉE =====
 // Format : mois-année-itération. À incrémenter à CHAQUE publication ;
 // affichée en bas de la fenêtre « Informations & mentions légales ».
-const APP_VERSION = '08-26-40';
+const APP_VERSION = '08-26-41';
 
 // ===== SUPABASE (authentification cloud) =====
 // Renseigner ces DEUX valeurs après création du projet Supabase
