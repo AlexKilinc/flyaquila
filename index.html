@@ -122,6 +122,11 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e;mi
 @keyframes btnStartAirac{0%{transform:translateX(54px);}100%{transform:translateX(-105%);}}
 /* Pendant l'intro, masquer l'icône ▶ pour laisser toute la largeur au défilement */
 #btn-start.intro #btn-start-icon{display:none;}
+/* Le badge utilisateur contient une pastille de 24px : sans cette regle il
+   mesure 38px alors que les autres boutons du bandeau en font 36. */
+@media (min-width:861px){
+  #user-badge{ height:36px;padding-top:0;padding-bottom:0; }
+}
 .hdr-btn{
   padding:6px 11px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);
   border-radius:6px;color:#a0aec0;font-size:11px;cursor:pointer;font-weight:600;
@@ -587,8 +592,12 @@ canvas{display:block;max-width:100%;}
 }
 
 /* Masse & centrage : abaque + résultats côte à côte (résultats à droite des courbes) */
-#centrage-right{display:grid;grid-template-columns:auto minmax(250px,1fr);gap:12px;align-items:start;}
+/* Abaque a gauche, resultats a droite — la colonne de resultats a EXACTEMENT
+   la meme largeur (320px) que la colonne de cartes situee a gauche de l'abaque. */
+#centrage-right{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:12px;align-items:start;}
+/* L'abaque garde sa taille propre et reste centre dans sa colonne. */
 #centrage-right > #centrage-canvas-wrap{min-width:0;}
+#centrage-right > #centrage-canvas-wrap > canvas{margin-left:auto;margin-right:auto;}
 /* Pas assez de largeur pour deux colonnes : les résultats passent sous l'abaque */
 @media(max-width:1200px){ #centrage-right{grid-template-columns:1fr;} }
 
@@ -1960,7 +1969,7 @@ canvas{display:block;max-width:100%;}
 
 <!-- BANDEAU BLEU MARINE -->
 <div id="header">
-  <span class="tag-club-wrap"><span class="logo-tag">AQUILA</span><span class="tag-club-ribbon small">Club</span></span>
+  <span class="logo-tag">AQUILA</span>
   <div>
     <h1>App</h1>
   </div>
@@ -11748,7 +11757,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <div id="hist-overlay" onclick="if(event.target===this)closeHist()">
   <div id="hist-box">
     <div id="hist-header">
-      <span class="tag-club-wrap"><span class="tag">AQUILA</span><span class="tag-club-ribbon small">Club</span></span>
+      <span class="tag">AQUILA</span>
       <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="9" y1="4" x2="9" y2="20"/></svg> Historique des préparations</h3>
       <button onclick="closeHist()" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:4px 11px;border-radius:6px;cursor:pointer;font-size:12px;">✕</button>
     </div>
@@ -12104,7 +12113,7 @@ const LS_ADMIN_AUTH = 'aquila_admin_auth_v1'; // Timestamp de la dernière saisi
 // ===== VERSION PUBLIÉE =====
 // Format : mois-année-itération. À incrémenter à CHAQUE publication ;
 // affichée en bas de la fenêtre « Informations & mentions légales ».
-const APP_VERSION = '08-26-35';
+const APP_VERSION = '08-26-37';
 
 // ===== SUPABASE (authentification cloud) =====
 // Renseigner ces DEUX valeurs après création du projet Supabase
