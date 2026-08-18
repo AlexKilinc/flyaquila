@@ -193,14 +193,21 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e;mi
 .tab-btn:hover{color:#1a1a2e;background-color:#eef2f7;}
 .tab-btn:hover::after{background:#c2ccda;opacity:1;transform:scaleX(1);}
 .tab-btn:active{background-color:#e6ebf2;}
+/* Onglet sélectionné : languette de dossier au premier plan — filet gris sur le
+   bord supérieur et les côtés, qui rejoint la ligne grise de la barre ; celle-ci
+   est interrompue sous l'onglet (fond blanc débordant de 2px) ; liseré rouge du
+   thème posé sur l'arête haute. */
 .tab-btn.active{
   color:#e94560;font-weight:800;
-  background:linear-gradient(180deg,rgba(233,69,96,.10),rgba(233,69,96,0));
+  background:#fff;
+  border:1px solid #d5dce6;border-bottom:none;
+  border-radius:10px 10px 0 0;
+  padding:9px 13px 13px;
+  box-shadow:inset 0 3px 0 #e94560, 0 -3px 7px rgba(22,33,62,.07);
+  z-index:1;
 }
-.tab-btn.active::after{
-  background:#e94560;opacity:1;transform:scaleX(1);
-  box-shadow:0 -2px 8px rgba(233,69,96,.45);
-}
+.tab-btn.active:hover{background:#fff;color:#e94560;}
+.tab-btn.active::after{display:none;}
 .tab-btn:focus-visible{outline:none;box-shadow:inset 0 0 0 2px rgba(233,69,96,.45);}
 
 /* ===== Ordre logique sur TOUS les écrans : Nav → Date → CDB → onglets ===== */
@@ -349,6 +356,14 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e;mi
   #tabs > .tab-btn:nth-of-type(6){ grid-column:7 / span 3;  grid-row:4; }
   #tabs > .tab-btn:nth-of-type(7){ grid-column:10 / span 3; grid-row:4; }
 
+  /* Grille 3+4 : l'onglet actif est une languette FERMÉE (le bas ne donne pas
+     sur le contenu mais sur l'autre rangée d'onglets) */
+  #tabs > .tab-btn.active{
+    border:1px solid #d5dce6;
+    border-radius:10px;
+    padding:7px 1px;
+    box-shadow:inset 0 3px 0 #e94560, 0 1px 4px rgba(22,33,62,.10);
+  }
   .tab-btn{
     padding:8px 2px;
     font-size:11px;
@@ -11972,7 +11987,7 @@ const LS_ADMIN_AUTH = 'aquila_admin_auth_v1'; // Timestamp de la dernière saisi
 // ===== VERSION PUBLIÉE =====
 // Format : mois-année-itération. À incrémenter à CHAQUE publication ;
 // affichée en bas de la fenêtre « Informations & mentions légales ».
-const APP_VERSION = '08-26-22';
+const APP_VERSION = '08-26-23';
 
 // ===== SUPABASE (authentification cloud) =====
 // Renseigner ces DEUX valeurs après création du projet Supabase
