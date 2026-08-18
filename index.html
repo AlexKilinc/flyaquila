@@ -871,13 +871,28 @@ canvas{display:block;max-width:100%;}
     width:100% !important;
     text-align:center;
   }
-  /* === Cadres Aérodrome (fieldsets) sur mobile === */
+  /* === Cadres Aérodrome (fieldsets) sur mobile ===
+     Les deux cadres tiennent sur UNE seule ligne : mentions « Dép./Arr. »
+     masquées (redondantes avec la légende du cadre) et calcul de ZP renvoyé
+     sous l'intitulé QNH, ce qui libère la largeur nécessaire. */
   #avion-bar-right .aero-group{
-    grid-column: 1 / -1;       /* pleine largeur sous Date+CDB */
-    padding: 3px 6px 4px 6px;
-    gap: 4px 6px;
+    padding: 2px 4px 3px 4px;
+    gap: 2px 3px;
     flex-wrap: wrap;
     align-items: center;
+    min-width: 0;
+  }
+  #avion-bar-right .aero-group:nth-of-type(1){ grid-column: 1 / 2; }
+  #avion-bar-right .aero-group:nth-of-type(2){ grid-column: 2 / -1; }
+  /* Mentions redondantes avec la légende du cadre */
+  #avion-bar-right .aero-group .aero-icao-lbl,
+  #avion-bar-right .aero-group .aero-sfx{ display:none !important; }
+  /* Calcul de ZP sur sa propre ligne, sous l'intitulé QNH */
+  #avion-bar-right .aero-group [id$="-zp-dep-lbl"],
+  #avion-bar-right .aero-group [id$="-zp-arr-lbl"]{
+    flex: 1 0 100%;
+    margin-left: 0 !important;
+    text-align: right;
   }
   #avion-bar-right .aero-group > legend{
     font-size: 8px;
@@ -893,19 +908,22 @@ canvas{display:block;max-width:100%;}
   /* Inputs ICAO (Dép./Arr.) plus compacts dans le cadre */
   #avion-bar-right .aero-group input#vol-dep,
   #avion-bar-right .aero-group input#vol-dest{
-    width: 64px !important;
-    flex: 0 0 64px !important;
-    padding: 5px 4px !important;
-    font-size: 12px !important;
-  }
-  /* Inputs QNH compacts */
-  #avion-bar-right .aero-group input#qnh-dep-input,
-  #avion-bar-right .aero-group input#qnh-arr-input{
     width: 56px !important;
     flex: 0 0 56px !important;
     padding: 5px 2px !important;
     font-size: 12px !important;
+    letter-spacing: 0 !important;
   }
+  /* Inputs QNH compacts */
+  #avion-bar-right .aero-group input#qnh-dep-input,
+  #avion-bar-right .aero-group input#qnh-arr-input{
+    width: 48px !important;
+    flex: 0 0 48px !important;
+    padding: 5px 1px !important;
+    font-size: 12px !important;
+  }
+  /* Bouton ▾ (aérodromes favoris) resserré */
+  #avion-bar-right .aero-group button{ padding: 4px 3px !important; min-width: 0 !important; }
   /* Labels internes très petits sur mobile pour gagner de la place */
   #avion-bar-right .aero-group label{
     font-size: 9px !important;
@@ -1974,7 +1992,7 @@ canvas{display:block;max-width:100%;}
     <fieldset class="aero-group">
       <legend>Aérodrome départ</legend>
       <div style="position:relative;">
-        <label style="font-size:10px;color:#a0aec0;white-space:nowrap;">Dép.</label>
+        <label class="aero-icao-lbl" style="font-size:10px;color:#a0aec0;white-space:nowrap;">Dép.</label>
         <input type="text" id="vol-dep" value="LFPN" placeholder="ICAO" maxlength="4"
           style="background:#1e2d4a;border:1px solid #2d3748;color:#fff;padding:4px 6px;
                  border-radius:5px;font-size:13px;width:100px;text-transform:uppercase;min-height:32px;font-weight:700;text-align:center;letter-spacing:1px;"
@@ -2000,7 +2018,7 @@ canvas{display:block;max-width:100%;}
       </div>
       <!-- QNH Départ (utilisé pour calcul ZP décollage / montée / autonomie) -->
       <div>
-        <label style="font-size:10px;color:#e94560;white-space:nowrap;font-weight:700;">QNH Dép.</label>
+        <label style="font-size:10px;color:#e94560;white-space:nowrap;font-weight:700;">QNH<span class="aero-sfx">&nbsp;Dép.</span></label>
         <input type="number" id="qnh-dep-input" value="1013" min="950" max="1050" step="1" placeholder="hPa"
           style="width:64px;background:#1e2d4a;border:1px solid #2d3748;color:#fff;
                  padding:4px 6px;border-radius:5px;font-size:12px;font-weight:700;text-align:center;min-height:32px;"
@@ -2012,7 +2030,7 @@ canvas{display:block;max-width:100%;}
     <fieldset class="aero-group">
       <legend>Aérodrome arrivée</legend>
       <div style="position:relative;">
-        <label style="font-size:10px;color:#a0aec0;white-space:nowrap;">Arr.</label>
+        <label class="aero-icao-lbl" style="font-size:10px;color:#a0aec0;white-space:nowrap;">Arr.</label>
         <input type="text" id="vol-dest" placeholder="ICAO" maxlength="4"
           style="background:#1e2d4a;border:1px solid #2d3748;color:#fff;padding:4px 6px;
                  border-radius:5px;font-size:13px;width:100px;text-transform:uppercase;min-height:32px;font-weight:700;text-align:center;letter-spacing:1px;"
@@ -2039,7 +2057,7 @@ canvas{display:block;max-width:100%;}
       </div>
       <!-- QNH Arrivée (utilisé pour calcul ZP atterrissage) -->
       <div>
-        <label style="font-size:10px;color:#e94560;white-space:nowrap;font-weight:700;">QNH Arr.</label>
+        <label style="font-size:10px;color:#e94560;white-space:nowrap;font-weight:700;">QNH<span class="aero-sfx">&nbsp;Arr.</span></label>
         <input type="number" id="qnh-arr-input" value="1013" min="950" max="1050" step="1" placeholder="hPa"
           style="width:64px;background:#1e2d4a;border:1px solid #2d3748;color:#fff;
                  padding:4px 6px;border-radius:5px;font-size:12px;font-weight:700;text-align:center;min-height:32px;"
@@ -12010,7 +12028,7 @@ const LS_ADMIN_AUTH = 'aquila_admin_auth_v1'; // Timestamp de la dernière saisi
 // ===== VERSION PUBLIÉE =====
 // Format : mois-année-itération. À incrémenter à CHAQUE publication ;
 // affichée en bas de la fenêtre « Informations & mentions légales ».
-const APP_VERSION = '08-26-24';
+const APP_VERSION = '08-26-25';
 
 // ===== SUPABASE (authentification cloud) =====
 // Renseigner ces DEUX valeurs après création du projet Supabase
