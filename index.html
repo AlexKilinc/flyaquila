@@ -268,10 +268,16 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e;mi
 
 /* Champ nom du voyage — responsive */
 .nom-voyage-wrap{ width:220px; margin-left:0; margin-right:6px; }
+/* Sur grand écran, le champ « Navigations vers … » peut se réduire plutôt que
+   de faire déborder la barre : elle n'a alors plus rien à faire défiler et
+   aucun élément n'est rogné au changement d'onglet. */
+@media (min-width:861px){
+  .nom-voyage-wrap{ flex:0 1 220px !important; min-width:140px; }
+}
 
 /* === iPad mini portrait & iPad (481-860px) ===
    UNE seule ligne avec scroll horizontal possible.
-   L'onglet actif sera centré dans le viewport au clic via showTab(). */
+   L'onglet choisi n'est ramené dans la vue que s'il en dépasse (showTab). */
 @media (min-width:481px) and (max-width:860px){
   #tabs{
     flex-wrap:nowrap;
@@ -5119,22 +5125,33 @@ function showTab(id, btn, skipScroll){
   document.querySelectorAll('.tab-btn').forEach(el=>el.classList.remove('active'));
   document.getElementById('tab-'+id).classList.add('active');
   btn.classList.add('active');
-  // Auto-scroll horizontal sur tablette (barre scrollable) :
-  // amener le PREMIER onglet (Carburant) sur le bord gauche du viewport visible,
-  // ce qui cache Nav/Date/CDB à gauche et révèle les 7 onglets sur une ligne.
-  // Sauf si skipScroll=true (cas init/Start : on veut au contraire montrer Nav/Date/CDB).
+  // Défilement horizontal de la barre : MINIMAL. On se contente d'amener
+  // l'onglet choisi entièrement dans la vue s'il en dépasse (navigation au
+  // clavier, écran étroit). Un onglet déjà visible ne provoque aucun
+  // déplacement : la barre ne se décale plus vers la gauche et la zone de
+  // saisie du nom de navigation n'est jamais tronquée.
   if (!skipScroll) {
     setTimeout(function(){
       try {
         const tabsBar = document.getElementById('tabs');
-        if (!tabsBar) return;
+        if (!tabsBar || !btn) return;
         const overflow = tabsBar.scrollWidth - tabsBar.clientWidth;
         if (overflow <= 0) return; // rien à scroller (cas desktop)
-        const firstTab = tabsBar.querySelector('.tab-btn');
-        if (!firstTab) return;
-        // offsetLeft donne la position visuelle même avec flex order
-        const target = Math.max(0, Math.min(firstTab.offsetLeft, overflow));
-        tabsBar.scrollTo({ left: target, behavior: 'smooth' });
+        const barRect = tabsBar.getBoundingClientRect();
+        const btnRect = btn.getBoundingClientRect();
+        const marge = 10;
+        const gauche = (btnRect.left  - barRect.left) + tabsBar.scrollLeft - marge;
+        const droite = (btnRect.right - barRect.left) + tabsBar.scrollLeft + marge;
+        let target = tabsBar.scrollLeft;
+        // Si l'onglet choisi tient entièrement barre non défilée, on revient à
+        // gauche : le champ « Navigations vers … » redevient complet.
+        if (droite <= tabsBar.clientWidth) target = 0;
+        if (droite > target + tabsBar.clientWidth) target = droite - tabsBar.clientWidth;
+        if (gauche < target) target = gauche;
+        target = Math.max(0, Math.min(target, overflow));
+        if (Math.abs(target - tabsBar.scrollLeft) > 1) {
+          tabsBar.scrollTo({ left: target, behavior: 'smooth' });
+        }
       } catch(e) {}
     }, 0);
   }
@@ -12081,7 +12098,7 @@ const LS_ADMIN_AUTH = 'aquila_admin_auth_v1'; // Timestamp de la dernière saisi
 // ===== VERSION PUBLIÉE =====
 // Format : mois-année-itération. À incrémenter à CHAQUE publication ;
 // affichée en bas de la fenêtre « Informations & mentions légales ».
-const APP_VERSION = '08-26-33';
+const APP_VERSION = '08-26-34';
 
 // ===== SUPABASE (authentification cloud) =====
 // Renseigner ces DEUX valeurs après création du projet Supabase
