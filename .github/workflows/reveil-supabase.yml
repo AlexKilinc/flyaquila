@@ -1,0 +1,100 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Réveil Supabase — empêche la mise en pause des projets peu utilisés.
+#
+# Le plan gratuit Supabase met un projet en pause après une période sans
+# activité BASE DE DONNÉES. Ce workflow effectue une vraie lecture (SELECT via
+# PostgREST) sur chaque projet, tous les deux jours : le compteur d'inactivité
+# est remis à zéro.
+#
+# ⚠ Ce workflow est PRÉVENTIF : il ne peut pas réveiller un projet DÉJÀ en
+#   pause (seul le tableau de bord Supabase le permet).
+#
+# ⚠ GitHub désactive un workflow planifié après 60 jours sans commit sur le
+#   dépôt. En cas d'inactivité prolongée, le réactiver depuis l'onglet Actions
+#   (ou lancer une fois « Run workflow »).
+#
+# CONFIGURATION (Settings → Secrets and variables → Actions) :
+#   • AQUILA  : rien à faire, l'URL et la clé publishable sont publiques et
+#               déjà inscrites ci-dessous (ce sont celles de index.html).
+#               Pour les surcharger : secrets SUPABASE_AQUILA_URL / _KEY.
+#   • LOGNAV  : ajouter les secrets SUPABASE_LOGNAV_URL et SUPABASE_LOGNAV_KEY
+#               (URL du projet + clé publishable / anon). Sans eux, le projet
+#               est simplement ignoré.
+#   • Table interrogée : SUPABASE_AQUILA_TABLE / SUPABASE_LOGNAV_TABLE
+#               (par défaut « profiles »).
+#
+# La clé publishable (anon) n'est pas un secret : elle figure déjà dans le code
+# public de l'application. La clé secrète (sb_secret_ / service_role) ne doit
+# JAMAIS être utilisée ici.
+# ─────────────────────────────────────────────────────────────────────────────
+name: Réveil Supabase
+
+on:
+  schedule:
+    # Tous les 2 jours à 06:17 UTC (marge confortable avant le seuil d'inactivité)
+    - cron: '17 6 */2 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  reveil:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Lecture réelle sur chaque projet Supabase
+        env:
+          AQUILA_URL:   ${{ secrets.SUPABASE_AQUILA_URL }}
+          AQUILA_KEY:   ${{ secrets.SUPABASE_AQUILA_KEY }}
+          AQUILA_TABLE: ${{ secrets.SUPABASE_AQUILA_TABLE }}
+          LOGNAV_URL:   ${{ secrets.SUPABASE_LOGNAV_URL }}
+          LOGNAV_KEY:   ${{ secrets.SUPABASE_LOGNAV_KEY }}
+          LOGNAV_TABLE: ${{ secrets.SUPABASE_LOGNAV_TABLE }}
+        run: |
+          set -u
+
+          # Valeurs par défaut d'AQUILA : publiques (identiques à index.html)
+          : "${AQUILA_URL:=https://xmqxxcurmheslgxzerzi.supabase.co}"
+          : "${AQUILA_KEY:=sb_publishable_j13ZPBthfrXyAgS4rnrJsw_c3CsSSIX}"
+          : "${AQUILA_TABLE:=profiles}"
+          : "${LOGNAV_TABLE:=profiles}"
+
+          echec=0
+          traite=0
+
+          ping_projet() {
+            nom="$1"; url="$2"; cle="$3"; table="$4"
+
+            if [ -z "$url" ] || [ -z "$cle" ]; then
+              echo "· $nom : non configuré (secrets absents) — ignoré."
+              return 0
+            fi
+
+            traite=$((traite + 1))
+            url="${url%/}"
+            url="${url%/rest/v1}"          # tolère une URL déjà suffixée
+
+            # SELECT réel : c'est l'activité base de données qui compte.
+            # RLS peut renvoyer un tableau vide — c'est normal et suffisant.
+            code=$(curl -sS -o /tmp/rep.txt -w '%{http_code}' --max-time 30 --retry 3 --retry-delay 5 \
+                   -H "apikey: $cle" -H "Authorization: Bearer $cle" \
+                   "$url/rest/v1/$table?select=*&limit=1" || echo 000)
+
+            if [ "$code" = "200" ] || [ "$code" = "206" ]; then
+              echo "✔ $nom : réveillé (HTTP $code, table « $table »)."
+            else
+              echo "✘ $nom : ÉCHEC (HTTP $code)."
+              echo "  Réponse : $(head -c 300 /tmp/rep.txt)"
+              echo "  → projet déjà en pause, table inexistante, ou clé invalide."
+              echec=1
+            fi
+          }
+
+          ping_projet "AQUILA" "$AQUILA_URL" "$AQUILA_KEY" "$AQUILA_TABLE"
+          ping_projet "LOGNAV" "${LOGNAV_URL:-}" "${LOGNAV_KEY:-}" "$LOGNAV_TABLE"
+
+          echo
+          if [ "$traite" -eq 0 ]; then
+            echo "Aucun projet configuré."; exit 1
+          fi
+          exit $echec
