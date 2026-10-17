@@ -33,7 +33,16 @@ if ('serviceWorker' in navigator &&
 <!-- PWA / Mobile web app -->
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<!-- iOS 26/27 : « black-translucent » n'est plus honoré (iOS retombe
+     silencieusement sur « default » : barre claire, horloge noire — d'où la
+     bande blanche dégradée en haut). « theme-color » et le theme_color du
+     manifeste sont eux aussi ignorés par les apps installées. Seule cette
+     balise agit encore, et elle n'accepte que trois mots : default, black,
+     black-translucent. « black » est donc la seule valeur donnant une barre
+     sombre. Contrepartie : barre noire et non bleu marine (la balise ne prend
+     pas de couleur), et sur iOS antérieur à 26 la barre devient noire au lieu
+     de laisser passer le bandeau. -->
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="AQUILA">
 <meta name="theme-color" content="#0A1A33">
 
@@ -83,8 +92,23 @@ html{
      qu'aucun bandeau blanc n'apparaisse — il se fond avec l'écran. */
   background:linear-gradient(180deg,#0B1C38 0%,#0A1A33 45%,#081427 100%);
 }
-body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e;min-height:100vh;
+/* Fond de page BLEU MARINE, et non plus gris clair : depuis iOS 26/27, le
+   système ne se contente plus de « theme-color » — il échantillonne la couleur
+   de la page pour peindre la zone de la barre d'état (effet dégradé « Liquid
+   Glass »). Avec un fond clair, cela donnait une bande blanche dégradée en haut
+   de l'application. Le gris clair du contenu est reporté sur #app-wrapper. */
+body{font-family:'Segoe UI',Arial,sans-serif;background:#0B1C38;color:#1a1a2e;min-height:100vh;
   -webkit-tap-highlight-color:transparent;}
+/* Bande fixe de la couleur du bandeau, exactement sous la barre d'état : quoi
+   que le système échantillonne ou floute à cet endroit, il y trouve le bleu
+   marine — y compris une fois la page défilée, bandeau sorti de l'écran. */
+body::before{
+  content:'';position:fixed;top:0;left:0;right:0;
+  height:env(safe-area-inset-top, 0px);
+  background:#0B1C38;z-index:2147483647;pointer-events:none;
+}
+/* Le gris clair de l'application, retiré de body, est posé ici. */
+#app-wrapper{background:#f0f2f5;min-height:100vh;}
 
 /* ===== BANDEAU BLEU MARINE ===== */
 #header{
@@ -12203,7 +12227,7 @@ const LS_ADMIN_AUTH = 'aquila_admin_auth_v1'; // Timestamp de la dernière saisi
 // ===== VERSION PUBLIÉE =====
 // Format : mois-année-itération. À incrémenter à CHAQUE publication ;
 // affichée en bas de la fenêtre « Informations & mentions légales ».
-const APP_VERSION = '09-26-01';
+const APP_VERSION = '10-26-02';
 
 // ===== SUPABASE (authentification cloud) =====
 // Renseigner ces DEUX valeurs après création du projet Supabase
