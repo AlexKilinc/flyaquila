@@ -115,7 +115,7 @@ body::before{
   background:linear-gradient(135deg,#0B1C38,#0A1A33);
   border-bottom:3px solid #e94560;
   padding:8px 14px;display:flex;align-items:center;gap:10px;flex-wrap:nowrap;
-  /* Mode app iOS : le bandeau bleu marine s'étend sous la barre d'état translucide */
+  /* Mode app iOS : le bandeau bleu marine s'étend sous la barre d'état */
   padding-top:calc(8px + env(safe-area-inset-top, 0px));
 }
 .logo-tag{background:#e94560;color:white;font-weight:900;font-size:13px;
@@ -157,6 +157,17 @@ body::before{
   transition:all .2s;min-height:36px;display:inline-flex;align-items:center;gap:4px;
   white-space:nowrap;-webkit-tap-highlight-color:transparent;touch-action:manipulation;
   box-sizing:border-box;vertical-align:middle;flex-shrink:0;
+}
+
+/* iOS 26/27, app installée : le système applique un flou progressif sur la
+   zone haute (effet « scroll edge »), qui étalait le badge AQUILA rouge dans
+   le bleu — d'où un halo dégradé. Aucun réglage ne désactive cet effet ; on
+   sort donc le contenu du bandeau de la zone floutée. Le flou ne porte alors
+   plus que sur du bleu uni, et devient invisible.
+   Marge appliquée en mode app seulement : rien ne change dans Safari ni sur
+   ordinateur. */
+@media (display-mode: standalone){
+  #header{ padding-top:calc(30px + env(safe-area-inset-top, 0px)); }
 }
 
 /* ===== BARRE AVION ===== */
@@ -12227,7 +12238,7 @@ const LS_ADMIN_AUTH = 'aquila_admin_auth_v1'; // Timestamp de la dernière saisi
 // ===== VERSION PUBLIÉE =====
 // Format : mois-année-itération. À incrémenter à CHAQUE publication ;
 // affichée en bas de la fenêtre « Informations & mentions légales ».
-const APP_VERSION = '10-26-02';
+const APP_VERSION = '10-26-03';
 
 // ===== SUPABASE (authentification cloud) =====
 // Renseigner ces DEUX valeurs après création du projet Supabase
