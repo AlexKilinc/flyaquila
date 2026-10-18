@@ -2100,7 +2100,7 @@ canvas{display:block;max-width:100%;}
     <h1>App</h1>
   </div>
   <div id="header-airac" title="Origine des données aérodromes / AIRAC utilisées">
-    <span class="airac-label">DONNÉES</span><span class="airac-val">XML AIRAC 10/26</span>
+    <span class="airac-label">DONNÉES</span><span class="airac-val">XML AIRAC 11/26</span>
   </div>
   <div id="header-right">
     <div id="header-warn" onclick="showCdbWarning()" title="Le CDB est responsable de ses calculs — Manuel de Vol">
@@ -4326,12 +4326,12 @@ function resetAerodromes() {
 }
 
 // ═══════════════════════════════════════════════════════
-// BASE AÉRODROMES FRANÇAIS — 434 aérodromes (AIRAC octobre 2026)
+// BASE AÉRODROMES FRANÇAIS — 434 aérodromes (AIRAC cycle 11/26)
 // Champs : i=ICAO, s=Statut(CAP/RST/PRV), n=Nom, e=Altitude_ft,
 //          tc=Type_Contrôle, r=Radio_Principal,
 //          f=Fréquences par service avec horaires (ordre ATIS/SOL/TWR/APP/FIS/VDF/AFIS/A/A, si applicable),
 //          np=Nb_Pistes, dp=Détail_Pistes, tdp=Alt_Tour_de_Piste_ft (si dispo), c=Commune
-// Source : SIA / AIP France — AIRAC octobre 2026 (cycle 2026-10-01)
+// Source : SIA / AIP France — AIRAC cycle 11/26 (2026-10-29)
 // ═══════════════════════════════════════════════════════
 const FR_AERODROMES = [
   {"i":"LF01","s":"PRV","n":"ALBE","e":0,"tc":"NIL","np":1,"dp":"08/26* (400m, revêtue)"},
@@ -4381,7 +4381,7 @@ const FR_AERODROMES = [
   {"i":"LFBL","s":"CAP","n":"LIMOGES BELLEGARDE","e":1300,"tc":"TWR","r":"LIMOGES Tour","f":"ATIS 128.080 (HO) ; TWR 119.555 (HO) ; APP 118.080 (HO) ; FIS 124.050 (HO) ; VDF 124.050 (HO) / 119.555 (HO) ; A/A 119.555 (HX)","np":2,"dp":"03/21* (2350m, béton bitumineux) ; 03R/21L (800m, gazon)","c":"6 km WNW de LIMOGES."},
   {"i":"LFBN","s":"CAP","n":"NIORT MARAIS POITEVIN","e":201,"tc":"AFIS","r":"NIORT Information","f":"AFIS 119.105 (HO)","np":2,"dp":"07/25* (1783m, revêtue) ; 07L/25R (682m, non revêtue)","c":"4 km ESE Niort"},
   {"i":"LFBO","s":"CAP","n":"TOULOUSE BLAGNAC","e":499,"tc":"TWR","r":"BLAGNAC Prévol","f":"ATIS 123.130 (H24) ; SOL 121.905 (H24) ; APP 123.850 (H24) / 125.180 (H24) ; FIS 121.250 (H24) / 123.930 (H24) ; VDF 118.105 (H24) / 129.305 (H24) ; AFIS 121.830 (HX)","np":2,"dp":"14R/32L* (3503m, béton bitumineux) ; 14L/32R (3025m, béton bitumineux)","c":"3,6 NM WNW de TOULOUSE. /  3.6 NM WNW from TOULOUSE."},
-  {"i":"LFBP","s":"CAP","n":"PAU PYRENEES","e":616,"tc":"TWR","r":"PAU Tour","f":"ATIS 128.480 (HO) ; SOL 121.755 (HO) ; TWR 124.150 (HO) ; APP 121.175 (HO) / 128.800 (HO) ; FIS 126.525 (HO) ; VDF 124.150 (HO) / 126.525 (HO)","np":1,"dp":"13/31* (2500m, asphalte)","c":"10 km NW de Pau."},
+  {"i":"LFBP","s":"CAP","n":"PAU PYRENEES","e":616,"tc":"TWR","r":"PAU Tour","f":"ATIS 128.480 (HO) ; SOL 121.755 (HO) ; TWR 124.155 (HO) ; APP 135.880 (HO) / 128.805 (HO) ; FIS 126.530 (HO)","np":1,"dp":"13/31* (2500m, asphalte)","c":"10 km NW de Pau."},
   {"i":"LFBR","s":"CAP","n":"MURET LHERM","e":623,"tc":"TWR","r":"MURET Tour","f":"ATIS 124.580 (HO) ; SOL 121.755 (HX) ; TWR 123.205 (HO)","np":3,"dp":"12/30* (1100m, revêtue) ; 12L/30R (300m, non revêtue) ; 12R/30L (825m, non revêtue)","c":"5 km WSW Muret"},
   {"i":"LFBS","s":"CAP","n":"BISCARROSSE PARENTIS","e":100,"tc":"TWR","r":"BISCARROSSE Tour","f":"TWR 118.040 (HO)","np":3,"dp":"09/27* (800m, revêtue) ; 13/31 (700m, non revêtue) ; 09R/27L (1300m, non revêtue)","c":"3,5 km S-E Biscarrosse"},
   {"i":"LFBT","s":"CAP","n":"TARBES LOURDES PYRENEES","e":1260,"tc":"TWR","r":"LOURDES Tour","f":"ATIS 125.955 (HX) ; SOL 121.805 (HX) ; TWR 119.055 (HX)","np":1,"dp":"02/20* (3000m, macadam)","c":"4.8NM SSW de TARBES"},
@@ -4567,7 +4567,7 @@ const FR_AERODROMES = [
   {"i":"LFKC","s":"CAP","n":"CALVI SAINTE CATHERINE","e":210,"tc":"TWR","r":"CALVI Tour","f":"ATIS 131.180 (H24) ; SOL 121.705 (HO) ; TWR 123.200 (HO)","np":1,"dp":"18/36* (2310m, béton bitumineux)","c":"6 km SE CALVI"},
   {"i":"LFKD","s":"RST","n":"SOLLIERES SARDIERES","e":4255,"tc":"NIL","np":1,"dp":"01/19* (705m, non revêtue)"},
   {"i":"LFKE","s":"RST","n":"SAINT JEAN EN ROYANS","e":872,"tc":"NIL","np":1,"dp":"14/32* (667m, non revêtue)"},
-  {"i":"LFKF","s":"CAP","n":"FIGARI SUD CORSE","e":85,"tc":"TWR","r":"FIGARI Tour","f":"ATIS 118.730 (HX) ; SOL 121.805 (HX) ; TWR 120.300 (HX)","np":1,"dp":"05/23* (2480m, béton bitumineux)","c":"1,6 NM NW FIGARI"},
+  {"i":"LFKF","s":"CAP","n":"FIGARI SUD CORSE","e":85,"tc":"TWR","r":"FIGARI Tour","f":"ATIS 118.730 (HX) ; SOL 121.805 (HX) ; TWR 120.300 (HX)","np":1,"dp":"04/22* (2480m, béton bitumineux)","c":"1,6 NM NW FIGARI"},
   {"i":"LFKG","s":"RST","n":"GHISONACCIA ALZITONE","e":177,"tc":"NIL","np":1,"dp":"18/36* (800m, revêtue)"},
   {"i":"LFKH","s":"RST","n":"SAINT JEAN D'AVELANNE","e":964,"tc":"NIL","np":1,"dp":"02/20* (407m, non revêtue)"},
   {"i":"LFKJ","s":"CAP","n":"AJACCIO NAPOLEON BONAPARTE","e":19,"tc":"TWR","r":"AJACCIO Tour","f":"ATIS 126.930 (H24) ; SOL 121.705 (H24) ; TWR 118.075 (H24) ; APP 121.050 (H24) / 127.780 (H24) ; FIS 119.825 (H24) ; VDF 118.075 (H24) / 121.050 (H24)","np":1,"dp":"02/20* (2300m, béton bitumineux)","c":"5 km Est d'Ajaccio / 5 km East of Ajaccio"},
@@ -4582,7 +4582,7 @@ const FR_AERODROMES = [
   {"i":"LFKY","s":"RST","n":"BELLEY-PEYRIEU","e":739,"tc":"NIL","np":1,"dp":"18/36* (638m, non revêtue)"},
   {"i":"LFLA","s":"CAP","n":"AUXERRE BRANCHES","e":523,"tc":"AFIS","r":"AUXERRE Information","f":"AFIS 129.805 (HO) ; A/A 129.805 (HX)","np":1,"dp":"18/36* (1650m, revêtue)","c":"8,5 km NW Auxerre"},
   {"i":"LFLB","s":"CAP","n":"CHAMBERY AIX LES BAINS","e":779,"tc":"TWR","r":"CHAMBERY Tour","f":"ATIS 127.100 (HO) ; TWR 118.305 (HO) ; APP 123.705 (HO) / 121.205 (HO) ; FIS 123.705 (HO) ; A/A 123.705 (HX)","np":2,"dp":"18/36* (2020m, béton bitumineux) ; 18L/36R (700m, gazon)","c":"4,5 NM NNW CHAMBERY / 3,5 NM SSW AIX LES BAINS"},
-  {"i":"LFLC","s":"CAP","n":"CLERMONT FERRAND AUVERGNE","e":1092,"tc":"TWR","r":"CLERMONT Tour","f":"ATIS 136.405 (H24) ; SOL 121.950 (H24) ; TWR 118.625 (H24) ; APP 122.225 (H24) / 133.725 (H24) ; FIS 119.375 (H24) / 133.725 (H24) ; VDF 118.625 (H24) / 122.225 (H24)","np":3,"dp":"08/26* (3013m, revêtue) ; 01/19 (645m, gazon) ; 08L/26R (909m, gazon)","c":"6.7 km E CLERMONT FERRAND"},
+  {"i":"LFLC","s":"CAP","n":"CLERMONT FERRAND AUVERGNE","e":1092,"tc":"TWR","r":"CLERMONT Tour","f":"ATIS 136.405 (H24) ; SOL 121.955 (H24) ; TWR 118.630 (H24) ; APP 122.230 (H24) / 133.725 (H24) ; FIS 119.375 (H24) / 133.725 (H24) ; VDF 118.630 (H24) / 122.230 (H24)","np":3,"dp":"08/26* (3013m, revêtue) ; 01/19 (645m, gazon) ; 08L/26R (909m, gazon)","c":"6.7 km E CLERMONT FERRAND"},
   {"i":"LFLD","s":"CAP","n":"BOURGES","e":529,"tc":"AFIS","r":"BOURGES Information","f":"AFIS 119.605 (HO) ; A/A 119.605 (HX)","np":2,"dp":"06/24* (1550m, revêtue) ; 06R/24L (915m, non revêtue)","c":"3 km SW Bourges"},
   {"i":"LFLE","s":"CAP","n":"CHAMBERY CHALLES LES EAUX","e":973,"tc":"A/A","r":"CHALLES","f":"A/A 118.405 (HX)","np":2,"dp":"14L/32R (890m, non revêtue) ; 14/32* (990m, revêtue)","c":"4 km ESE de Chambéry (73 - Savoie)"},
   {"i":"LFLG","s":"CAP","n":"GRENOBLE LE VERSOUD","e":724,"tc":"TWR","r":"LE VERSOUD Tour","f":"ATIS 125.230 (H24) ; SOL 121.655 (HO) ; TWR 121.000 (HO) ; A/A 121.000 (HX)","np":2,"dp":"04/22* (900m, revêtue) ; 04L/22R (893m, non revêtue)","c":"10 km ENE Grenoble (38 - Isère)"},
@@ -4602,26 +4602,26 @@ const FR_AERODROMES = [
   {"i":"LFLV","s":"CAP","n":"VICHY CHARMEIL","e":817,"tc":"AFIS","r":"VICHY Information","f":"AFIS 121.405 (HO) ; A/A 121.405 (HX)","np":1,"dp":"01/19* (2200m, revêtue)","c":"5 km NNW Vichy"},
   {"i":"LFLW","s":"CAP","n":"AURILLAC","e":2096,"tc":"AFIS","r":"AURILLAC Information","f":"AFIS 118.330 (HO)","np":1,"dp":"15/33* (1700m, revêtue)","c":"3 km SW Aurillac"},
   {"i":"LFLX","s":"CAP","n":"CHATEAUROUX DEOLS","e":529,"tc":"TWR","r":"CHATEAUROUX Tour","f":"TWR 133.805 (HX) / 125.880 (HO) ; AFIS 125.880 (HO) / 133.805 (HX)","np":1,"dp":"03/21* (3500m, béton bitumineux)","c":"5.5 km NNE CHATEAUROUX"},
-  {"i":"LFLY","s":"CAP","n":"LYON BRON","e":659,"tc":"TWR","r":"BRON Tour","f":"ATIS 128.130 (HO) ; SOL 121.705 (HO) ; TWR 118.100 (HO)","np":1,"dp":"16/34* (1820m, revêtue)","c":"10 km E Lyon"},
+  {"i":"LFLY","s":"CAP","n":"LYON BRON","e":659,"tc":"TWR","r":"BRON Tour","f":"ATIS 128.130 (HO) ; SOL 121.705 (HO) ; TWR 118.105 (HO)","np":1,"dp":"16/34* (1820m, revêtue)","c":"10 km E Lyon"},
   {"i":"LFLZ","s":"CAP","n":"FEURS CHAMBEON","e":1095,"tc":"NIL","np":1,"dp":"15/33* (940m, non revêtue)"},
   {"i":"LFMA","s":"CAP","n":"AIX LES MILLES","e":368,"tc":"TWR","r":"AIX Tour","f":"ATIS 136.230 (H24) ; SOL 121.605 (HO) ; TWR 118.755 (HO) ; VDF 118.755 (HO)","np":1,"dp":"14/32* (1604m, revêtue)","c":"6 km WSW Aix en Provence  (13 - Bouches du Rhône)"},
   {"i":"LFMC","s":"RST","n":"LE LUC LE CANNET","e":265,"tc":"TWR","r":"LE LUC Tour","f":"ATIS 128.650 (HX) ; TWR 123.000 (HX) / 121.850 (HX) ; APP 276.025 (HX) / 141.300 (HX) ; VDF 123.500 (HX) / 121.500 (HX)","np":2,"dp":"09/27 (799m, macadam) ; 13/31* (1399m, macadam)","c":"6 Km E LE LUC (83 - VAR)"},
-  {"i":"LFMD","s":"CAP","n":"CANNES MANDELIEU","e":14,"tc":"TWR","r":"LERINS Tour","f":"ATIS 130.480 (HO) ; SOL 121.805 (HO) ; TWR 120.780 (HO) / 118.625 (HO) ; VDF 118.625 (HO)","np":3,"dp":"17/35* (1540m, revêtue) ; 04/22 (760m, revêtue) ; 17L/35R (550m, non revêtue)","c":"3.2 NM W CANNES"},
+  {"i":"LFMD","s":"CAP","n":"CANNES MANDELIEU","e":14,"tc":"TWR","r":"LERINS Tour","f":"ATIS 130.480 (HO) ; SOL 121.805 (HO) ; TWR 120.780 (HO) / 118.630 (HO) ; VDF 118.630 (HO)","np":3,"dp":"17/35* (1540m, revêtue) ; 04/22 (760m, revêtue) ; 17L/35R (550m, non revêtue)","c":"3.2 NM W CANNES"},
   {"i":"LFME","s":"CAP","n":"NIMES COURBESSAC","e":197,"tc":"A/A","r":"COURBESSAC","f":"A/A 118.255 (HX)","np":2,"dp":"18R/36L* (940m, non revêtue) ; 18L/36R (910m, non revêtue)","c":"5 km ENE Nîmes (30 - Gard)"},
   {"i":"LFMF","s":"CAP","n":"FAYENCE","e":738,"tc":"A/A","r":"FAYENCE","f":"A/A 119.055 (HX)","np":3,"dp":"10L/28R* (785m, non revêtue) ; 10R/28L (830m, non revêtue) ; 32 (650m, non revêtue)"},
   {"i":"LFMG","s":"RST","n":"MONTAGNE NOIRE","e":1468,"tc":"A/A","r":"MONTAGNE","f":"A/A 134.155 (HX)","np":3,"dp":"18/36 (275m, revêtue) ; 12/30* (500m, revêtue) ; 03/21 (380m, revêtue)"},
-  {"i":"LFMH","s":"CAP","n":"SAINT ETIENNE LOIRE","e":1325,"tc":"TWR","r":"SAINT ETIENNE Tour","f":"ATIS 132.805 (HO) ; TWR 119.250 (HO) ; AFIS 119.250 (HX) ; A/A 119.250 (HX)","np":1,"dp":"17/35* (2300m, enrobé bitumineux)","c":"7 NM NNW de Saint Etienne"},
+  {"i":"LFMH","s":"CAP","n":"SAINT ETIENNE LOIRE","e":1325,"tc":"TWR","r":"SAINT ETIENNE Tour","f":"ATIS 132.805 (HO) ; TWR 119.255 (HO) ; AFIS 119.255 (HX) ; A/A 119.255 (HX)","np":1,"dp":"17/35* (2300m, enrobé bitumineux)","c":"7 NM NNW de Saint Etienne"},
   {"i":"LFMI","s":"RST","n":"ISTRES LE TUBE","e":82,"tc":"TWR","r":"ISTRES Tour","f":"SOL 397.050 (HX) / 122.100 (HX) ; TWR 257.800 (HX) / 123.600 (HX) ; APP 142.450 (HX) / 359.550 (HX) ; VDF 123.600 (HX) / 127.925 (HX)","np":1,"dp":"15/33* (3750m, béton)","c":"3.3 Km NNW ISTRES (13 - BOUCHES DU RHONE)"},
   {"i":"LFMK","s":"CAP","n":"CARCASSONNE SALVAZA","e":434,"tc":"TWR","r":"CARCASSONNE Tour","f":"ATIS 120.030 (HX) ; TWR 134.505 (HO) ; VDF 134.505 (HO)","np":2,"dp":"09/27* (2050m, revêtue) ; 09L/27R (792m, gazon)","c":"3 km W CARCASSONNE."},
-  {"i":"LFML","s":"CAP","n":"MARSEILLE PROVENCE","e":70,"tc":"TWR","r":"PROVENCE Tour","f":"ATIS 125.355 (H24) ; SOL 121.905 (H24) ; TWR 123.725 (H24) / 133.100 (H24) ; APP 120.205 (H24) / 129.475 (H24) ; FIS 126.260 (H24) / 131.230 (H24) ; VDF 121.500 (H24) / 121.430 (H24)","np":2,"dp":"13R/31L (2370m, béton bitumineux) ; 13L/31R* (3500m, béton bitumineux)","c":"14.6 NM NW de MARSEILLE."},
-  {"i":"LFMN","s":"CAP","n":"NICE COTE D'AZUR","e":12,"tc":"TWR","r":"NICE Tour","f":"ATIS 129.605 (H24) / 136.580 (H24) ; SOL 121.705 (H24) ; TWR 118.700 (H24) / 122.380 (H24) ; APP 125.580 (H24) / 120.160 (H24) ; FIS 122.925 (H24) / 124.425 (H24) ; VDF 118.700 (H24) / 122.380 (H24)","np":2,"dp":"04R/22L* (2963m, béton bitumineux) ; 04L/22R (2628m, béton bitumineux)","c":"3,2 NM SW de NICE / 3,2 NM SW NICE"},
+  {"i":"LFML","s":"CAP","n":"MARSEILLE PROVENCE","e":70,"tc":"TWR","r":"PROVENCE Tour","f":"ATIS 125.355 (H24) ; SOL 121.905 (H24) ; TWR 123.730 (H24) / 133.105 (H24) ; APP 120.205 (H24) / 129.480 (H24) ; FIS 126.260 (H24) / 131.230 (H24) ; VDF 121.500 (H24) / 121.430 (H24)","np":2,"dp":"13R/31L (2370m, béton bitumineux) ; 13L/31R* (3500m, béton bitumineux)","c":"14.6 NM NW de MARSEILLE."},
+  {"i":"LFMN","s":"CAP","n":"NICE COTE D'AZUR","e":12,"tc":"TWR","r":"NICE Tour","f":"ATIS 129.605 (H24) / 136.580 (H24) ; SOL 121.705 (H24) ; TWR 118.705 (H24) / 122.380 (H24) ; APP 125.580 (H24) / 120.160 (H24) ; FIS 122.930 (H24) / 124.430 (H24) ; VDF 118.705 (H24) / 122.380 (H24)","np":2,"dp":"04R/22L* (2963m, béton bitumineux) ; 04L/22R (2628m, béton bitumineux)","c":"3,2 NM SW de NICE / 3,2 NM SW NICE"},
   {"i":"LFMP","s":"CAP","n":"PERPIGNAN RIVESALTES","e":144,"tc":"TWR","r":"PERPIGNAN Tour","f":"ATIS 127.880 (HO) ; SOL 121.780 (HO) ; TWR 118.300 (HO) ; VDF 118.300 (HO) ; A/A 118.300 (HX)","np":2,"dp":"15/33* (2500m, macadam) ; 13/31 (1085m, macadam)","c":"2 NM NW de PERPIGNAN."},
   {"i":"LFMQ","s":"CAP","n":"LE CASTELLET","e":1391,"tc":"AFIS","r":"LE CASTELLET Information","f":"AFIS 119.005 (HX)","np":1,"dp":"12/30* (1485m, béton bitumineux)","c":"5 km N Le Castellet"},
   {"i":"LFMR","s":"CAP","n":"BARCELONNETTE SAINT PONS","e":3714,"tc":"NIL","np":1,"dp":"09/27* (800m, revêtue)"},
   {"i":"LFMS","s":"CAP","n":"ALES CEVENNES","e":668,"tc":"A/A","r":"ALES","f":"A/A 130.205 (HX)","np":1,"dp":"01/19* (1400m, revêtue)"},
-  {"i":"LFMT","s":"CAP","n":"MONTPELLIER MEDITERRANEE","e":17,"tc":"TWR","r":"MONTPELLIER Tour","f":"ATIS 124.130 (H24) ; SOL 121.955 (H24) ; TWR 118.200 (H24) / 118.775 (H24) ; APP 130.855 (H24) / 120.375 (H24) ; FIS 136.625 (H24) / 134.375 (H24) ; VDF 134.375 (H24) / 118.200 (H24)","np":2,"dp":"12R/30L (1100m, macadam) ; 12L/30R* (2600m, macadam)","c":"3,8 NM ESE MONTPELLIER"},
+  {"i":"LFMT","s":"CAP","n":"MONTPELLIER MEDITERRANEE","e":17,"tc":"TWR","r":"MONTPELLIER Tour","f":"ATIS 124.130 (H24) ; SOL 121.955 (H24) ; TWR 118.205 (H24) / 118.780 (H24) ; APP 130.855 (H24) / 120.380 (H24) ; FIS 136.625 (H24) / 134.380 (H24) ; VDF 134.380 (H24) / 118.205 (H24)","np":2,"dp":"12R/30L (1100m, macadam) ; 12L/30R* (2600m, macadam)","c":"3,8 NM ESE MONTPELLIER"},
   {"i":"LFMU","s":"CAP","n":"BEZIERS VIAS","e":56,"tc":"TWR","r":"BEZIERS Tour","f":"ATIS 127.530 (H24) ; TWR 120.175 (HO) ; VDF 120.175 (HO) ; A/A 120.175 (HX)","np":1,"dp":"09/27* (2000m, béton bitumineux)","c":"11.5 km ESE BEZIERS (34 - HERAULT)"},
-  {"i":"LFMV","s":"CAP","n":"AVIGNON CAUMONT","e":124,"tc":"TWR","r":"AVIGNON Tour","f":"ATIS 120.830 (H24) ; SOL 121.755 (HO) ; TWR 122.600 (HO) ; VDF 122.600 (HO)","np":3,"dp":"17/35* (1880m, revêtue) ; 17R/35L (700m, gazon) ; 17L/35R (250m, gazon)","c":"8 km SE d'Avignon (84 - Vaucluse) / 8 km SE of Avignon (84 - Vaucluse)"},
+  {"i":"LFMV","s":"CAP","n":"AVIGNON CAUMONT","e":124,"tc":"TWR","r":"AVIGNON Tour","f":"ATIS 120.830 (H24) ; SOL 121.755 (HO) ; TWR 122.605 (HO) ; VDF 122.605 (HO)","np":3,"dp":"17/35* (1875m, revêtue) ; 17R/35L (700m, gazon) ; 17L/35R (250m, gazon)","c":"8 km SE d'Avignon (84 - Vaucluse) / 8 km SE of Avignon (84 - Vaucluse)"},
   {"i":"LFMW","s":"CAP","n":"CASTELNAUDARY VILLENEUVE","e":553,"tc":"A/A","r":"CASTELNAUDARY","f":"A/A 118.905 (HX)","np":1,"dp":"11/29* (810m, revêtue)"},
   {"i":"LFMX","s":"CAP","n":"CHATEAU ARNOUX SAINT AUBAN","e":1507,"tc":"A/A","r":"SAINT AUBAN","f":"A/A 122.305 (HO)","np":1,"dp":"02/20* (926m, non revêtue)"},
   {"i":"LFMY","s":"RST","n":"SALON DE PROVENCE","e":197,"tc":"TWR","r":"SALON Tour","f":"TWR 232.125 (HX) / 122.100 (HX) ; APP 142.175 (HX) / 372.800 (HX) ; VDF 135.150 (HX) / 121.500 (HX)","np":4,"dp":"16/34* (2001m, revêtue) ; 16R/34L (1103m, gazon) ; 09/27 (783m, gazon) ; 16L/34R (968m, gazon)","c":"4 Km SSE SALON (13 - BOUCHES DU RHONE)"},
@@ -4759,7 +4759,7 @@ const FR_AERODROMES = [
   {"i":"LFTN","s":"RST","n":"LA GRAND'COMBE","e":1623,"tc":"NIL","np":1,"dp":"17/35* (780m, non revêtue)"},
   {"i":"LFTP","s":"RST","n":"PUIMOISSON","e":2469,"tc":"NIL","np":2,"dp":"07/25* (800m, non revêtue) ; 16/34 (530m, non revêtue)"},
   {"i":"LFTQ","s":"CAP","n":"CHATEAUBRIANT POUANCE","e":322,"tc":"NIL","np":1,"dp":"10/28* (720m, non revêtue)"},
-  {"i":"LFTW","s":"CAP","n":"NIMES GARONS","e":309,"tc":"TWR","r":"GARONS Tour","f":"ATIS 129.355 (HO) ; SOL 121.800 (HO) ; TWR 123.200 (HO) ; VDF 123.200 (HO)","np":1,"dp":"18/36* (2443m, béton)","c":"9 km SSE de NÎMES / 9 km SSE NÎMES"},
+  {"i":"LFTW","s":"CAP","n":"NIMES GARONS","e":309,"tc":"TWR","r":"GARONS Tour","f":"ATIS 129.355 (HO) ; SOL 121.805 (HO) ; TWR 123.205 (HO) ; VDF 123.205 (HO)","np":1,"dp":"18/36* (2443m, béton)","c":"9 km SSE de NÎMES / 9 km SSE NÎMES"},
   {"i":"LFTZ","s":"RST","n":"LA MOLE","e":63,"tc":"AFIS","r":"LA MOLE Information","f":"AFIS 118.130 (HO)","np":1,"dp":"06/24* (1071m, revêtue)","c":"15 km SW Saint-Tropez (83 - VAR)"},
   {"i":"LFXA","s":"CAP","n":"AMBERIEU","e":812,"tc":"TWR","r":"AMBERIEU Tour","f":"TWR 122.100 (HX) / 243.000 (HX) ; A/A 129.755 (HX)","np":2,"dp":"01R/19L (800m, non revêtue) ; 01L/19R* (1993m, revêtue)"},
   {"i":"LFXB","s":"RST","n":"SAINTES THENAC","e":118,"tc":"A/A","r":"SAINTES","f":"A/A 122.400 (HX)","np":4,"dp":"12/30 (800m, non revêtue) ; 05/23* (1100m, revêtue) ; 05L/23R (900m, non revêtue) ; 05R/23L (900m, non revêtue)"},
@@ -12238,7 +12238,7 @@ const LS_ADMIN_AUTH = 'aquila_admin_auth_v1'; // Timestamp de la dernière saisi
 // ===== VERSION PUBLIÉE =====
 // Format : mois-année-itération. À incrémenter à CHAQUE publication ;
 // affichée en bas de la fenêtre « Informations & mentions légales ».
-const APP_VERSION = '10-26-03';
+const APP_VERSION = '10-26-04';
 
 // ===== SUPABASE (authentification cloud) =====
 // Renseigner ces DEUX valeurs après création du projet Supabase
@@ -12903,7 +12903,7 @@ function playStartAiracIntro() {
     lbl.dataset.airacIntroDone = '1';
     if (btn) btn.classList.add('intro');
     lbl.classList.add('bsl');
-    lbl.innerHTML = '<span>XML AIRAC 10/26</span>';
+    lbl.innerHTML = '<span>XML AIRAC 11/26</span>';
     setTimeout(function () {
       if (btn) btn.classList.remove('intro');
       lbl.classList.remove('bsl');
