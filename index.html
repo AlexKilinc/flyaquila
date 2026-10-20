@@ -170,14 +170,16 @@ body::before{
    plus que sur du bleu uni, et devient invisible.
    Marge appliquée en mode app seulement : rien ne change dans Safari ni sur
    ordinateur. */
-@media (display-mode: standalone){
-  /* Sélecteur « html #header » et non « #header » : deux blocs responsives
-     plus bas dans cette feuille redéfinissent padding-top sur #header. À
-     spécificité égale, la dernière règle l'emporterait et la marge serait
-     perdue sur mobile — ce qui était le cas. La spécificité supérieure rend
-     la règle indépendante de l'ordre. */
-  html #header{ padding-top:calc(30px + env(safe-area-inset-top, 0px)); }
-}
+/* Marge haute du bandeau — SANS media query.
+   La condition « @media (display-mode: standalone) » ne correspondait pas sur
+   l'iPhone : la marge n'a jamais été appliquée (badge mesuré au même pixel sur
+   trois versions successives). On multiplie donc directement l'encoche : là où
+   elle vaut 0 — navigateur, ordinateur — la marge reste à 8px ; là où elle
+   existe, en app installée, elle s'étire et sort le logo de la zone floutée.
+   Sélecteur « html #header » : deux blocs responsives redéfinissent
+   padding-top plus bas dans cette feuille, la spécificité supérieure rend la
+   règle indépendante de l'ordre. */
+html #header{ padding-top:calc(8px + env(safe-area-inset-top, 0px) * 1.6); }
 
 /* ===== BARRE AVION ===== */
 #avion-bar{
@@ -12247,7 +12249,7 @@ const LS_ADMIN_AUTH = 'aquila_admin_auth_v1'; // Timestamp de la dernière saisi
 // ===== VERSION PUBLIÉE =====
 // Format : mois-année-itération. À incrémenter à CHAQUE publication ;
 // affichée en bas de la fenêtre « Informations & mentions légales ».
-const APP_VERSION = '10-26-08';
+const APP_VERSION = '10-26-09';
 
 // ===== SUPABASE (authentification cloud) =====
 // Renseigner ces DEUX valeurs après création du projet Supabase
