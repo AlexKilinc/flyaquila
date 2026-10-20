@@ -174,6 +174,20 @@ body::before{
      perdue sur mobile — ce qui était le cas. La spécificité supérieure rend
      la règle indépendante de l'ordre. */
   html #header{ padding-top:calc(30px + env(safe-area-inset-top, 0px)); }
+
+  /* WebKit n'applique pas son flou de bord haut quand le contenu du haut
+     appartient à un conteneur FIXE occupant tout l'écran avec un fond opaque.
+     C'est exactement la forme des fenêtres de l'application (position:fixed ;
+     inset:0), et c'est pourquoi elles en sont exemptes alors que la page, qui
+     défile avec le document, ne l'est pas. On donne donc cette même forme à la
+     coque de l'application : le défilement passe du document à ce conteneur,
+     sans rien coûter en hauteur d'affichage. */
+  html body #app-wrapper{
+    position:fixed; inset:0;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    background:#f0f2f5;
+  }
 }
 
 /* ===== BARRE AVION ===== */
@@ -12244,7 +12258,7 @@ const LS_ADMIN_AUTH = 'aquila_admin_auth_v1'; // Timestamp de la dernière saisi
 // ===== VERSION PUBLIÉE =====
 // Format : mois-année-itération. À incrémenter à CHAQUE publication ;
 // affichée en bas de la fenêtre « Informations & mentions légales ».
-const APP_VERSION = '10-26-06';
+const APP_VERSION = '10-26-07';
 
 // ===== SUPABASE (authentification cloud) =====
 // Renseigner ces DEUX valeurs après création du projet Supabase
