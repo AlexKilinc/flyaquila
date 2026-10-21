@@ -84,6 +84,7 @@ if ('serviceWorker' in navigator &&
 
 <!-- iOS status bar plein écran — déjà défini dans le bloc PWA ci-dessus -->
 <style>
+:root{ --bandeau-colle:0px; }   /* hauteur du bandeau collé (mobile/tablette) */
 *{box-sizing:border-box;margin:0;padding:0;}
 html{
   -webkit-text-size-adjust:100%;text-size-adjust:100%;
@@ -105,7 +106,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#0B1C38;color:#1a1a2e;mi
 body::before{
   content:'';position:fixed;top:0;left:0;right:0;
   height:env(safe-area-inset-top, 0px);
-  background:#0B1C38;z-index:2147483647;pointer-events:none;
+  background:#0B1C38;z-index:1001;pointer-events:none;
 }
 /* Le gris clair de l'application, retiré de body, est posé ici. */
 #app-wrapper{background:#f0f2f5;min-height:100vh;}
@@ -181,9 +182,12 @@ body::before{
    La marge haute revient donc a sa valeur normale. */
 @media screen and (max-width:1100px){
   html #header{
-    position:sticky; top:0; z-index:50;
+    position:sticky; top:0; z-index:1000;
     padding-top:calc(8px + env(safe-area-inset-top, 0px));
   }
+  /* Hauteur du bandeau collé : tout ce qui colle AUSSI en haut doit s'en
+     décaler, sinon il se fige derrière lui. */
+  :root{ --bandeau-colle:56px; }
 }
 
 /* ===== BARRE AVION ===== */
@@ -2225,7 +2229,7 @@ canvas{display:block;max-width:100%;}
         <button onclick="toggleAeroMenu('vol-dep-menu')" type="button"
           style="margin-left:3px;width:24px;height:32px;background:#1e2d4a;border:1px solid #2d3748;color:#a0aec0;border-radius:5px;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;line-height:1;"
           title="Aérodromes favoris">▾</button>
-        <div id="vol-dep-menu" style="display:none;position:absolute;top:38px;left:0;z-index:9999;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);min-width:240px;max-height:610px;overflow-y:auto;"></div>
+        <div id="vol-dep-menu" style="display:none;position:absolute;top:38px;left:0;z-index:999;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);min-width:240px;max-height:610px;overflow-y:auto;"></div>
       </div>
       <!-- QNH Départ (utilisé pour calcul ZP décollage / montée / autonomie) -->
       <div>
@@ -2264,7 +2268,7 @@ canvas{display:block;max-width:100%;}
         <button onclick="toggleAeroMenu('vol-dest-menu')" type="button"
           style="margin-left:3px;width:24px;height:32px;background:#1e2d4a;border:1px solid #2d3748;color:#a0aec0;border-radius:5px;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;line-height:1;"
           title="Aérodromes favoris">▾</button>
-        <div id="vol-dest-menu" style="display:none;position:absolute;top:38px;left:0;z-index:9999;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);min-width:240px;max-height:610px;overflow-y:auto;"></div>
+        <div id="vol-dest-menu" style="display:none;position:absolute;top:38px;left:0;z-index:999;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);min-width:240px;max-height:610px;overflow-y:auto;"></div>
       </div>
       <!-- QNH Arrivée (utilisé pour calcul ZP atterrissage) -->
       <div>
@@ -2590,7 +2594,7 @@ canvas{display:block;max-width:100%;}
     </div>
     <!-- Colonne droite : abaque de centrage + résultats à sa droite -->
     <div id="centrage-right">
-      <div id="centrage-canvas-wrap" style="align-self:start;position:sticky;top:12px;"><canvas id="cv-centrage"></canvas></div>
+      <div id="centrage-canvas-wrap" style="align-self:start;position:sticky;top:calc(var(--bandeau-colle,0px) + 12px);"><canvas id="cv-centrage"></canvas></div>
         <div class="card" id="card-resultats-centrage" style="margin:0;">
           <h3>Résultats centrage</h3>
 
@@ -2819,7 +2823,7 @@ canvas{display:block;max-width:100%;}
 
     <!-- COLONNE DROITE : RÉSULTATS -->
     <div>
-      <div class="card" style="position:sticky;top:0;">
+      <div class="card" style="position:sticky;top:var(--bandeau-colle,0px);">
         <h3>Carburant en litres</h3>
         <div style="display:flex;align-items:stretch;gap:2px;margin-bottom:14px;border-radius:6px;overflow:hidden;height:22px;">
           <div style="background:#718096;flex:0.5;display:flex;align-items:center;justify-content:center;font-size:9px;color:white;font-weight:700;">Roulage</div>
@@ -4877,7 +4881,7 @@ function showAeroTooltip(inputEl) {
       '<span style="color:#fff;font-size:10.5px;line-height:1.5;">' + _esc(detail).replace(/ ; /g,'<br>') + '</span>' +
       (tdp != null ? '<span style="color:#a0aec0;">TDP</span><span style="color:#fff;">' + _esc(tdp) + ' ft</span>' : '') +
     '</div>';
-  tip.style.cssText = 'position:absolute;left:0;top:calc(100% + 4px);z-index:9999;background:#1a1a2e;border:1px solid #2d3748;color:#fff;padding:10px 12px;border-radius:10px;font-size:11px;line-height:1.4;width:260px;box-shadow:0 8px 24px rgba(0,0,0,.35);pointer-events:none;';
+  tip.style.cssText = 'position:absolute;left:0;top:calc(100% + 4px);z-index:999;background:#1a1a2e;border:1px solid #2d3748;color:#fff;padding:10px 12px;border-radius:10px;font-size:11px;line-height:1.4;width:260px;box-shadow:0 8px 24px rgba(0,0,0,.35);pointer-events:none;';
   inputEl.parentElement.style.position = 'relative';
   inputEl.parentElement.appendChild(tip);
 }
@@ -4909,7 +4913,7 @@ function showAeroDropdown(inp) {
   if (!results.length) return;
   const dd = document.createElement('div');
   dd.className = 'aero-autocomplete';
-  dd.style.cssText = 'position:absolute;left:0;top:100%;z-index:9999;background:#fff;border:1px solid #cbd5e0;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);max-height:260px;overflow-y:auto;min-width:240px;';
+  dd.style.cssText = 'position:absolute;left:0;top:100%;z-index:999;background:#fff;border:1px solid #cbd5e0;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);max-height:260px;overflow-y:auto;min-width:240px;';
   results.forEach(a => {
     const row = document.createElement('div');
     row.style.cssText = 'display:flex;align-items:center;gap:6px;padding:7px 10px;cursor:pointer;border-bottom:1px solid #f0f0f0;font-size:12px;';
@@ -12255,7 +12259,7 @@ const LS_ADMIN_AUTH = 'aquila_admin_auth_v1'; // Timestamp de la dernière saisi
 // ===== VERSION PUBLIÉE =====
 // Format : mois-année-itération. À incrémenter à CHAQUE publication ;
 // affichée en bas de la fenêtre « Informations & mentions légales ».
-const APP_VERSION = '10-26-11';
+const APP_VERSION = '10-26-12';
 
 // ===== SUPABASE (authentification cloud) =====
 // Renseigner ces DEUX valeurs après création du projet Supabase
