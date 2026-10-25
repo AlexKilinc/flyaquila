@@ -4791,6 +4791,78 @@ const FR_AERODROMES = [
   {"i":"LFYV","s":"RST","n":"YVETOT-BAONS LE COMTE","e":472,"tc":"NIL","np":1,"dp":"08/26* (695m, non revêtue)"}
 ];
 
+// ═══════════════════════════════════════════════════════════════
+// ATIS — langue de diffusion et ordre des fréquences
+// ═══════════════════════════════════════════════════════════════
+// Sur les grands aérodromes, l'ATIS est diffusée sur plusieurs fréquences :
+// une en français, une en anglais. La base AIRAC/SIA les liste sans préciser
+// la langue ; l'application prenait la première venue et affichait donc
+// parfois l'ATIS anglaise — à Orly, 131.355 au lieu de 126.505.
+//
+// ⚠ À REVÉRIFIER À CHAQUE CYCLE AIRAC : ces fréquences changent d'un cycle à
+//   l'autre, et cette table n'est pas mise à jour par l'AIRAC.
+//   Sources : cartes COM du SIA, recoupées. Orly confirmé par le pilote.
+//   Nice provient de l'amendement 03/22 et reste à revérifier dans l'AIP en
+//   vigueur.
+//
+// Pour compléter un terrain : 'OACI': { 'fréquence': 'FR' | 'EN', … }
+const ATIS_LANGUES = {
+  'LFPO': { '126.505':'FR', '131.355':'EN' },   // Paris-Orly
+  'LFPG': { '128.230':'FR', '127.130':'EN' },   // Paris-Charles de Gaulle
+  'LFMN': { '129.605':'FR', '136.580':'EN' }    // Nice-Côte d'Azur
+};
+
+// Bande VHF aéronautique civile : 118.000 → 136.975 MHz. Au-delà, la
+// fréquence est militaire : une radio d'avion civil ne la reçoit pas.
+const VHF_CIVILE_MAX = 136.975;
+
+// Rang de tri : français, puis sans indication, puis anglais, puis militaire.
+function _atisRang(icao, freq) {
+  if (parseFloat(freq) > VHF_CIVILE_MAX) return 3;
+  const lg = (ATIS_LANGUES[icao] || {})[freq];
+  if (lg === 'FR') return 0;
+  if (lg === 'EN') return 2;
+  return 1;
+}
+
+// Réordonne et annote la seule liste ATIS d'un terrain. Les autres services —
+// SOL, TWR, APP, FIS, VDF, AFIS, A/A — ne sont jamais touchés.
+// Le tri est STABLE : à rang égal, l'ordre d'origine est conservé.
+// La langue n'est indiquée que s'il y a un choix à faire (au moins deux
+// fréquences) ; la mention « mil. » l'est toujours, car elle signale une
+// fréquence que la radio de bord ne reçoit pas.
+function normaliseFrequencesATIS(icao, f) {
+  if (!f) return f;
+  return f.split(' ; ').map(function (seg) {
+    if (seg.indexOf('ATIS ') !== 0) return seg;
+    const entrees = seg.slice(5).split(' / ');
+    const choix = entrees.length > 1;
+    const liste = entrees.map(function (e, i) {
+      const m = e.match(/^(\d{3}\.\d{3})(.*)$/);
+      if (!m) return { txt: e, rang: 1, i: i };
+      const freq = m[1], reste = m[2];
+      const rang = _atisRang(icao, freq);
+      let mention = '';
+      if (rang === 3) mention = ' mil.';
+      else if (choix) {
+        const lg = (ATIS_LANGUES[icao] || {})[freq];
+        if (lg) mention = ' ' + lg;
+      }
+      return { txt: freq + mention + reste, rang: rang, i: i };
+    });
+    liste.sort(function (x, y) { return (x.rang - y.rang) || (x.i - y.i); });
+    return 'ATIS ' + liste.map(function (x) { return x.txt; }).join(' / ');
+  }).join(' ; ');
+}
+
+// Correction appliquée À LA SOURCE, au chargement de la base : tout ce qui
+// lit ensuite une fréquence — info-bulle aérodrome, recherche, et toute
+// reprise future — hérite de l'ordre corrigé, sans traitement écran par
+// écran. L'ATIS en français se trouve donc toujours en tête.
+FR_AERODROMES.forEach(function (a) {
+  if (a.f) a.f = normaliseFrequencesATIS(a.i, a.f);
+});
+
 // Index pour recherche rapide par ICAO
 const FR_AERO_MAP = {};
 FR_AERODROMES.forEach(a => { FR_AERO_MAP[a.i] = a; });
@@ -12259,7 +12331,7 @@ const LS_ADMIN_AUTH = 'aquila_admin_auth_v1'; // Timestamp de la dernière saisi
 // ===== VERSION PUBLIÉE =====
 // Format : mois-année-itération. À incrémenter à CHAQUE publication ;
 // affichée en bas de la fenêtre « Informations & mentions légales ».
-const APP_VERSION = '10-26-12';
+const APP_VERSION = '10-26-13';
 
 // ===== SUPABASE (authentification cloud) =====
 // Renseigner ces DEUX valeurs après création du projet Supabase
